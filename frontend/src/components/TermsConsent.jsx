@@ -1,4 +1,6 @@
 import { Link } from 'react-router-dom';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 
 /**
  * Required "I agree to the Terms & Conditions" checkbox used on the
@@ -7,37 +9,15 @@ import { Link } from 'react-router-dom';
  */
 export default function TermsConsent({ checked, onChange, id = 'terms-consent' }) {
   return (
-    <label
-      htmlFor={id}
-      style={{
-        display: 'flex',
-        alignItems: 'flex-start',
-        gap: '0.6rem',
-        cursor: 'pointer',
-        fontSize: '0.85rem',
-        color: 'var(--text-secondary)',
-        lineHeight: 1.5,
-      }}
-    >
-      <input
-        id={id}
-        type="checkbox"
-        checked={checked}
-        onChange={(e) => onChange(e.target.checked)}
-        style={{ width: '1.1rem', height: '1.1rem', accentColor: 'var(--cat-terra)', marginTop: '0.1rem', flexShrink: 0 }}
-      />
-      <span>
+    <div className="flex items-start gap-2.5">
+      <Checkbox id={id} checked={checked} onCheckedChange={onChange} className="mt-0.5" />
+      <Label htmlFor={id} className="text-sm leading-relaxed font-normal text-muted-foreground">
         I have read and agree to the{' '}
-        <Link
-          to="/terms"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ color: 'var(--cat-terra)', fontWeight: 700, textDecoration: 'underline' }}
-        >
+        <Link to="/terms" target="_blank" rel="noopener noreferrer" className="font-medium text-primary underline underline-offset-2">
           Terms &amp; Conditions and Licensing Agreement
         </Link>
         .
-      </span>
-    </label>
+      </Label>
+    </div>
   );
 }

@@ -1,18 +1,23 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
-import { authApi } from '../../api/authApi';
-import useDocumentTitle from '../../hooks/useDocumentTitle';
+import { Lock, Eye, EyeOff } from 'lucide-react';
+import { authApi } from '@/api/authApi';
+import useDocumentTitle from '@/hooks/useDocumentTitle';
+import AuthCard from '@/components/patterns/AuthCard';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 export default function ResetPasswordPage() {
   useDocumentTitle('Reset Password');
-  const [searchParams]           = useSearchParams();
-  const token                    = searchParams.get('token') || '';
-  const navigate                 = useNavigate();
-  const [password,  setPassword] = useState('');
-  const [confirm,   setConfirm]  = useState('');
-  const [error,     setError]    = useState('');
-  const [loading,   setLoading]  = useState(false);
-  const [showPass,  setShowPass] = useState(false);
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get('token') || '';
+  const navigate = useNavigate();
+  const [password, setPassword] = useState('');
+  const [confirm, setConfirm] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [showPass, setShowPass] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,50 +34,46 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--cat-cream)', padding: '2rem' }}>
-      <div style={{
-        background: 'var(--surface-raised)',
-        border: '1px solid var(--border-default)',
-        borderRadius: '24px',
-        padding: '3rem 2.5rem',
-        maxWidth: '440px',
-        width: '100%',
-        boxShadow: 'var(--shadow-lg)',
-        animation: 'fadeIn 0.35s ease',
-      }}>
-        <div style={{ marginBottom: '2rem' }}>
-          <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>🔐</div>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 900, color: 'var(--text-primary)', margin: '0 0 0.5rem' }}>Set new password</h1>
-          <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: '0.9rem' }}>Choose a strong password for your account.</p>
+    <AuthCard>
+      <div className="mb-7">
+        <div className="mb-3 flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+          <Lock className="size-5" />
         </div>
-        {error && <div className="form-error" style={{ marginBottom: '1.25rem' }}>🙀 {error}</div>}
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {[
-            { label: 'New Password', value: password, onChange: setPassword, id: 'new-pass' },
-            { label: 'Confirm Password', value: confirm, onChange: setConfirm, id: 'confirm-pass' },
-          ].map(({ label, value, onChange, id }) => (
-            <div key={id} className="form-group">
-              <label className="label-base">{label}</label>
-              <div style={{ position: 'relative' }}>
-                <input type={showPass ? 'text' : 'password'} required minLength={8}
-                  value={value} onChange={e => onChange(e.target.value)}
-                  className="input-base" placeholder="Min 8 characters" id={id}
-                  style={{ paddingRight: '3rem' }} />
-                <button type="button" onClick={() => setShowPass(!showPass)}
-                  style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', fontSize: '1rem', color: 'var(--text-muted)', padding: 0 }}>
-                  {showPass ? '🙈' : '👁️'}
-                </button>
-              </div>
-            </div>
-          ))}
-          <button type="submit" disabled={loading} className="btn btn-primary" style={{ width: '100%', padding: '0.875rem' }}>
-            {loading ? 'Saving…' : '🔐 Reset Password'}
-          </button>
-        </form>
-        <p style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
-          <Link to="/login" style={{ color: 'var(--cat-terra)', fontWeight: 700, textDecoration: 'none' }}>← Back to Login</Link>
-        </p>
+        <h1 className="font-display text-2xl font-bold text-foreground">Set new password</h1>
+        <p className="mt-1 text-sm text-muted-foreground">Choose a strong password for your account.</p>
       </div>
-    </div>
+      {error && <div className="mb-5 rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-sm font-medium text-destructive">{error}</div>}
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        {[
+          { label: 'New password', value: password, onChange: setPassword, id: 'new-pass' },
+          { label: 'Confirm password', value: confirm, onChange: setConfirm, id: 'confirm-pass' },
+        ].map(({ label, value, onChange, id }) => (
+          <div key={id}>
+            <Label htmlFor={id}>{label}</Label>
+            <div className="relative mt-1.5">
+              <Input
+                id={id}
+                type={showPass ? 'text' : 'password'}
+                required
+                minLength={8}
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                placeholder="Min 8 characters"
+                className="pr-10"
+              />
+              <button type="button" onClick={() => setShowPass(!showPass)} className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground hover:text-foreground" tabIndex={-1}>
+                {showPass ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+              </button>
+            </div>
+          </div>
+        ))}
+        <Button type="submit" disabled={loading} className="h-11 w-full">
+          {loading ? 'Saving…' : 'Reset password'}
+        </Button>
+      </form>
+      <p className="mt-6 text-center text-sm">
+        <Link to="/login" className="font-semibold text-primary">Back to login</Link>
+      </p>
+    </AuthCard>
   );
 }

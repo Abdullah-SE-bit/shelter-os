@@ -1,16 +1,23 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { authApi } from '../../api/authApi';
-import { sheltersApi } from '../../api/sheltersApi';
-import PhoneInput, { isValidPkMobile } from '../../components/PhoneInput';
-import useDocumentTitle from '../../hooks/useDocumentTitle';
-import TermsConsent from '../../components/TermsConsent';
+import { Heart, Cat, HeartHandshake, Stethoscope, Mail, Eye, EyeOff, Check, X, Lock, PawPrint } from 'lucide-react';
+import { authApi } from '@/api/authApi';
+import { sheltersApi } from '@/api/sheltersApi';
+import PhoneInput, { isValidPkMobile } from '@/components/PhoneInput';
+import useDocumentTitle from '@/hooks/useDocumentTitle';
+import TermsConsent from '@/components/TermsConsent';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
+import { cn } from '@/lib/utils';
 
 const ROLES = [
-  { value: 'ADOPTER',   emoji: '❤️', label: 'Adopter',       desc: 'I want to adopt a cat' },
-  { value: 'CAT_OWNER', emoji: '🐱', label: 'Cat Owner',     desc: 'I already own cats' },
-  { value: 'VOLUNTEER', emoji: '🙋', label: 'Volunteer',     desc: 'I want to help rescue cats' },
-  { value: 'VET',       emoji: '🩺', label: 'Veterinarian',  desc: 'I provide medical care' },
+  { value: 'ADOPTER', icon: Heart, label: 'Adopter', desc: 'I want to adopt a cat' },
+  { value: 'CAT_OWNER', icon: Cat, label: 'Cat Owner', desc: 'I already own cats' },
+  { value: 'VOLUNTEER', icon: HeartHandshake, label: 'Volunteer', desc: 'I want to help rescue cats' },
+  { value: 'VET', icon: Stethoscope, label: 'Veterinarian', desc: 'I provide medical care' },
 ];
 
 const SKILLS = ['RESCUE', 'TRANSPORT', 'FOSTERING', 'FUNDRAISING', 'MEDICAL_ASSIST', 'EVENT_SUPPORT'];
@@ -19,24 +26,10 @@ const HOUSING = ['HOUSE', 'APARTMENT', 'CONDO', 'FARM', 'OTHER'];
 // Common feline-veterinary specializations for the multi-select. Vets can also
 // add any missing one via the free-text box.
 const CAT_VET_SPECIALIZATIONS = [
-  'Feline General Medicine',
-  'Feline Surgery',
-  'Internal Medicine',
-  'Dermatology',
-  'Dentistry',
-  'Cardiology',
-  'Ophthalmology',
-  'Oncology',
-  'Neurology',
-  'Nutrition',
-  'Behavior',
-  'Emergency & Critical Care',
-  'Diagnostic Imaging / Radiology',
-  'Anesthesiology',
-  'Reproduction / Theriogenology',
-  'Parasitology',
-  'Preventive Care & Vaccination',
-  'Infectious Diseases',
+  'Feline General Medicine', 'Feline Surgery', 'Internal Medicine', 'Dermatology', 'Dentistry',
+  'Cardiology', 'Ophthalmology', 'Oncology', 'Neurology', 'Nutrition', 'Behavior',
+  'Emergency & Critical Care', 'Diagnostic Imaging / Radiology', 'Anesthesiology',
+  'Reproduction / Theriogenology', 'Parasitology', 'Preventive Care & Vaccination', 'Infectious Diseases',
 ];
 
 // A3: only RFC-style format validation; no domain allow-list.
@@ -45,16 +38,40 @@ const validateEmail = (email) => {
   return emailRegex.test(email) ? null : 'Please enter a valid email address';
 };
 
+const selectClass = cn(
+  'h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-xs outline-none',
+  'focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50',
+  'dark:bg-input/30',
+);
+
+function FieldError({ children }) {
+  if (!children) return null;
+  return <p className="mt-1 text-xs font-medium text-destructive">{children}</p>;
+}
+
+function Pill({ active, onClick, children }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        'rounded-full border px-3 py-1 text-xs font-semibold transition-colors',
+        active ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card text-muted-foreground hover:border-border-strong',
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+
 export default function RegisterPage() {
   useDocumentTitle('Create Account');
-  const navigate = useNavigate();
   const [step, setStep] = useState(1); // 1: basics + role, 2: role details, 3: success
   const [form, setForm] = useState({
     email: '', password: '', first_name: '', last_name: '', dob: '', role: 'ADOPTER',
   });
   const [details, setDetails] = useState({
     shelter_id: '', service_radius_km: 10, bio: '', skills: [],
-    // Vet fields
     reg_digits: '', reg_len: 3, practice_type: 'CLINIC',
     clinic_name: '', clinic_location: '', clinic_registration_number: '',
     specializations: [], custom_specialization: '',
@@ -72,7 +89,6 @@ export default function RegisterPage() {
   const set = (k, v) => { setForm(f => ({ ...f, [k]: v })); setFieldErrors(fe => ({ ...fe, [k]: undefined })); };
   const setD = (k, v) => { setDetails(d => ({ ...d, [k]: v })); setFieldErrors(fe => ({ ...fe, [k]: undefined })); };
 
-  // Load shelters when a volunteer, or a shelter-based vet, reaches step 2.
   const needsShelters = form.role === 'VOLUNTEER'
     || (form.role === 'VET' && details.practice_type === 'SHELTER');
   useEffect(() => {
@@ -132,7 +148,7 @@ export default function RegisterPage() {
   const validateStep2 = () => {
     const errs = {};
     if (form.role === 'VOLUNTEER') {
-      if (sheltersLoaded && shelters.length === 0) return errs; // blocked message shown instead
+      if (sheltersLoaded && shelters.length === 0) return errs;
       if (!details.shelter_id) errs.shelter_id = 'Please select a shelter to join.';
     } else if (form.role === 'VET') {
       const digits = details.reg_digits.trim();
@@ -234,7 +250,6 @@ export default function RegisterPage() {
         };
         flatten(detail);
         setFieldErrors(mapped);
-        // jump to the step where the error belongs
         if (mapped.email || mapped.password || mapped.first_name || mapped.last_name || mapped.date_of_birth || mapped.dob) {
           setStep(1);
         }
@@ -253,335 +268,379 @@ export default function RegisterPage() {
   // Success screen
   if (step === 3) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--cat-cream)', padding: '2rem' }}>
-        <div style={{ background: 'var(--surface-raised)', border: '1px solid var(--border-default)', borderRadius: '24px', padding: '3rem 2.5rem', maxWidth: '440px', width: '100%', textAlign: 'center', boxShadow: 'var(--shadow-xl)' }}>
-          <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>✉️</div>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 900, color: 'var(--text-primary)', margin: '0 0 0.75rem' }}>Check your inbox! 🐾</h1>
-          <p style={{ color: 'var(--text-muted)', lineHeight: 1.7, margin: '0 0 1rem', fontSize: '0.9375rem' }}>
-            We sent a verification link to <strong style={{ color: 'var(--cat-terra)' }}>{form.email}</strong>. Click it to activate your account.
+      <div className="flex min-h-screen items-center justify-center bg-background p-8">
+        <div className="w-full max-w-[440px] rounded-2xl border border-border bg-card p-10 text-center shadow-lg">
+          <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-primary/10 text-primary">
+            <Mail className="size-7" />
+          </div>
+          <h1 className="font-display text-2xl font-bold text-foreground">Check your inbox!</h1>
+          <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+            We sent a verification link to <strong className="text-primary">{form.email}</strong>. Click it to
+            activate your account.
           </p>
           {form.role === 'VET' && (
-            <div style={{ background: 'var(--cat-linen)', border: '1px solid var(--border-default)', borderRadius: '12px', padding: '0.9rem 1rem', margin: '0 0 1.5rem', fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.6, textAlign: 'left' }}>
-              🩺 Your registration request has been sent to a <strong>Super Admin</strong> and then a <strong>Shelter Admin</strong> for approval. After verifying your email you can log in, but vet features stay locked until both approve your request.
+            <div className="mt-4 rounded-lg border border-border bg-surface-muted p-4 text-left text-sm leading-relaxed text-muted-foreground">
+              <Stethoscope className="mb-1.5 size-4 text-primary" />
+              Your registration request has been sent to a <strong className="text-foreground">Super Admin</strong> and
+              then a <strong className="text-foreground">Shelter Admin</strong> for approval. After verifying your
+              email you can log in, but vet features stay locked until both approve your request.
             </div>
           )}
-          <Link to="/login" className="btn btn-primary" style={{ display: 'block', textAlign: 'center', padding: '0.875rem' }}>🐾 Go to Login</Link>
+          <Button asChild className="mt-6 w-full">
+            <Link to="/login">Go to login</Link>
+          </Button>
         </div>
       </div>
     );
   }
 
-  const errStyle = { color: 'var(--cat-red)', fontSize: '0.78rem', marginTop: '0.3rem', fontWeight: 600 };
-  const fieldBorder = (name) => fieldErrors[name] ? { borderColor: 'var(--cat-red)' } : undefined;
   const volunteersBlocked = form.role === 'VOLUNTEER' && sheltersLoaded && shelters.length === 0;
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--cat-cream)', padding: '2rem' }}>
-      <div style={{ background: 'var(--surface-raised)', border: '1px solid var(--border-default)', borderRadius: '24px', padding: '2.5rem', maxWidth: '480px', width: '100%', boxShadow: 'var(--shadow-lg)' }}>
-        {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <div style={{ width: '56px', height: '56px', background: 'linear-gradient(135deg, var(--cat-terra), var(--cat-rust))', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.75rem', margin: '0 auto 1rem' }}>🐾</div>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 900, color: 'var(--text-primary)', margin: '0 0 0.375rem' }}>Join CatConnect</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', margin: 0 }}>Help us care for every cat 🐱</p>
+    <div className="flex min-h-screen items-center justify-center bg-background p-8">
+      <div className="w-full max-w-[500px] rounded-2xl border border-border bg-card p-8 shadow-lg">
+        <div className="mb-7 text-center">
+          <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+            <PawPrint className="size-6" />
+          </div>
+          <h1 className="font-display text-2xl font-bold text-foreground">Join Shelter OS</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Help us care for every cat</p>
         </div>
 
-        {/* Progress steps */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginBottom: '2rem' }}>
-          {[1, 2].map(s => (
-            <div key={s} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: step >= s ? 'var(--cat-terra)' : 'var(--cat-linen)', border: step >= s ? 'none' : '1.5px solid var(--border-default)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 800, color: step >= s ? 'white' : 'var(--text-muted)' }}>{s}</div>
-              {s < 2 && <div style={{ width: '40px', height: '2px', background: step > s ? 'var(--cat-terra)' : 'var(--border-default)' }} />}
+        <div className="mb-7 flex items-center justify-center gap-2">
+          {[1, 2].map((s) => (
+            <div key={s} className="flex items-center gap-2">
+              <div
+                className={cn(
+                  'flex size-7 items-center justify-center rounded-full text-xs font-bold',
+                  step >= s ? 'bg-primary text-primary-foreground' : 'border border-border bg-surface-muted text-muted-foreground',
+                )}
+              >
+                {s}
+              </div>
+              {s < 2 && <div className={cn('h-0.5 w-10', step > s ? 'bg-primary' : 'bg-border')} />}
             </div>
           ))}
         </div>
 
-        {error && <div className="form-error" style={{ marginBottom: '1.25rem' }}>🙀 {error}</div>}
+        {error && <div className="mb-5 rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-sm font-medium text-destructive">{error}</div>}
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           {step === 1 && (
             <>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                <div className="form-group">
-                  <label className="label-base">First name</label>
-                  <input required value={form.first_name} onChange={e => set('first_name', e.target.value)} className="input-base" placeholder="Emma" id="reg-fname" style={fieldBorder('first_name')} />
-                  {fieldErrors.first_name && <div style={errStyle}>{fieldErrors.first_name}</div>}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label htmlFor="reg-fname">First name</Label>
+                  <Input id="reg-fname" required value={form.first_name} onChange={e => set('first_name', e.target.value)} placeholder="Emma" className="mt-1.5" aria-invalid={!!fieldErrors.first_name} />
+                  <FieldError>{fieldErrors.first_name}</FieldError>
                 </div>
-                <div className="form-group">
-                  <label className="label-base">Last name</label>
-                  <input required value={form.last_name} onChange={e => set('last_name', e.target.value)} className="input-base" placeholder="Watson" id="reg-lname" style={fieldBorder('last_name')} />
-                  {fieldErrors.last_name && <div style={errStyle}>{fieldErrors.last_name}</div>}
+                <div>
+                  <Label htmlFor="reg-lname">Last name</Label>
+                  <Input id="reg-lname" required value={form.last_name} onChange={e => set('last_name', e.target.value)} placeholder="Watson" className="mt-1.5" aria-invalid={!!fieldErrors.last_name} />
+                  <FieldError>{fieldErrors.last_name}</FieldError>
                 </div>
               </div>
 
-              <div className="form-group">
-                <label className="label-base">Email address</label>
-                <input type="email" required value={form.email} onChange={e => set('email', e.target.value)} className="input-base" placeholder="you@example.com" id="reg-email" style={fieldBorder('email')} />
+              <div>
+                <Label htmlFor="reg-email">Email address</Label>
+                <Input id="reg-email" type="email" required value={form.email} onChange={e => set('email', e.target.value)} placeholder="you@example.com" className="mt-1.5" aria-invalid={!!fieldErrors.email} />
                 {fieldErrors.email
-                  ? <div style={errStyle}>{fieldErrors.email}</div>
-                  : <small style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem', display: 'block' }}>Any valid email works — school, work, or personal.</small>}
+                  ? <FieldError>{fieldErrors.email}</FieldError>
+                  : <p className="mt-1 text-xs text-muted-foreground">Any valid email works — school, work, or personal.</p>}
               </div>
 
-              <div className="form-group">
-                <label className="label-base">Date of birth</label>
-                <input type="date" value={form.dob} onChange={e => set('dob', e.target.value)} className="input-base" id="reg-dob" style={fieldBorder('dob')} max={new Date().toISOString().split('T')[0]} />
-                {fieldErrors.dob && <div style={errStyle}>{fieldErrors.dob}</div>}
+              <div>
+                <Label htmlFor="reg-dob">Date of birth</Label>
+                <Input id="reg-dob" type="date" value={form.dob} onChange={e => set('dob', e.target.value)} className="mt-1.5" max={new Date().toISOString().split('T')[0]} aria-invalid={!!fieldErrors.dob} />
+                <FieldError>{fieldErrors.dob}</FieldError>
               </div>
 
-              <div className="form-group">
-                <label className="label-base">Password</label>
-                <div style={{ position: 'relative' }}>
-                  <input type={showPass ? 'text' : 'password'} required minLength={8} value={form.password} onChange={e => set('password', e.target.value)} className="input-base" placeholder="Min 8 chars, 1 uppercase, 1 number" id="reg-password" style={{ paddingRight: '3rem', ...(fieldBorder('password') || {}) }} />
-                  <button type="button" onClick={() => setShowPass(!showPass)} style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', fontSize: '1rem', color: 'var(--text-muted)', padding: 0 }}>{showPass ? '🙈' : '👁️'}</button>
+              <div>
+                <Label htmlFor="reg-password">Password</Label>
+                <div className="relative mt-1.5">
+                  <Input
+                    id="reg-password"
+                    type={showPass ? 'text' : 'password'}
+                    required
+                    minLength={8}
+                    value={form.password}
+                    onChange={e => set('password', e.target.value)}
+                    placeholder="Min 8 chars, 1 uppercase, 1 number"
+                    className="pr-10"
+                    aria-invalid={!!fieldErrors.password}
+                  />
+                  <button type="button" onClick={() => setShowPass(!showPass)} className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground hover:text-foreground" tabIndex={-1}>
+                    {showPass ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                  </button>
                 </div>
-                {fieldErrors.password && <div style={errStyle}>{fieldErrors.password}</div>}
+                <FieldError>{fieldErrors.password}</FieldError>
               </div>
 
-              <p style={{ color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.9rem', margin: '0.5rem 0 0' }}>I am joining as a…</p>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                {ROLES.map(r => (
-                  <button key={r.value} type="button" onClick={() => set('role', r.value)} style={{ padding: '1rem', borderRadius: '12px', border: `2px solid ${form.role === r.value ? 'var(--cat-terra)' : 'var(--border-default)'}`, background: form.role === r.value ? 'rgba(201,123,84,0.08)' : 'var(--surface-card)', cursor: 'pointer', textAlign: 'left' }}>
-                    <div style={{ fontSize: '1.5rem', marginBottom: '0.375rem' }}>{r.emoji}</div>
-                    <div style={{ fontWeight: 800, fontSize: '0.875rem', color: 'var(--text-primary)' }}>{r.label}</div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>{r.desc}</div>
+              <p className="mt-1 text-sm font-semibold text-foreground">I am joining as a…</p>
+              <div className="grid grid-cols-2 gap-3">
+                {ROLES.map((r) => (
+                  <button
+                    key={r.value}
+                    type="button"
+                    onClick={() => set('role', r.value)}
+                    className={cn(
+                      'rounded-xl border-2 p-3.5 text-left transition-colors',
+                      form.role === r.value ? 'border-primary bg-primary/5' : 'border-border bg-card hover:border-border-strong',
+                    )}
+                  >
+                    <r.icon className={cn('mb-1.5 size-5', form.role === r.value ? 'text-primary' : 'text-muted-foreground')} />
+                    <div className="text-sm font-bold text-foreground">{r.label}</div>
+                    <div className="mt-0.5 text-xs text-muted-foreground">{r.desc}</div>
                   </button>
                 ))}
               </div>
 
-              <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '0.875rem', fontSize: '1rem', marginTop: '0.5rem' }}>Continue → Role details</button>
+              <Button type="submit" className="mt-1 h-11 w-full">Continue to role details</Button>
             </>
           )}
 
           {step === 2 && (
             <>
-              <p style={{ color: 'var(--text-secondary)', fontWeight: 700, fontSize: '0.95rem', textAlign: 'center', margin: 0 }}>
-                {ROLES.find(r => r.value === form.role)?.emoji} {ROLES.find(r => r.value === form.role)?.label} details
+              <p className="text-center text-sm font-semibold text-foreground">
+                {ROLES.find(r => r.value === form.role)?.label} details
               </p>
 
-              {/* VOLUNTEER */}
               {form.role === 'VOLUNTEER' && (
                 volunteersBlocked ? (
-                  <div className="form-error">
-                    No shelters are available to join yet. Volunteer signup requires an active shelter — please check back later or contact an administrator.
+                  <div className="rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-sm font-medium text-destructive">
+                    No shelters are available to join yet. Volunteer signup requires an active shelter — please check
+                    back later or contact an administrator.
                   </div>
                 ) : (
                   <>
-                    <div className="form-group">
-                      <label className="label-base">Shelter to join *</label>
-                      <select value={details.shelter_id} onChange={e => setD('shelter_id', e.target.value)} className="input-base" id="reg-shelter" style={fieldBorder('shelter_id')}>
+                    <div>
+                      <Label>Shelter to join *</Label>
+                      <select value={details.shelter_id} onChange={e => setD('shelter_id', e.target.value)} className={cn(selectClass, 'mt-1.5')}>
                         <option value="">{sheltersLoaded ? 'Select a shelter…' : 'Loading shelters…'}</option>
                         {shelters.map(s => <option key={s.id} value={s.id}>{s.name}{s.city ? ` — ${s.city}` : ''}</option>)}
                       </select>
-                      {fieldErrors.shelter_id && <div style={errStyle}>{fieldErrors.shelter_id}</div>}
+                      <FieldError>{fieldErrors.shelter_id}</FieldError>
                     </div>
-                    <div className="form-group">
-                      <label className="label-base">Service radius (km)</label>
-                      <input type="number" min="1" max="200" value={details.service_radius_km} onChange={e => setD('service_radius_km', e.target.value)} className="input-base" id="reg-radius" />
+                    <div>
+                      <Label htmlFor="reg-radius">Service radius (km)</Label>
+                      <Input id="reg-radius" type="number" min="1" max="200" value={details.service_radius_km} onChange={e => setD('service_radius_km', e.target.value)} className="mt-1.5" />
                     </div>
-                    <div className="form-group">
-                      <label className="label-base">Skills</label>
-                      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                    <div>
+                      <Label>Skills</Label>
+                      <div className="mt-1.5 flex flex-wrap gap-1.5">
                         {SKILLS.map(skill => (
-                          <button type="button" key={skill} onClick={() => toggleSkill(skill)} style={{ padding: '0.35rem 0.7rem', borderRadius: '999px', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', border: `1.5px solid ${details.skills.includes(skill) ? 'var(--cat-terra)' : 'var(--border-default)'}`, background: details.skills.includes(skill) ? 'var(--cat-terra)' : 'var(--surface-card)', color: details.skills.includes(skill) ? 'white' : 'var(--text-secondary)' }}>
+                          <Pill key={skill} active={details.skills.includes(skill)} onClick={() => toggleSkill(skill)}>
                             {skill.replace(/_/g, ' ')}
-                          </button>
+                          </Pill>
                         ))}
                       </div>
                     </div>
-                    <div className="form-group">
-                      <label className="label-base">Short bio</label>
-                      <textarea value={details.bio} onChange={e => setD('bio', e.target.value)} className="input-base" rows={2} placeholder="Tell us a bit about yourself" style={{ resize: 'vertical' }} />
+                    <div>
+                      <Label htmlFor="reg-bio">Short bio</Label>
+                      <Textarea id="reg-bio" value={details.bio} onChange={e => setD('bio', e.target.value)} rows={2} placeholder="Tell us a bit about yourself" className="mt-1.5" />
                     </div>
                   </>
                 )
               )}
 
-              {/* VET */}
               {form.role === 'VET' && (
                 <>
-                  {/* Registration number: fixed RVMP prefix + 3/5 digit choice */}
-                  <div className="form-group">
-                    <label className="label-base">Registration number *</label>
-                    <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                  <div>
+                    <Label>Registration number *</Label>
+                    <div className="mt-1.5 mb-2 flex gap-2">
                       {[3, 5].map(len => (
-                        <label key={len} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer', padding: '0.35rem 0.7rem', border: `1.5px solid ${Number(details.reg_len) === len ? 'var(--cat-terra)' : 'var(--border-default)'}`, borderRadius: '999px', background: Number(details.reg_len) === len ? 'rgba(201,123,84,0.08)' : 'var(--surface-card)' }}>
-                          <input type="checkbox" checked={Number(details.reg_len) === len} onChange={() => { setD('reg_len', len); setD('reg_digits', ''); }} style={{ width: '1rem', height: '1rem' }} />
+                        <label key={len} className={cn(
+                          'flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold',
+                          Number(details.reg_len) === len ? 'border-primary bg-primary/5 text-foreground' : 'border-border text-muted-foreground',
+                        )}>
+                          <input type="radio" checked={Number(details.reg_len) === len} onChange={() => { setD('reg_len', len); setD('reg_digits', ''); }} className="size-3.5" />
                           {len} digits
                         </label>
                       ))}
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'stretch' }}>
-                      <span style={{ display: 'flex', alignItems: 'center', padding: '0 0.85rem', fontWeight: 800, letterSpacing: '0.05em', color: 'var(--cat-terra)', background: 'var(--cat-linen)', border: '1.5px solid var(--border-default)', borderRight: 'none', borderRadius: '10px 0 0 10px' }}>RVMP</span>
-                      <input
+                    <div className="flex items-stretch">
+                      <span className="flex items-center rounded-l-md border border-r-0 border-input bg-surface-muted px-3 text-sm font-bold tracking-wide text-primary">RVMP</span>
+                      <Input
                         value={details.reg_digits}
                         onChange={e => setD('reg_digits', e.target.value.replace(/\D/g, '').slice(0, Number(details.reg_len)))}
-                        className="input-base"
                         inputMode="numeric"
                         placeholder={'0'.repeat(Number(details.reg_len))}
-                        style={{ borderRadius: '0 10px 10px 0', ...(fieldBorder('registration_number') || {}) }}
+                        className="rounded-l-none"
+                        aria-invalid={!!fieldErrors.registration_number}
                       />
                     </div>
-                    <small style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem', display: 'block' }}>
+                    <p className="mt-1 text-xs text-muted-foreground">
                       Your PVMC number — "RVMP" then {details.reg_len} digits{details.reg_digits ? ` → ${regNumber()}` : ''}.
-                    </small>
-                    {fieldErrors.registration_number && <div style={errStyle}>{fieldErrors.registration_number}</div>}
+                    </p>
+                    <FieldError>{fieldErrors.registration_number}</FieldError>
                   </div>
 
-                  {/* Practice type */}
-                  <div className="form-group">
-                    <label className="label-base">Where will you practise? *</label>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                  <div>
+                    <Label>Where will you practise? *</Label>
+                    <div className="mt-1.5 grid grid-cols-2 gap-2">
                       {[
-                        { value: 'CLINIC', emoji: '🏥', label: 'At a clinic' },
-                        { value: 'SHELTER', emoji: '🏠', label: 'At a shelter' },
+                        { value: 'CLINIC', label: 'At a clinic' },
+                        { value: 'SHELTER', label: 'At a shelter' },
                       ].map(opt => (
-                        <button type="button" key={opt.value} onClick={() => setD('practice_type', opt.value)} style={{ padding: '0.85rem', borderRadius: '12px', border: `2px solid ${details.practice_type === opt.value ? 'var(--cat-terra)' : 'var(--border-default)'}`, background: details.practice_type === opt.value ? 'rgba(201,123,84,0.08)' : 'var(--surface-card)', cursor: 'pointer', textAlign: 'center' }}>
-                          <div style={{ fontSize: '1.35rem', marginBottom: '0.2rem' }}>{opt.emoji}</div>
-                          <div style={{ fontWeight: 800, fontSize: '0.84rem', color: 'var(--text-primary)' }}>{opt.label}</div>
+                        <button
+                          type="button"
+                          key={opt.value}
+                          onClick={() => setD('practice_type', opt.value)}
+                          className={cn(
+                            'rounded-xl border-2 py-3 text-center text-sm font-bold transition-colors',
+                            details.practice_type === opt.value ? 'border-primary bg-primary/5 text-foreground' : 'border-border text-muted-foreground hover:border-border-strong',
+                          )}
+                        >
+                          {opt.label}
                         </button>
                       ))}
                     </div>
-                    {fieldErrors.practice_type && <div style={errStyle}>{fieldErrors.practice_type}</div>}
+                    <FieldError>{fieldErrors.practice_type}</FieldError>
                   </div>
 
-                  {/* Clinic details */}
                   {details.practice_type === 'CLINIC' && (
                     <>
-                      <div className="form-group">
-                        <label className="label-base">Clinic name</label>
-                        <input value={details.clinic_name} onChange={e => setD('clinic_name', e.target.value)} className="input-base" placeholder="Happy Paws Veterinary Clinic" />
+                      <div>
+                        <Label htmlFor="reg-clinic-name">Clinic name</Label>
+                        <Input id="reg-clinic-name" value={details.clinic_name} onChange={e => setD('clinic_name', e.target.value)} placeholder="Happy Paws Veterinary Clinic" className="mt-1.5" />
                       </div>
-                      <div className="form-group">
-                        <label className="label-base">Clinic location *</label>
-                        <input value={details.clinic_location} onChange={e => setD('clinic_location', e.target.value)} className="input-base" placeholder="Street, area, city" style={fieldBorder('clinic_location')} />
-                        {fieldErrors.clinic_location && <div style={errStyle}>{fieldErrors.clinic_location}</div>}
+                      <div>
+                        <Label htmlFor="reg-clinic-loc">Clinic location *</Label>
+                        <Input id="reg-clinic-loc" value={details.clinic_location} onChange={e => setD('clinic_location', e.target.value)} placeholder="Street, area, city" className="mt-1.5" aria-invalid={!!fieldErrors.clinic_location} />
+                        <FieldError>{fieldErrors.clinic_location}</FieldError>
                       </div>
-                      <div className="form-group">
-                        <label className="label-base">Clinic registration number *</label>
-                        <input value={details.clinic_registration_number} onChange={e => setD('clinic_registration_number', e.target.value)} className="input-base" placeholder="Official clinic registration / license no." style={fieldBorder('clinic_registration_number')} />
-                        {fieldErrors.clinic_registration_number && <div style={errStyle}>{fieldErrors.clinic_registration_number}</div>}
+                      <div>
+                        <Label htmlFor="reg-clinic-reg">Clinic registration number *</Label>
+                        <Input id="reg-clinic-reg" value={details.clinic_registration_number} onChange={e => setD('clinic_registration_number', e.target.value)} placeholder="Official clinic registration / license no." className="mt-1.5" aria-invalid={!!fieldErrors.clinic_registration_number} />
+                        <FieldError>{fieldErrors.clinic_registration_number}</FieldError>
                       </div>
                     </>
                   )}
 
-                  {/* Shelter selection */}
                   {details.practice_type === 'SHELTER' && (
-                    <div className="form-group">
-                      <label className="label-base">Shelter you will work at *</label>
-                      <select value={details.shelter_id} onChange={e => setD('shelter_id', e.target.value)} className="input-base" style={fieldBorder('shelter_id')}>
+                    <div>
+                      <Label>Shelter you will work at *</Label>
+                      <select value={details.shelter_id} onChange={e => setD('shelter_id', e.target.value)} className={cn(selectClass, 'mt-1.5')}>
                         <option value="">{sheltersLoaded ? 'Select a shelter…' : 'Loading shelters…'}</option>
                         {shelters.map(s => <option key={s.id} value={s.id}>{s.name}{s.city ? ` — ${s.city}` : ''}</option>)}
                       </select>
                       {sheltersLoaded && shelters.length === 0 && (
-                        <small style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem', display: 'block' }}>
-                          No shelters listed yet — you can still register and be assigned later.
-                        </small>
+                        <p className="mt-1 text-xs text-muted-foreground">No shelters listed yet — you can still register and be assigned later.</p>
                       )}
-                      {fieldErrors.shelter_id && <div style={errStyle}>{fieldErrors.shelter_id}</div>}
+                      <FieldError>{fieldErrors.shelter_id}</FieldError>
                     </div>
                   )}
 
-                  {/* Specializations multi-select */}
-                  <div className="form-group">
-                    <label className="label-base">Specializations *</label>
-                    <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
+                  <div>
+                    <Label>Specializations *</Label>
+                    <div className="mt-1.5 mb-2 flex flex-wrap gap-1.5">
                       {CAT_VET_SPECIALIZATIONS.map(spec => {
                         const on = details.specializations.includes(spec);
                         return (
-                          <button type="button" key={spec} onClick={() => toggleSpecialization(spec)} style={{ padding: '0.3rem 0.65rem', borderRadius: '999px', fontSize: '0.74rem', fontWeight: 700, cursor: 'pointer', border: `1.5px solid ${on ? 'var(--cat-terra)' : 'var(--border-default)'}`, background: on ? 'var(--cat-terra)' : 'var(--surface-card)', color: on ? 'white' : 'var(--text-secondary)' }}>
-                            {on ? '✓ ' : ''}{spec}
+                          <button
+                            type="button"
+                            key={spec}
+                            onClick={() => toggleSpecialization(spec)}
+                            className={cn(
+                              'inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-semibold',
+                              on ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card text-muted-foreground hover:border-border-strong',
+                            )}
+                          >
+                            {on && <Check className="size-3" />}
+                            {spec}
                           </button>
                         );
                       })}
                     </div>
-                    {/* Custom specializations not in the list */}
                     {details.specializations.filter(s => !CAT_VET_SPECIALIZATIONS.includes(s)).length > 0 && (
-                      <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
+                      <div className="mb-2 flex flex-wrap gap-1.5">
                         {details.specializations.filter(s => !CAT_VET_SPECIALIZATIONS.includes(s)).map(spec => (
-                          <button type="button" key={spec} onClick={() => toggleSpecialization(spec)} style={{ padding: '0.3rem 0.65rem', borderRadius: '999px', fontSize: '0.74rem', fontWeight: 700, cursor: 'pointer', border: '1.5px solid var(--cat-rust)', background: 'var(--cat-rust)', color: 'white' }}>
-                            ✕ {spec}
+                          <button type="button" key={spec} onClick={() => toggleSpecialization(spec)} className="inline-flex items-center gap-1 rounded-full border border-primary bg-primary px-2.5 py-1 text-xs font-semibold text-primary-foreground">
+                            <X className="size-3" />
+                            {spec}
                           </button>
                         ))}
                       </div>
                     )}
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      <input
+                    <div className="flex gap-2">
+                      <Input
                         value={details.custom_specialization}
                         onChange={e => setD('custom_specialization', e.target.value)}
                         onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addCustomSpecialization(); } }}
-                        className="input-base"
                         placeholder="Add another specialization…"
-                        style={{ flex: 1 }}
+                        className="flex-1"
                       />
-                      <button type="button" onClick={addCustomSpecialization} className="btn btn-secondary" style={{ padding: '0 1rem' }}>Add</button>
+                      <Button type="button" variant="secondary" onClick={addCustomSpecialization}>Add</Button>
                     </div>
-                    {fieldErrors.specializations && <div style={errStyle}>{fieldErrors.specializations}</div>}
+                    <FieldError>{fieldErrors.specializations}</FieldError>
                   </div>
 
-                  <div style={{ background: 'var(--cat-linen)', border: '1px solid var(--border-default)', borderRadius: '10px', padding: '0.75rem 0.9rem', fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                    🔐 Your request will be reviewed by a <strong>Super Admin</strong> and then a <strong>Shelter Admin</strong>. You can log in right away, but vet features stay locked until both approve.
+                  <div className="flex items-start gap-2 rounded-lg border border-border bg-surface-muted p-3 text-xs leading-relaxed text-muted-foreground">
+                    <Lock className="mt-0.5 size-3.5 shrink-0" />
+                    Your request will be reviewed by a <strong className="text-foreground">&nbsp;Super Admin&nbsp;</strong> and then a
+                    <strong className="text-foreground">&nbsp;Shelter Admin</strong>. You can log in right away, but vet features stay
+                    locked until both approve.
                   </div>
                 </>
               )}
 
-              {/* ADOPTER */}
               {form.role === 'ADOPTER' && (
                 <>
-                  <div className="form-group">
-                    <label className="label-base">Housing type</label>
-                    <select value={details.housing_type} onChange={e => setD('housing_type', e.target.value)} className="input-base">
+                  <div>
+                    <Label>Housing type</Label>
+                    <select value={details.housing_type} onChange={e => setD('housing_type', e.target.value)} className={cn(selectClass, 'mt-1.5')}>
                       {HOUSING.map(h => <option key={h} value={h}>{h.charAt(0) + h.slice(1).toLowerCase()}</option>)}
                     </select>
                   </div>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer' }}>
-                    <input type="checkbox" checked={details.has_other_pets} onChange={e => setD('has_other_pets', e.target.checked)} style={{ width: '1.1rem', height: '1.1rem' }} />
+                  <label className="flex cursor-pointer items-center gap-2 text-sm font-medium text-foreground">
+                    <Checkbox checked={details.has_other_pets} onCheckedChange={(v) => setD('has_other_pets', v)} />
                     I have other pets at home
                   </label>
-                  <div className="form-group">
-                    <label className="label-base">Household info</label>
-                    <textarea value={details.household_info} onChange={e => setD('household_info', e.target.value)} className="input-base" rows={2} placeholder="Who lives in your home? Any children?" style={{ resize: 'vertical' }} />
+                  <div>
+                    <Label htmlFor="reg-household">Household info</Label>
+                    <Textarea id="reg-household" value={details.household_info} onChange={e => setD('household_info', e.target.value)} rows={2} placeholder="Who lives in your home? Any children?" className="mt-1.5" />
                   </div>
                 </>
               )}
 
-              {/* CAT_OWNER */}
               {form.role === 'CAT_OWNER' && (
                 <>
-                  <div className="form-group">
-                    <label className="label-base">Phone</label>
-                    <PhoneInput value={details.phone} onChange={v => setD('phone', v)} error={fieldErrors.phone} />
-                    {fieldErrors.phone && <div style={errStyle}>{fieldErrors.phone}</div>}
+                  <div>
+                    <Label>Phone</Label>
+                    <div className="mt-1.5">
+                      <PhoneInput value={details.phone} onChange={v => setD('phone', v)} error={fieldErrors.phone} />
+                    </div>
+                    <FieldError>{fieldErrors.phone}</FieldError>
                   </div>
-                  <div className="form-group">
-                    <label className="label-base">Address</label>
-                    <input value={details.address} onChange={e => setD('address', e.target.value)} className="input-base" placeholder="Street address" />
+                  <div>
+                    <Label htmlFor="reg-address">Address</Label>
+                    <Input id="reg-address" value={details.address} onChange={e => setD('address', e.target.value)} placeholder="Street address" className="mt-1.5" />
                   </div>
-                  <div className="form-group">
-                    <label className="label-base">City</label>
-                    <input value={details.city} onChange={e => setD('city', e.target.value)} className="input-base" placeholder="City" />
+                  <div>
+                    <Label htmlFor="reg-city">City</Label>
+                    <Input id="reg-city" value={details.city} onChange={e => setD('city', e.target.value)} placeholder="City" className="mt-1.5" />
                   </div>
                 </>
               )}
 
-              {!volunteersBlocked && (
-                <div style={{ marginTop: '0.25rem' }}>
-                  <TermsConsent checked={agreed} onChange={setAgreed} id="register-terms" />
-                </div>
-              )}
+              {!volunteersBlocked && <TermsConsent checked={agreed} onChange={setAgreed} id="register-terms" />}
 
-              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
-                <button type="button" onClick={() => { setStep(1); setError(''); }} className="btn btn-secondary" style={{ flex: 1, padding: '0.75rem' }}>← Back</button>
-                <button type="submit" disabled={loading || volunteersBlocked || !agreed} className="btn btn-primary" style={{ flex: 2, padding: '0.75rem' }}>
+              <div className="mt-1 flex gap-3">
+                <Button type="button" variant="secondary" onClick={() => { setStep(1); setError(''); }} className="flex-1">
+                  Back
+                </Button>
+                <Button type="submit" disabled={loading || volunteersBlocked || !agreed} className="flex-[2]">
                   {loading
-                    ? (form.role === 'VET' ? '🐾 Sending request…' : '🐾 Creating account…')
-                    : (form.role === 'VET' ? '🩺 Send Registration Request' : '🐾 Create Account')}
-                </button>
+                    ? (form.role === 'VET' ? 'Sending request…' : 'Creating account…')
+                    : (form.role === 'VET' ? 'Send registration request' : 'Create account')}
+                </Button>
               </div>
             </>
           )}
         </form>
 
-        <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.875rem', marginTop: '1.5rem' }}>
-          Already have an account? <Link to="/login" style={{ color: 'var(--cat-terra)', fontWeight: 700, textDecoration: 'none' }}>Sign in →</Link>
+        <p className="mt-6 text-center text-sm text-muted-foreground">
+          Already have an account? <Link to="/login" className="font-semibold text-primary">Sign in</Link>
         </p>
       </div>
     </div>

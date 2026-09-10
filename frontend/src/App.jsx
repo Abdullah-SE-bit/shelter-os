@@ -1,11 +1,8 @@
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import ProtectedRoute from './components/ProtectedRoute';
-import Navbar from './components/Navbar';
-import Sidebar from './components/Sidebar';
-import Footer from './components/Footer';
-import { useAuth } from './context/AuthContext';
+import AppShell from './app-shell/AppShell';
 
 // Auth
 import LoginPage           from './pages/auth/LoginPage';
@@ -108,57 +105,9 @@ const ALL_AUTH = ['SUPER_ADMIN','SHELTER_ADMIN','VET','VOLUNTEER','CAT_OWNER','A
 // Cats list + medical browse aren't for vets — they reach patients via appointments.
 const CATS_VIEW = ['SUPER_ADMIN','SHELTER_ADMIN','VOLUNTEER','CAT_OWNER','ADOPTER'];
 
-// Layout wrapper that shows sidebar for logged-in users
-function AppLayout({ children }) {
-  const { user } = useAuth();
-  const location = useLocation();
-
-  // Full-screen pages (no sidebar/nav)
-  const fullScreenPaths = ['/login', '/register', '/forgot-password', '/reset-password', '/verify-email', '/terms'];
-  const isFullScreen = fullScreenPaths.some(p => location.pathname.startsWith(p));
-
-  if (isFullScreen) {
-    return <>{children}</>;
-  }
-
-  // Public pages: navbar only (no sidebar)
-  const publicPaths = ['/adoption', '/shelters', '/lost-found', '/campaigns'];
-  const isPublicPage = !user && publicPaths.some(p => location.pathname.startsWith(p));
-
-  // Full-height "workspace" screens manage their own scroll — no footer.
-  const noFooterPaths = ['/messages'];
-  const hideFooter = noFooterPaths.some(p => location.pathname.startsWith(p));
-
-  if (isPublicPage || !user) {
-    return (
-      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-        <Navbar />
-        <main style={{ flex: 1 }}>{children}</main>
-        {!hideFooter && <Footer />}
-      </div>
-    );
-  }
-
-  // Logged-in: sidebar + content
-  return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <Navbar />
-      <div style={{ display: 'flex', flex: 1 }}>
-        <div className="hide-mobile">
-          <Sidebar />
-        </div>
-        <main style={{ flex: 1, minWidth: 0, background: 'var(--cat-cream)' }}>
-          {children}
-        </main>
-      </div>
-      {!hideFooter && <Footer />}
-    </div>
-  );
-}
-
 function AppRoutes() {
   return (
-    <AppLayout>
+    <AppShell>
       <Routes>
         {/* Public */}
         <Route path="/login"           element={<LoginPage />} />
@@ -250,7 +199,7 @@ function AppRoutes() {
         <Route path="/"  element={<Navigate to="/adoption" replace />} />
         <Route path="*"  element={<Navigate to="/adoption" replace />} />
       </Routes>
-    </AppLayout>
+    </AppShell>
   );
 }
 
