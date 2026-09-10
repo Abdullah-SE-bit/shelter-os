@@ -1,40 +1,45 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { inventoryApi } from '../../api/inventoryApi';
-import { sheltersApi } from '../../api/sheltersApi';
-import useApi from '../../hooks/useApi';
-import LoadingSpinner from '../../components/LoadingSpinner';
-import EmptyState from '../../components/EmptyState';
-import PageHeader from '../../components/PageHeader';
-import Modal from '../../components/Modal';
+import { Beef, Pill, Wrench, SprayCan, BedDouble, Package, Plus, History, Building2 } from 'lucide-react';
+import { inventoryApi } from '@/api/inventoryApi';
+import { sheltersApi } from '@/api/sheltersApi';
+import useApi from '@/hooks/useApi';
+import LoadingSpinner from '@/components/LoadingSpinner';
+import EmptyState from '@/components/EmptyState';
+import PageHeader from '@/components/patterns/PageHeader';
+import Modal from '@/components/Modal';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
+import { NativeSelect } from '@/components/ui/native-select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { cn } from '@/lib/utils';
 
-const CATEGORY_ICONS = {
-  FOOD: '🍖', MEDICINE: '💊', EQUIPMENT: '🔧', CLEANING: '🧼', BEDDING: '🛏️', OTHER: '📦',
+const CATEGORIES = {
+  FOOD: Beef, MEDICINE: Pill, EQUIPMENT: Wrench, CLEANING: SprayCan, BEDDING: BedDouble, OTHER: Package,
 };
 
 export default function InventoryListPage() {
   const [shelterId, setShelterId] = useState(null);
   const [shelterErr, setShelterErr] = useState('');
   const [addOpen, setAddOpen] = useState(false);
-  const [stockModal, setStockModal] = useState(null); // { item, mode: 'restock'|'use' }
+  const [stockModal, setStockModal] = useState(null);
   const [category, setCategory] = useState('');
   const [lowStock, setLowStock] = useState(false);
 
-  // Resolve the current admin's shelter (super admin -> first shelter).
   useEffect(() => {
-    sheltersApi.myDashboard()
-      .then(res => setShelterId(res.data?.data?.shelter_id || null))
-      .catch(() => setShelterErr('No shelter is associated with your account.'));
+    sheltersApi.myDashboard().then((res) => setShelterId(res.data?.data?.shelter_id || null)).catch(() => setShelterErr('No shelter is associated with your account.'));
   }, []);
 
   const { data, loading, refetch } = useApi(
     () => inventoryApi.listByShelter(shelterId, { category: category || undefined }),
     { skip: !shelterId },
-    [shelterId, category]
+    [shelterId, category],
   );
 
   const allItems = Array.isArray(data) ? data : (data?.results || []);
-  const items = lowStock ? allItems.filter(i => i.is_low_stock) : allItems;
+  const items = lowStock ? allItems.filter((i) => i.is_low_stock) : allItems;
 
   const handleStock = async (e) => {
     e.preventDefault();
@@ -42,11 +47,8 @@ export default function InventoryListPage() {
     const qty = Number(fd.get('qty'));
     const notes = fd.get('notes') || '';
     try {
-      if (stockModal.mode === 'restock') {
-        await inventoryApi.restock(stockModal.item.id, { quantity_added: qty, notes });
-      } else {
-        await inventoryApi.use(stockModal.item.id, { quantity_used: qty, notes });
-      }
+      if (stockModal.mode === 'restock') await inventoryApi.restock(stockModal.item.id, { quantity_added: qty, notes });
+      else await inventoryApi.use(stockModal.item.id, { quantity_used: qty, notes });
       setStockModal(null);
       refetch();
     } catch (err) {
@@ -56,129 +58,119 @@ export default function InventoryListPage() {
 
   if (shelterErr) {
     return (
-      <div className="page-container">
-        <PageHeader title="📦 Inventory" subtitle="Track supplies and stock levels" />
-        <EmptyState icon="🏠" title="No shelter found" message={shelterErr} />
+      <div className="mx-auto max-w-[1200px] px-4 py-6 sm:px-6">
+        <PageHeader title="Inventory" description="Track supplies and stock levels" />
+        <EmptyState icon={Building2} title="No shelter found" message={shelterErr} />
       </div>
     );
   }
 
   return (
-    <div className="page-container">
+    <div className="mx-auto max-w-[1200px] px-4 py-6 sm:px-6">
       <PageHeader
-        title="📦 Inventory"
-        subtitle={`${items.length} items · Track supplies and stock levels`}
-        action={<button onClick={() => setAddOpen(true)} className="btn btn-primary" disabled={!shelterId}>+ Add Item</button>}
+        title="Inventory"
+        description={`${items.length} items · Track supplies and stock levels`}
+        actions={<Button onClick={() => setAddOpen(true)} disabled={!shelterId}><Plus className="size-4" />Add item</Button>}
       />
 
-      {/* Filters */}
-      <div style={{ display: 'flex', gap: '0.625rem', flexWrap: 'wrap', alignItems: 'center', marginBottom: '1.5rem', padding: '0.875rem 1.25rem', background: 'var(--surface-card)', border: '1px solid var(--border-default)', borderRadius: '12px' }}>
-        <select value={category} onChange={e => setCategory(e.target.value)} className="input-base" style={{ width: 'auto' }}>
-          <option value="">All Categories</option>
-          {Object.entries(CATEGORY_ICONS).map(([k, v]) => <option key={k} value={k}>{v} {k}</option>)}
-        </select>
-        <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', fontWeight: 600, fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-          <input type="checkbox" checked={lowStock} onChange={e => setLowStock(e.target.checked)} style={{ accentColor: 'var(--cat-terra)' }} />
-          ⚠️ Low stock only
+      <div className="mb-6 flex flex-wrap items-center gap-3 rounded-xl border border-border bg-card p-4">
+        <NativeSelect value={category} onChange={(e) => setCategory(e.target.value)} className="w-auto min-w-[160px]">
+          <option value="">All categories</option>
+          {Object.keys(CATEGORIES).map((k) => <option key={k} value={k}>{k}</option>)}
+        </NativeSelect>
+        <label className="flex cursor-pointer items-center gap-2 text-sm font-medium text-foreground">
+          <Checkbox checked={lowStock} onCheckedChange={setLowStock} />
+          Low stock only
         </label>
-        <span style={{ marginLeft: 'auto', fontSize: '0.875rem', color: 'var(--text-muted)', fontWeight: 600 }}>{items.length} items</span>
+        <span className="ml-auto text-sm font-semibold text-muted-foreground">{items.length} items</span>
       </div>
 
       {(loading || !shelterId) && <LoadingSpinner text="Loading inventory…" />}
 
       {!loading && shelterId && items.length === 0 && (
-        <EmptyState icon="📦" title="No inventory items" message={lowStock ? 'No low-stock items. Stock levels look good!' : 'No items in inventory yet.'}
-          action={<button onClick={() => setAddOpen(true)} className="btn btn-primary">+ Add Item</button>} />
+        <EmptyState icon={Package} title="No inventory items" message={lowStock ? 'No low-stock items. Stock levels look good!' : 'No items in inventory yet.'}
+          action={<Button onClick={() => setAddOpen(true)}><Plus className="size-4" />Add item</Button>} />
       )}
 
       {!loading && items.length > 0 && (
-        <div style={{ background: 'var(--surface-card)', border: '1px solid var(--border-default)', borderRadius: '12px', overflow: 'hidden', marginBottom: '1.5rem' }}>
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Item</th>
-                <th>Category</th>
-                <th>Quantity</th>
-                <th>Min Threshold</th>
-                <th>Status</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map(item => {
+        <div className="mb-6 rounded-xl border border-border bg-card">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Item</TableHead>
+                <TableHead>Category</TableHead>
+                <TableHead>Quantity</TableHead>
+                <TableHead>Min threshold</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead />
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {items.map((item) => {
                 const isLow = item.is_low_stock;
+                const Icon = CATEGORIES[item.category] || Package;
                 return (
-                  <tr key={item.id} style={{ background: isLow ? 'rgba(192,82,78,0.04)' : undefined }}>
-                    <td>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <span style={{ fontSize: '1.25rem' }}>{CATEGORY_ICONS[item.category] || '📦'}</span>
-                        <span style={{ fontWeight: 700 }}>{item.name}</span>
+                  <TableRow key={item.id} className={cn(isLow && 'bg-destructive/5')}>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Icon className="size-4 text-muted-foreground" />
+                        <span className="font-semibold text-foreground">{item.name}</span>
                       </div>
-                    </td>
-                    <td style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>{item.category}</td>
-                    <td>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <span style={{ fontWeight: 800, fontSize: '1rem', color: isLow ? 'var(--cat-red)' : 'var(--cat-terra)' }}>
-                          {Number(item.current_quantity)}
-                        </span>
-                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{item.unit}</span>
-                      </div>
-                    </td>
-                    <td style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>{Number(item.minimum_threshold) || '—'}</td>
-                    <td>
-                      <span style={{
-                        background: isLow ? 'var(--cat-red-light)' : 'var(--cat-sage-light)',
-                        color: isLow ? '#8B2C2A' : '#2E6B24',
-                        fontSize: '0.7rem', fontWeight: 700, padding: '0.2rem 0.5rem', borderRadius: '999px',
-                      }}>
-                        {isLow ? '⚠️ Low' : '✅ OK'}
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{item.category}</TableCell>
+                    <TableCell>
+                      <span className={cn('text-[15px] font-bold', isLow ? 'text-destructive' : 'text-primary')}>{Number(item.current_quantity)}</span>
+                      <span className="ml-1 text-xs text-muted-foreground">{item.unit}</span>
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{Number(item.minimum_threshold) || '—'}</TableCell>
+                    <TableCell>
+                      <span className={cn('rounded-full px-2 py-0.5 text-xs font-semibold', isLow ? 'bg-destructive/10 text-destructive' : 'bg-success/10 text-success')}>
+                        {isLow ? 'Low' : 'OK'}
                       </span>
-                    </td>
-                    <td>
-                      <div style={{ display: 'flex', gap: '0.375rem' }}>
-                        <button onClick={() => setStockModal({ item, mode: 'restock' })} className="btn btn-secondary btn-sm">+ Restock</button>
-                        <button onClick={() => setStockModal({ item, mode: 'use' })} className="btn btn-secondary btn-sm">− Use</button>
-                        <Link to={`/inventory/${item.id}/history`} className="btn btn-secondary btn-sm">📋</Link>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-1.5">
+                        <Button size="sm" variant="secondary" onClick={() => setStockModal({ item, mode: 'restock' })}>Restock</Button>
+                        <Button size="sm" variant="secondary" onClick={() => setStockModal({ item, mode: 'use' })}>Use</Button>
+                        <Button size="sm" variant="secondary" asChild><Link to={`/inventory/${item.id}/history`}><History className="size-3.5" /></Link></Button>
                       </div>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 );
               })}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       )}
 
-      {/* Restock / Use modal */}
-      <Modal open={!!stockModal} onClose={() => setStockModal(null)}
-        title={stockModal ? `${stockModal.mode === 'restock' ? '+ Restock' : '− Use'}: ${stockModal.item.name}` : ''}
+      <Modal
+        open={!!stockModal}
+        onClose={() => setStockModal(null)}
+        title={stockModal ? `${stockModal.mode === 'restock' ? 'Restock' : 'Use'}: ${stockModal.item.name}` : ''}
         footer={
           <>
-            <button onClick={() => setStockModal(null)} className="btn btn-secondary">Cancel</button>
-            <button form="stock-form" type="submit" className="btn btn-primary">
-              {stockModal?.mode === 'restock' ? 'Add Stock' : 'Reduce Stock'}
-            </button>
+            <Button variant="secondary" onClick={() => setStockModal(null)}>Cancel</Button>
+            <Button form="stock-form" type="submit">{stockModal?.mode === 'restock' ? 'Add stock' : 'Reduce stock'}</Button>
           </>
         }
       >
         {stockModal && (
-          <form id="stock-form" onSubmit={handleStock} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <div style={{ background: 'var(--cat-linen)', borderRadius: '10px', padding: '0.75rem 1rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-              Current: <strong style={{ color: 'var(--cat-terra)' }}>{Number(stockModal.item.current_quantity)} {stockModal.item.unit}</strong>
+          <form id="stock-form" onSubmit={handleStock} className="flex flex-col gap-4">
+            <div className="rounded-lg bg-surface-muted p-3 text-sm text-muted-foreground">
+              Current: <strong className="text-primary">{Number(stockModal.item.current_quantity)} {stockModal.item.unit}</strong>
             </div>
-            <div className="form-group">
-              <label className="label-base">{stockModal.mode === 'restock' ? 'Quantity to add' : 'Quantity to use'} *</label>
-              <input type="number" name="qty" required min="0.01" step="0.01" className="input-base" placeholder="e.g. 10" id="stock-qty" />
+            <div>
+              <Label htmlFor="stock-qty">{stockModal.mode === 'restock' ? 'Quantity to add' : 'Quantity to use'} *</Label>
+              <Input id="stock-qty" type="number" name="qty" required min="0.01" step="0.01" placeholder="e.g. 10" className="mt-1.5" />
             </div>
-            <div className="form-group">
-              <label className="label-base">Notes</label>
-              <input name="notes" className="input-base" placeholder="Reason / reference…" id="stock-notes" />
+            <div>
+              <Label htmlFor="stock-notes">Notes</Label>
+              <Input id="stock-notes" name="notes" placeholder="Reason / reference…" className="mt-1.5" />
             </div>
           </form>
         )}
       </Modal>
 
-      {/* Add item modal */}
       <AddItemModal open={addOpen} shelterId={shelterId} onClose={() => setAddOpen(false)} onSaved={() => { setAddOpen(false); refetch(); }} />
     </div>
   );
@@ -188,20 +180,16 @@ function AddItemModal({ open, shelterId, onClose, onSaved }) {
   const [form, setForm] = useState({ name: '', category: 'FOOD', current_quantity: '', unit: 'units', minimum_threshold: '', unit_cost: '', supplier_info: '' });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+  const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
   const handleSave = async (e) => {
     e.preventDefault();
     setSaving(true); setError('');
     try {
       await inventoryApi.createForShelter(shelterId, {
-        name: form.name,
-        category: form.category,
-        unit: form.unit || 'units',
-        current_quantity: Number(form.current_quantity) || 0,
-        minimum_threshold: Number(form.minimum_threshold) || 0,
-        unit_cost: form.unit_cost ? Number(form.unit_cost) : null,
-        supplier_info: form.supplier_info,
+        name: form.name, category: form.category, unit: form.unit || 'units',
+        current_quantity: Number(form.current_quantity) || 0, minimum_threshold: Number(form.minimum_threshold) || 0,
+        unit_cost: form.unit_cost ? Number(form.unit_cost) : null, supplier_info: form.supplier_info,
       });
       onSaved();
       setForm({ name: '', category: 'FOOD', current_quantity: '', unit: 'units', minimum_threshold: '', unit_cost: '', supplier_info: '' });
@@ -212,50 +200,28 @@ function AddItemModal({ open, shelterId, onClose, onSaved }) {
   };
 
   return (
-    <Modal open={open} onClose={onClose} title="📦 Add Inventory Item"
-      footer={
-        <>
-          <button onClick={onClose} className="btn btn-secondary">Cancel</button>
-          <button form="add-item-form" type="submit" disabled={saving} className="btn btn-primary">
-            {saving ? 'Saving…' : 'Add Item'}
-          </button>
-        </>
-      }
+    <Modal
+      open={open}
+      onClose={onClose}
+      title="Add inventory item"
+      footer={<><Button variant="secondary" onClick={onClose}>Cancel</Button><Button form="add-item-form" type="submit" disabled={saving}>{saving ? 'Saving…' : 'Add item'}</Button></>}
     >
-      {error && <div className="form-error" style={{ marginBottom: '1rem' }}>{error}</div>}
-      <form id="add-item-form" onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-          <div className="form-group">
-            <label className="label-base">Item Name *</label>
-            <input required value={form.name} onChange={e => set('name', e.target.value)} className="input-base" placeholder="Royal Canin Kitten" id="inv-name" />
+      {error && <div className="mb-4 rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-sm font-medium text-destructive">{error}</div>}
+      <form id="add-item-form" onSubmit={handleSave} className="flex flex-col gap-3.5">
+        <div className="grid grid-cols-2 gap-3">
+          <div><Label htmlFor="inv-name">Item name *</Label><Input id="inv-name" required value={form.name} onChange={(e) => set('name', e.target.value)} placeholder="Royal Canin Kitten" className="mt-1.5" /></div>
+          <div>
+            <Label htmlFor="inv-cat">Category</Label>
+            <NativeSelect id="inv-cat" value={form.category} onChange={(e) => set('category', e.target.value)} className="mt-1.5">
+              {Object.keys(CATEGORIES).map((k) => <option key={k} value={k}>{k}</option>)}
+            </NativeSelect>
           </div>
-          <div className="form-group">
-            <label className="label-base">Category</label>
-            <select value={form.category} onChange={e => set('category', e.target.value)} className="input-base" id="inv-cat">
-              {Object.keys(CATEGORY_ICONS).map(k => <option key={k} value={k}>{CATEGORY_ICONS[k]} {k}</option>)}
-            </select>
-          </div>
-          <div className="form-group">
-            <label className="label-base">Quantity *</label>
-            <input type="number" required min="0" step="0.01" value={form.current_quantity} onChange={e => set('current_quantity', e.target.value)} className="input-base" placeholder="50" id="inv-qty" />
-          </div>
-          <div className="form-group">
-            <label className="label-base">Unit</label>
-            <input value={form.unit} onChange={e => set('unit', e.target.value)} className="input-base" placeholder="kg, units, bottles" id="inv-unit" />
-          </div>
-          <div className="form-group">
-            <label className="label-base">Min Threshold</label>
-            <input type="number" min="0" step="0.01" value={form.minimum_threshold} onChange={e => set('minimum_threshold', e.target.value)} className="input-base" placeholder="10" id="inv-min" />
-          </div>
-          <div className="form-group">
-            <label className="label-base">Unit Cost (optional)</label>
-            <input type="number" min="0" step="0.01" value={form.unit_cost} onChange={e => set('unit_cost', e.target.value)} className="input-base" placeholder="0.00" id="inv-cost" />
-          </div>
+          <div><Label htmlFor="inv-qty">Quantity *</Label><Input id="inv-qty" type="number" required min="0" step="0.01" value={form.current_quantity} onChange={(e) => set('current_quantity', e.target.value)} placeholder="50" className="mt-1.5" /></div>
+          <div><Label htmlFor="inv-unit">Unit</Label><Input id="inv-unit" value={form.unit} onChange={(e) => set('unit', e.target.value)} placeholder="kg, units, bottles" className="mt-1.5" /></div>
+          <div><Label htmlFor="inv-min">Min threshold</Label><Input id="inv-min" type="number" min="0" step="0.01" value={form.minimum_threshold} onChange={(e) => set('minimum_threshold', e.target.value)} placeholder="10" className="mt-1.5" /></div>
+          <div><Label htmlFor="inv-cost">Unit cost (optional)</Label><Input id="inv-cost" type="number" min="0" step="0.01" value={form.unit_cost} onChange={(e) => set('unit_cost', e.target.value)} placeholder="0.00" className="mt-1.5" /></div>
         </div>
-        <div className="form-group">
-          <label className="label-base">Supplier Info</label>
-          <input value={form.supplier_info} onChange={e => set('supplier_info', e.target.value)} className="input-base" placeholder="Supplier name / contact" id="inv-supplier" />
-        </div>
+        <div><Label htmlFor="inv-supplier">Supplier info</Label><Input id="inv-supplier" value={form.supplier_info} onChange={(e) => set('supplier_info', e.target.value)} placeholder="Supplier name / contact" className="mt-1.5" /></div>
       </form>
     </Modal>
   );
