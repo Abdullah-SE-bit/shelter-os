@@ -1,14 +1,22 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { sheltersApi } from '../../api/sheltersApi';
-import { authApi } from '../../api/authApi';
-import { coreApi } from '../../api/coreApi';
-import useApi from '../../hooks/useApi';
-import LoadingSpinner from '../../components/LoadingSpinner';
-import MapLocationPicker from '../../components/MapLocationPicker';
-import PhoneInput, { isValidPkMobile } from '../../components/PhoneInput';
-import ShelterPhoneField, { isValidPkPhone } from '../../components/ShelterPhoneField';
-import Modal from '../../components/Modal';
+import { Building2, Tag, Plus } from 'lucide-react';
+import { sheltersApi } from '@/api/sheltersApi';
+import { authApi } from '@/api/authApi';
+import { coreApi } from '@/api/coreApi';
+import useApi from '@/hooks/useApi';
+import LoadingSpinner from '@/components/LoadingSpinner';
+import MapLocationPicker from '@/components/MapLocationPicker';
+import PhoneInput, { isValidPkMobile } from '@/components/PhoneInput';
+import ShelterPhoneField, { isValidPkPhone } from '@/components/ShelterPhoneField';
+import Modal from '@/components/Modal';
+import PageHeader from '@/components/patterns/PageHeader';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { NativeSelect } from '@/components/ui/native-select';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 function distanceKm(lat1, lng1, lat2, lng2) {
   const R = 6371;
@@ -17,6 +25,11 @@ function distanceKm(lat1, lng1, lat2, lng2) {
   const a = Math.sin(dLat / 2) ** 2 +
     Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLng / 2) ** 2;
   return R * 2 * Math.asin(Math.sqrt(a));
+}
+
+function FieldError({ children }) {
+  if (!children) return null;
+  return <p className="mt-1 text-xs font-medium text-destructive">{children}</p>;
 }
 
 export default function CreateShelterPage() {
@@ -29,44 +42,26 @@ export default function CreateShelterPage() {
   const [errors, setErrors] = useState({});
   const [generalError, setGeneralError] = useState('');
   const [form, setForm] = useState({
-    name: '',
-    street: '',
-    city: '',
-    country: 'Pakistan',
-    phone: '',
-    email: '',
-    website: '',
-    capacity_total: '',
-    admin: '',
-    description: '',
-    latitude: '',
-    longitude: '',
+    name: '', street: '', city: '', country: 'Pakistan', phone: '', email: '', website: '',
+    capacity_total: '', admin: '', description: '', latitude: '', longitude: '',
   });
 
-  // Fetch users for admin assignment (only SHELTER_ADMIN or unassigned users)
-  const { data: usersData, loading: usersLoading, refetch: refetchUsers } = useApi(() => 
-    authApi.listUsers({ role: 'SHELTER_ADMIN' })
+  const { data: usersData, loading: usersLoading, refetch: refetchUsers } = useApi(() =>
+    authApi.listUsers({ role: 'SHELTER_ADMIN' }),
   );
-  // Only shelter admins not already managing a shelter can be assigned here.
-  const users = (usersData || []).filter(u => !u.assigned_shelter_id);
+  const users = (usersData || []).filter((u) => !u.assigned_shelter_id);
 
-  // E1: controlled city list.
   const { data: citiesData } = useApi(() => coreApi.getLookup('CITIES'));
   const cities = Array.isArray(citiesData) ? citiesData : (citiesData?.results || []);
 
-  // Centre + radius of the selected city (from lookup metadata) constrains the map.
-  const selectedCity = cities.find(c => c.display_label === form.city) || null;
+  const selectedCity = cities.find((c) => c.display_label === form.city) || null;
   const cityCenter = selectedCity?.metadata && selectedCity.metadata.lat != null
-    ? {
-        lat: selectedCity.metadata.lat,
-        lng: selectedCity.metadata.lng,
-        radius_km: selectedCity.metadata.radius_km || 45,
-      }
+    ? { lat: selectedCity.metadata.lat, lng: selectedCity.metadata.lng, radius_km: selectedCity.metadata.radius_km || 45 }
     : null;
 
   const handleChange = (field, value) => {
-    setForm(prev => ({ ...prev, [field]: value }));
-    setErrors(prev => ({ ...prev, [field]: undefined }));
+    setForm((prev) => ({ ...prev, [field]: value }));
+    setErrors((prev) => ({ ...prev, [field]: undefined }));
   };
 
   const handleCreateOwner = async (e) => {
@@ -79,14 +74,12 @@ export default function CreateShelterPage() {
     setOwnerError('');
     try {
       const res = await authApi.createAdminUser({ ...ownerForm, role: 'SHELTER_ADMIN' });
-      alert('Shelter Admin created successfully!');
       await refetchUsers();
       const newUserId = res.data?.data?.user_id || res.data?.user_id;
-      setForm(prev => ({ ...prev, admin: newUserId }));
+      setForm((prev) => ({ ...prev, admin: newUserId }));
       setOwnerOpen(false);
       setOwnerForm({ email: '', password: '', first_name: '', last_name: '', phone: '' });
     } catch (err) {
-      console.error(err);
       setOwnerError(err.response?.data?.error?.message || 'Failed to create shelter admin.');
     } finally {
       setOwnerSaving(false);
@@ -99,14 +92,9 @@ export default function CreateShelterPage() {
     if (!form.city) errs.city = 'Please select a city.';
     const cap = parseInt(form.capacity_total);
     if (!cap || cap <= 0) errs.capacity_total = 'Capacity must be a positive number.';
-
-    // Contact phone: required Pakistani mobile OR landline.
     if (!isValidPkPhone(form.phone)) errs.phone = 'Enter a valid Pakistani mobile or landline number.';
-
     if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) errs.email = 'Enter a valid email.';
     if (form.website && !/^https?:\/\/.+/.test(form.website)) errs.website = 'Website must start with http:// or https://';
-
-    // Location is mandatory and must fall inside the selected city.
     if (form.latitude === '' || form.longitude === '' || form.latitude == null || form.longitude == null) {
       errs.location = 'Please pick the shelter location on the map.';
     } else if (cityCenter) {
@@ -147,384 +135,171 @@ export default function CreateShelterPage() {
     }
   };
 
-  const errText = { color: 'var(--cat-red)', fontSize: '0.78rem', marginTop: '0.3rem', fontWeight: 600 };
-  const bd = (f) => ({ width: '100%', padding: '0.625rem', borderRadius: '8px', border: `1px solid ${errors[f] ? 'var(--cat-red)' : 'var(--border-default)'}` });
-
   return (
-    <div className="page-container">
-      {/* Header */}
-      <div style={{
-        background: 'linear-gradient(135deg, var(--cat-rust), var(--cat-espresso))',
-        borderRadius: '20px',
-        padding: '2rem 2.5rem',
-        marginBottom: '2rem',
-        position: 'relative',
-        overflow: 'hidden',
-        boxShadow: 'var(--shadow-lg)',
-      }}>
-        <div style={{ position: 'absolute', right: '2rem', bottom: '-0.5rem', fontSize: '6rem', opacity: 0.1 }}>🏠</div>
-        <h1 style={{ color: 'white', margin: '0 0 0.5rem', fontSize: '2rem', fontFamily: 'Playfair Display, serif' }}>
-          Create New Shelter
-        </h1>
-        <p style={{ color: 'rgba(255,255,255,0.7)', margin: 0, fontSize: '0.9375rem' }}>
-          Add a new shelter to the PawTrack OS network
-        </p>
-      </div>
+    <div className="mx-auto max-w-[860px] px-4 py-6 sm:px-6">
+      <PageHeader title="Create new shelter" description="Add a new shelter to the Shelter OS network" backTo="/shelters" backLabel="Shelters" />
 
       {usersLoading ? (
-        <LoadingSpinner text="Loading..." />
+        <LoadingSpinner text="Loading…" />
       ) : (
-        <form onSubmit={handleSubmit}>
-          {generalError && <div className="form-error" style={{ marginBottom: '1.25rem' }}>🙀 {generalError}</div>}
-          <div style={{
-            background: 'var(--surface-card)',
-            border: '1px solid var(--border-default)',
-            borderRadius: '14px',
-            padding: '1.5rem',
-            marginBottom: '1.5rem',
-          }}>
-            <h2 style={{ margin: '0 0 1.25rem', fontSize: '1.125rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-              Basic Information
-            </h2>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+          {generalError && <div className="rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-sm font-medium text-destructive">{generalError}</div>}
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-              <div>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.875rem' }}>
-                  Shelter Name *
-                </label>
-                <input
-                  required
-                  type="text"
-                  value={form.name}
-                  onChange={(e) => handleChange('name', e.target.value)}
-                  placeholder="Happy Paws Shelter"
-                  style={bd('name')}
-                />
-                {errors.name && <div style={errText}>{errors.name}</div>}
-              </div>
-
-              <div>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.875rem' }}>
-                  Registration Number
-                </label>
-                <div style={{
-                  padding: '0.625rem 0.75rem',
-                  borderRadius: '8px',
-                  border: '1px dashed var(--border-default)',
-                  background: 'var(--cat-linen)',
-                  color: 'var(--text-muted)',
-                  fontSize: '0.85rem',
-                  fontWeight: 600,
-                }}>
-                  🔖 Auto-generated on creation
+          <Card>
+            <CardHeader><CardTitle>Basic information</CardTitle></CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                  <Label htmlFor="shelter-name">Shelter name *</Label>
+                  <Input id="shelter-name" required value={form.name} onChange={(e) => handleChange('name', e.target.value)} placeholder="Happy Paws Shelter" className="mt-1.5" aria-invalid={!!errors.name} />
+                  <FieldError>{errors.name}</FieldError>
+                </div>
+                <div>
+                  <Label>Registration number</Label>
+                  <div className="mt-1.5 flex h-9 items-center gap-2 rounded-md border border-dashed border-border bg-surface-muted px-3 text-sm text-muted-foreground">
+                    <Tag className="size-3.5" />
+                    Auto-generated on creation
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="shelter-city">City *</Label>
+                  <NativeSelect id="shelter-city" required value={form.city} onChange={(e) => handleChange('city', e.target.value)} className="mt-1.5" aria-invalid={!!errors.city}>
+                    <option value="">Select a city…</option>
+                    {cities.map((c) => <option key={c.id} value={c.display_label}>{c.display_label}</option>)}
+                  </NativeSelect>
+                  <FieldError>{errors.city}</FieldError>
+                </div>
+                <div>
+                  <Label htmlFor="shelter-country">Country *</Label>
+                  <Input id="shelter-country" required value={form.country} onChange={(e) => handleChange('country', e.target.value)} className="mt-1.5" />
+                </div>
+                <div className="sm:col-span-2">
+                  <Label htmlFor="shelter-street">Street address</Label>
+                  <Input id="shelter-street" value={form.street} onChange={(e) => handleChange('street', e.target.value)} placeholder="123 Main Street, Block A" className="mt-1.5" />
+                </div>
+                <div>
+                  <Label htmlFor="shelter-capacity">Capacity (total cats) *</Label>
+                  <Input id="shelter-capacity" required type="number" min="1" value={form.capacity_total} onChange={(e) => handleChange('capacity_total', e.target.value)} placeholder="50" className="mt-1.5" aria-invalid={!!errors.capacity_total} />
+                  <FieldError>{errors.capacity_total}</FieldError>
+                </div>
+                <div>
+                  <Label htmlFor="shelter-admin">Assign shelter admin</Label>
+                  <NativeSelect id="shelter-admin" value={form.admin} onChange={(e) => handleChange('admin', e.target.value)} className="mt-1.5">
+                    <option value="">Select admin (optional)</option>
+                    {users.map((u) => (
+                      <option key={u.id} value={u.id}>
+                        {u.email}{u.profile?.first_name && ` — ${u.profile.first_name} ${u.profile.last_name}`}
+                      </option>
+                    ))}
+                  </NativeSelect>
+                  <p className="mt-1 text-xs text-muted-foreground">Assign a user with the Shelter Admin role to manage this shelter.</p>
+                  <Button type="button" variant="secondary" size="sm" className="mt-2" onClick={() => setOwnerOpen(true)}>
+                    <Plus className="size-3.5" />
+                    Create new shelter owner
+                  </Button>
                 </div>
               </div>
+            </CardContent>
+          </Card>
 
-              <div>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.875rem' }}>
-                  City *
-                </label>
-                <select
-                  required
-                  value={form.city}
-                  onChange={(e) => handleChange('city', e.target.value)}
-                  style={bd('city')}
-                >
-                  <option value="">Select a city…</option>
-                  {cities.map(c => <option key={c.id} value={c.display_label}>{c.display_label}</option>)}
-                </select>
-                {errors.city && <div style={errText}>{errors.city}</div>}
+          <Card>
+            <CardHeader><CardTitle>Contact information</CardTitle></CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                  <Label>Phone *</Label>
+                  <div className="mt-1.5">
+                    <ShelterPhoneField cityName={form.city} value={form.phone} onChange={(v) => handleChange('phone', v)} error={errors.phone} />
+                  </div>
+                  <FieldError>{errors.phone}</FieldError>
+                  <p className="mt-1 text-xs text-muted-foreground">Choose Mobile (+92) or Landline — the landline area code is set from the selected city.</p>
+                </div>
+                <div>
+                  <Label htmlFor="shelter-email">Email</Label>
+                  <Input id="shelter-email" type="email" value={form.email} onChange={(e) => handleChange('email', e.target.value)} placeholder="info@happypaws.org" className="mt-1.5" aria-invalid={!!errors.email} />
+                  <FieldError>{errors.email}</FieldError>
+                </div>
+                <div className="sm:col-span-2">
+                  <Label htmlFor="shelter-website">Website</Label>
+                  <Input id="shelter-website" type="url" value={form.website} onChange={(e) => handleChange('website', e.target.value)} placeholder="https://happypaws.org" className="mt-1.5" aria-invalid={!!errors.website} />
+                  <FieldError>{errors.website}</FieldError>
+                </div>
               </div>
+            </CardContent>
+          </Card>
 
-              <div>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.875rem' }}>
-                  Country *
-                </label>
-                <input
-                  required
-                  type="text"
-                  value={form.country}
-                  onChange={(e) => handleChange('country', e.target.value)}
-                  style={bd('country')}
-                />
-              </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>Location *</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="mb-4 text-sm text-muted-foreground">
+                {form.city ? `Pin the shelter's exact spot within ${form.city}.` : 'Select a city above first, then pin the shelter on the map.'}
+              </p>
+              <MapLocationPicker
+                cityName={form.city}
+                cityCenter={cityCenter}
+                latitude={form.latitude}
+                longitude={form.longitude}
+                onChange={(loc) => { setForm((prev) => ({ ...prev, latitude: loc.latitude, longitude: loc.longitude })); setErrors((prev) => ({ ...prev, location: undefined })); }}
+              />
+              <FieldError>{errors.location}</FieldError>
+            </CardContent>
+          </Card>
 
-              <div style={{ gridColumn: 'span 2' }}>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.875rem' }}>
-                  Street Address
-                </label>
-                <input
-                  type="text"
-                  value={form.street}
-                  onChange={(e) => handleChange('street', e.target.value)}
-                  placeholder="123 Main Street, Block A"
-                  style={{
-                    width: '100%',
-                    padding: '0.625rem',
-                    borderRadius: '8px',
-                    border: '1px solid var(--border-default)',
-                  }}
-                />
-              </div>
+          <Card>
+            <CardHeader><CardTitle>Description</CardTitle></CardHeader>
+            <CardContent>
+              <Textarea value={form.description} onChange={(e) => handleChange('description', e.target.value)} rows={4} placeholder="Tell us about the shelter, its mission, facilities, and services…" />
+            </CardContent>
+          </Card>
 
-              <div>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.875rem' }}>
-                  Capacity (Total Cats) *
-                </label>
-                <input
-                  required
-                  type="number"
-                  min="1"
-                  value={form.capacity_total}
-                  onChange={(e) => handleChange('capacity_total', e.target.value)}
-                  placeholder="50"
-                  style={bd('capacity_total')}
-                />
-                {errors.capacity_total && <div style={errText}>{errors.capacity_total}</div>}
-              </div>
-
-              <div>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.875rem' }}>
-                  Assign Shelter Admin
-                </label>
-                <select
-                  value={form.admin}
-                  onChange={(e) => handleChange('admin', e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '0.625rem',
-                    borderRadius: '8px',
-                    border: '1px solid var(--border-default)',
-                  }}
-                >
-                  <option value="">Select admin (optional)</option>
-                  {users.map(user => (
-                    <option key={user.id} value={user.id}>
-                      {user.email} 
-                      {user.profile?.first_name && ` - ${user.profile.first_name} ${user.profile.last_name}`}
-                    </option>
-                  ))}
-                </select>
-                <small style={{ display: 'block', marginTop: '0.25rem', color: 'var(--text-muted)', fontSize: '0.75rem' }}>
-                  Assign a user with SHELTER_ADMIN role to manage this shelter
-                </small>
-                <button
-                  type="button"
-                  onClick={() => setOwnerOpen(true)}
-                  className="btn btn-secondary btn-sm"
-                  style={{ marginTop: '0.5rem', display: 'inline-block', fontSize: '0.75rem', padding: '0.35rem 0.75rem' }}
-                >
-                  ➕ Create New Shelter Owner
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Contact Information */}
-          <div style={{
-            background: 'var(--surface-card)',
-            border: '1px solid var(--border-default)',
-            borderRadius: '14px',
-            padding: '1.5rem',
-            marginBottom: '1.5rem',
-          }}>
-            <h2 style={{ margin: '0 0 1.25rem', fontSize: '1.125rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-              Contact Information
-            </h2>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-              <div>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.875rem' }}>
-                  Phone *
-                </label>
-                <ShelterPhoneField
-                  cityName={form.city}
-                  value={form.phone}
-                  onChange={(v) => { handleChange('phone', v); setErrors(prev => ({ ...prev, phone: undefined })); }}
-                  error={errors.phone}
-                />
-                {errors.phone && <div style={errText}>{errors.phone}</div>}
-                <small style={{ display: 'block', marginTop: '0.25rem', color: 'var(--text-muted)', fontSize: '0.72rem' }}>
-                  Choose Mobile (+92) or Landline — the landline area code is set from the selected city.
-                </small>
-              </div>
-
-              <div>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.875rem' }}>
-                  Email
-                </label>
-                <input
-                  type="email"
-                  value={form.email}
-                  onChange={(e) => handleChange('email', e.target.value)}
-                  placeholder="info@happypaws.org"
-                  style={bd('email')}
-                />
-                {errors.email && <div style={errText}>{errors.email}</div>}
-              </div>
-
-              <div style={{ gridColumn: 'span 2' }}>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.875rem' }}>
-                  Website
-                </label>
-                <input
-                  type="url"
-                  value={form.website}
-                  onChange={(e) => handleChange('website', e.target.value)}
-                  placeholder="https://happypaws.org"
-                  style={bd('website')}
-                />
-                {errors.website && <div style={errText}>{errors.website}</div>}
-              </div>
-            </div>
-          </div>
-
-          {/* Location */}
-          <div style={{
-            background: 'var(--surface-card)',
-            border: '1px solid var(--border-default)',
-            borderRadius: '14px',
-            padding: '1.5rem',
-            marginBottom: '1.5rem',
-          }}>
-            <h2 style={{ margin: '0 0 0.5rem', fontSize: '1.125rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-              Location *
-            </h2>
-            <p style={{ margin: '0 0 1.25rem', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
-              {form.city
-                ? `Pin the shelter's exact spot within ${form.city}.`
-                : 'Select a city above first, then pin the shelter on the map.'}
-            </p>
-
-            <MapLocationPicker
-              cityName={form.city}
-              cityCenter={cityCenter}
-              latitude={form.latitude}
-              longitude={form.longitude}
-              onChange={(loc) => {
-                setForm(prev => ({ ...prev, latitude: loc.latitude, longitude: loc.longitude }));
-                setErrors(prev => ({ ...prev, location: undefined }));
-              }}
-            />
-            {errors.location && <div style={errText}>{errors.location}</div>}
-          </div>
-
-          {/* Description */}
-          <div style={{
-            background: 'var(--surface-card)',
-            border: '1px solid var(--border-default)',
-            borderRadius: '14px',
-            padding: '1.5rem',
-            marginBottom: '1.5rem',
-          }}>
-            <h2 style={{ margin: '0 0 1.25rem', fontSize: '1.125rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-              Description
-            </h2>
-
-            <textarea
-              value={form.description}
-              onChange={(e) => handleChange('description', e.target.value)}
-              rows={4}
-              placeholder="Tell us about the shelter, its mission, facilities, and services..."
-              style={{
-                width: '100%',
-                padding: '0.625rem',
-                borderRadius: '8px',
-                border: '1px solid var(--border-default)',
-                resize: 'vertical',
-              }}
-            />
-          </div>
-
-          {/* Actions */}
-          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
-            <button
-              type="button"
-              onClick={() => navigate('/shelters')}
-              className="btn btn-secondary"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={saving}
-              className="btn btn-primary"
-            >
-              {saving ? 'Creating...' : '🏠 Create Shelter'}
-            </button>
+          <div className="flex justify-end gap-3">
+            <Button type="button" variant="secondary" onClick={() => navigate('/shelters')}>Cancel</Button>
+            <Button type="submit" disabled={saving}>
+              <Building2 className="size-4" />
+              {saving ? 'Creating…' : 'Create shelter'}
+            </Button>
           </div>
         </form>
       )}
 
-      {/* Create Shelter Admin Modal */}
       <Modal
         open={ownerOpen}
         onClose={() => setOwnerOpen(false)}
-        title="👤 Create Shelter Owner"
+        title="Create shelter owner"
         footer={
           <>
-            <button onClick={() => setOwnerOpen(false)} className="btn btn-secondary">Cancel</button>
-            <button form="owner-form" type="submit" disabled={ownerSaving} className="btn btn-primary">
-              {ownerSaving ? 'Creating…' : 'Create Owner'}
-            </button>
+            <Button variant="secondary" onClick={() => setOwnerOpen(false)}>Cancel</Button>
+            <Button form="owner-form" type="submit" disabled={ownerSaving}>{ownerSaving ? 'Creating…' : 'Create owner'}</Button>
           </>
         }
       >
-        {ownerError && <div className="form-error" style={{ marginBottom: '1rem' }}>🙀 {ownerError}</div>}
-        <form id="owner-form" onSubmit={handleCreateOwner} style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
-          <div className="form-group">
-            <label className="label-base">Email *</label>
-            <input
-              type="email"
-              required
-              value={ownerForm.email}
-              onChange={e => setOwnerForm(prev => ({ ...prev, email: e.target.value }))}
-              className="input-base"
-              placeholder="owner@example.com"
-            />
+        {ownerError && <div className="mb-4 rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-sm font-medium text-destructive">{ownerError}</div>}
+        <form id="owner-form" onSubmit={handleCreateOwner} className="flex flex-col gap-3.5">
+          <div>
+            <Label htmlFor="owner-email">Email *</Label>
+            <Input id="owner-email" type="email" required value={ownerForm.email} onChange={(e) => setOwnerForm((p) => ({ ...p, email: e.target.value }))} placeholder="owner@example.com" className="mt-1.5" />
           </div>
-          <div className="form-group">
-            <label className="label-base">Password *</label>
-            <input
-              type="password"
-              required
-              value={ownerForm.password}
-              onChange={e => setOwnerForm(prev => ({ ...prev, password: e.target.value }))}
-              className="input-base"
-              placeholder="••••••••"
-            />
+          <div>
+            <Label htmlFor="owner-password">Password *</Label>
+            <Input id="owner-password" type="password" required value={ownerForm.password} onChange={(e) => setOwnerForm((p) => ({ ...p, password: e.target.value }))} placeholder="••••••••" className="mt-1.5" />
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-            <div className="form-group">
-              <label className="label-base">First Name *</label>
-              <input
-                type="text"
-                required
-                value={ownerForm.first_name}
-                onChange={e => setOwnerForm(prev => ({ ...prev, first_name: e.target.value }))}
-                className="input-base"
-                placeholder="Jane"
-              />
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label htmlFor="owner-fname">First name *</Label>
+              <Input id="owner-fname" required value={ownerForm.first_name} onChange={(e) => setOwnerForm((p) => ({ ...p, first_name: e.target.value }))} placeholder="Jane" className="mt-1.5" />
             </div>
-            <div className="form-group">
-              <label className="label-base">Last Name *</label>
-              <input
-                type="text"
-                required
-                value={ownerForm.last_name}
-                onChange={e => setOwnerForm(prev => ({ ...prev, last_name: e.target.value }))}
-                className="input-base"
-                placeholder="Doe"
-              />
+            <div>
+              <Label htmlFor="owner-lname">Last name *</Label>
+              <Input id="owner-lname" required value={ownerForm.last_name} onChange={(e) => setOwnerForm((p) => ({ ...p, last_name: e.target.value }))} placeholder="Doe" className="mt-1.5" />
             </div>
           </div>
-          <div className="form-group">
-            <label className="label-base">Phone *</label>
-            <PhoneInput
-              value={ownerForm.phone}
-              onChange={v => setOwnerForm(prev => ({ ...prev, phone: v }))}
-              error={!!ownerError && !isValidPkMobile(ownerForm.phone)}
-            />
+          <div>
+            <Label>Phone *</Label>
+            <div className="mt-1.5">
+              <PhoneInput value={ownerForm.phone} onChange={(v) => setOwnerForm((p) => ({ ...p, phone: v }))} error={!!ownerError && !isValidPkMobile(ownerForm.phone)} />
+            </div>
           </div>
         </form>
       </Modal>
