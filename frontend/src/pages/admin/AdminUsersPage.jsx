@@ -1,19 +1,24 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { authApi } from '../../api/authApi';
-import { analyticsApi } from '../../api/analyticsApi';
-import LoadingSpinner from '../../components/LoadingSpinner';
-import EmptyState from '../../components/EmptyState';
-import PageHeader from '../../components/PageHeader';
-import { formatDateTime } from '../../utils/dateUtils';
+import { Crown, Building2, Stethoscope, Cat, Heart, HeartHandshake, Users as UsersIcon, RefreshCw, X } from 'lucide-react';
+import { authApi } from '@/api/authApi';
+import { analyticsApi } from '@/api/analyticsApi';
+import LoadingSpinner from '@/components/LoadingSpinner';
+import EmptyState from '@/components/EmptyState';
+import PageHeader from '@/components/patterns/PageHeader';
+import { formatDateTime } from '@/utils/dateUtils';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { cn } from '@/lib/utils';
 
 const ROLE_META = {
-  SUPER_ADMIN:   { icon: '👑', label: 'Super Admins', color: 'var(--cat-rust)' },
-  SHELTER_ADMIN: { icon: '🏠', label: 'Shelter Admins', color: 'var(--cat-terra)' },
-  VET:           { icon: '🩺', label: 'Vets', color: 'var(--cat-blue)' },
-  CAT_OWNER:     { icon: '🐱', label: 'Cat Owners', color: 'var(--cat-sage)' },
-  ADOPTER:       { icon: '❤️', label: 'Adopters', color: 'var(--cat-amber)' },
-  VOLUNTEER:     { icon: '🙋', label: 'Volunteers', color: 'var(--cat-brown)' },
+  SUPER_ADMIN: { icon: Crown, label: 'Super Admins' },
+  SHELTER_ADMIN: { icon: Building2, label: 'Shelter Admins' },
+  VET: { icon: Stethoscope, label: 'Vets' },
+  CAT_OWNER: { icon: Cat, label: 'Cat Owners' },
+  ADOPTER: { icon: Heart, label: 'Adopters' },
+  VOLUNTEER: { icon: HeartHandshake, label: 'Volunteers' },
 };
 
 // "Online" if the user recorded activity within this window.
@@ -23,11 +28,11 @@ export default function AdminUsersPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const roleFilter = searchParams.get('role') || '';
 
-  const [list, setList]               = useState([]);
+  const [list, setList] = useState([]);
   const [usersByRole, setUsersByRole] = useState({});
-  const [loading, setLoading]         = useState(true);
-  const [refreshing, setRefreshing]   = useState(false);
-  const [busyId, setBusyId]           = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [busyId, setBusyId] = useState(null);
 
   const POLL_MS = 15000;
 
@@ -37,7 +42,6 @@ export default function AdminUsersPage() {
     if (silent) setRefreshing(true); else setLoading(true);
     try {
       const [usersRes, overviewRes] = await Promise.all([
-        // `_` is a cache-buster so polled responses are never served stale.
         authApi.listUsers({ role: roleFilter || undefined, _: Date.now() }),
         analyticsApi.overview(),
       ]);
@@ -52,7 +56,6 @@ export default function AdminUsersPage() {
     }
   }, [roleFilter]);
 
-  // Initial load, and reload when the role filter changes.
   useEffect(() => { loadData(false); }, [loadData]);
 
   // Live presence: silently re-fetch on an interval. No spinner, the table
@@ -95,132 +98,127 @@ export default function AdminUsersPage() {
   const isOnline = (u) => lastSeenAt(u) && (Date.now() - new Date(lastSeenAt(u)).getTime() < ONLINE_WINDOW_MS);
 
   return (
-    <div className="page-container">
+    <div className="mx-auto max-w-[1200px] px-4 py-6 sm:px-6">
       <PageHeader
-        title="👥 Users"
-        subtitle="All platform users by role, with live online status"
-        action={
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)' }}
-              title={`Auto-refreshing every ${POLL_MS / 1000}s`}>
-              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#2ecc71', boxShadow: '0 0 0 3px rgba(46,204,113,0.2)' }} />
+        title="Users"
+        description="All platform users by role, with live online status"
+        actions={
+          <div className="flex items-center gap-3">
+            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground" title={`Auto-refreshing every ${POLL_MS / 1000}s`}>
+              <span className="size-2 rounded-full bg-success shadow-[0_0_0_3px_var(--success-bg)]" />
               {refreshing ? 'Updating…' : 'Live'}
             </span>
-            <button onClick={() => loadData(true)} disabled={refreshing} className="btn btn-secondary btn-sm">↻ Refresh</button>
+            <Button variant="secondary" size="sm" onClick={() => loadData(true)} disabled={refreshing}>
+              <RefreshCw className={cn('size-3.5', refreshing && 'animate-spin')} />
+              Refresh
+            </Button>
           </div>
         }
       />
 
-      {/* Role counter cards (B2) */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '1rem', marginBottom: '1.75rem' }}>
+      <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         {Object.entries(ROLE_META).map(([role, meta]) => {
           const count = usersByRole[role] || 0;
           const active = roleFilter === role;
           return (
-            <button key={role} onClick={() => setRole(active ? '' : role)} style={{
-              background: active ? meta.color : 'var(--surface-card)',
-              border: `1.5px solid ${active ? meta.color : 'var(--border-default)'}`,
-              borderRadius: '14px', padding: '1.1rem 1.25rem', cursor: 'pointer', textAlign: 'left',
-              color: active ? 'white' : 'var(--text-primary)', transition: 'all 0.2s',
-            }}>
-              <div style={{ fontSize: '1.5rem', marginBottom: '0.25rem' }}>{meta.icon}</div>
-              <div style={{ fontSize: '1.75rem', fontWeight: 900, lineHeight: 1, color: active ? 'white' : meta.color }}>{count}</div>
-              <div style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', opacity: active ? 0.9 : 0.7 }}>{meta.label}</div>
+            <button
+              key={role}
+              onClick={() => setRole(active ? '' : role)}
+              className={cn(
+                'rounded-xl border p-4 text-left transition-colors',
+                active ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card hover:border-border-strong',
+              )}
+            >
+              <meta.icon className={cn('mb-1.5 size-5', active ? 'text-primary-foreground' : 'text-primary')} />
+              <div className="text-xl font-bold">{count}</div>
+              <div className={cn('text-[11px] font-semibold uppercase', active ? 'text-primary-foreground/80' : 'text-muted-foreground')}>{meta.label}</div>
             </button>
           );
         })}
       </div>
 
       {roleFilter && (
-        <div style={{ marginBottom: '1rem' }}>
-          <button onClick={() => setRole('')} className="btn btn-secondary btn-sm">✕ Clear filter: {ROLE_META[roleFilter]?.label || roleFilter}</button>
+        <div className="mb-4">
+          <Button variant="secondary" size="sm" onClick={() => setRole('')}>
+            <X className="size-3.5" />
+            Clear filter: {ROLE_META[roleFilter]?.label || roleFilter}
+          </Button>
         </div>
       )}
 
       {loading && <LoadingSpinner text="Loading users…" />}
 
       {!loading && list.length === 0 && (
-        <EmptyState icon="👥" title="No users found" message="No users match the current filter." />
+        <EmptyState icon={UsersIcon} title="No users found" message="No users match the current filter." />
       )}
 
       {!loading && list.length > 0 && (
-        <div style={{ background: 'var(--surface-card)', border: '1px solid var(--border-default)', borderRadius: '12px', overflow: 'hidden' }}>
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Active</th>
-                <th>Email Verified</th>
-                <th>Last Seen</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {list.map(u => {
-                const meta = ROLE_META[u.role] || { icon: '👤', label: u.role };
+        <div className="rounded-xl border border-border bg-card">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Role</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Email verified</TableHead>
+                <TableHead>Last seen</TableHead>
+                <TableHead />
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {list.map((u) => {
+                const meta = ROLE_META[u.role] || { icon: UsersIcon, label: u.role };
                 const name = u.profile ? `${u.profile.first_name} ${u.profile.last_name}`.trim() : '—';
                 return (
-                  <tr key={u.id}>
-                    <td style={{ fontWeight: 700 }}>{name || '—'}</td>
-                    <td style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>{u.email}</td>
-                    <td>
-                      <span style={{ background: 'var(--cat-linen)', color: 'var(--text-secondary)', fontSize: '0.72rem', fontWeight: 700, padding: '0.2rem 0.6rem', borderRadius: '999px' }}>
-                        {meta.icon} {u.role?.replace(/_/g, ' ')}
-                      </span>
-                    </td>
-                    <td>
-                      <span style={{
-                        display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
-                        background: u.is_active ? 'var(--cat-sage-light)' : '#EDE8E3',
-                        color: u.is_active ? '#2E6B24' : 'var(--text-muted)',
-                        fontSize: '0.72rem', fontWeight: 700, padding: '0.2rem 0.6rem', borderRadius: '999px',
-                      }}>
-                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: u.is_active ? (isOnline(u) ? '#2ecc71' : 'var(--cat-sage)') : 'var(--text-muted)' }} />
+                  <TableRow key={u.id}>
+                    <TableCell className="font-semibold text-foreground">{name || '—'}</TableCell>
+                    <TableCell className="text-muted-foreground">{u.email}</TableCell>
+                    <TableCell>
+                      <Badge variant="secondary" className="gap-1">
+                        <meta.icon className="size-3" />
+                        {u.role?.replace(/_/g, ' ')}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <span className={cn(
+                        'inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-semibold',
+                        u.is_active ? 'bg-success/10 text-success' : 'bg-surface-muted text-muted-foreground',
+                      )}>
+                        <span className={cn('size-1.5 rounded-full', u.is_active ? (isOnline(u) ? 'bg-success' : 'bg-success/50') : 'bg-muted-foreground')} />
                         {u.is_active ? (isOnline(u) ? 'Online' : 'Offline') : 'Inactive'}
                       </span>
-                    </td>
-                    <td>
+                    </TableCell>
+                    <TableCell>
                       {u.role === 'SUPER_ADMIN' ? (
-                        <span style={{ color: 'var(--text-muted)', fontSize: '0.72rem', fontWeight: 700 }}>— Exempt</span>
+                        <span className="text-xs font-semibold text-muted-foreground">Exempt</span>
                       ) : (
-                        <span style={{
-                          display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
-                          background: u.is_email_verified ? 'var(--cat-sage-light)' : '#FBEFD3',
-                          color: u.is_email_verified ? '#2E6B24' : '#8A6D1A',
-                          fontSize: '0.72rem', fontWeight: 700, padding: '0.2rem 0.6rem', borderRadius: '999px',
-                        }}>
-                          {u.is_email_verified ? '✅ Verified' : '⏳ Unverified'}
+                        <span className={cn(
+                          'rounded-full px-2 py-0.5 text-xs font-semibold',
+                          u.is_email_verified ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning',
+                        )}>
+                          {u.is_email_verified ? 'Verified' : 'Unverified'}
                         </span>
                       )}
-                    </td>
-                    <td style={{ color: 'var(--text-muted)', fontSize: '0.82rem' }}>
-                      {lastSeenAt(u) ? formatDateTime(lastSeenAt(u)) : 'Never'}
-                    </td>
-                    <td>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">{lastSeenAt(u) ? formatDateTime(lastSeenAt(u)) : 'Never'}</TableCell>
+                    <TableCell>
                       {u.role !== 'SUPER_ADMIN' && (
-                        <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
-                          {!u.is_email_verified ? (
-                            <button onClick={() => toggleVerified(u)} disabled={busyId === u.id} className="btn btn-primary btn-sm">
-                              ✅ Verify
-                            </button>
-                          ) : (
-                            <button onClick={() => toggleVerified(u)} disabled={busyId === u.id} className="btn btn-secondary btn-sm" title="Revoke email verification">
-                              ↩ Unverify
-                            </button>
-                          )}
-                          <button onClick={() => toggleActive(u)} disabled={busyId === u.id} className="btn btn-secondary btn-sm">
+                        <div className="flex flex-wrap gap-1.5">
+                          <Button size="sm" variant={u.is_email_verified ? 'secondary' : 'default'} onClick={() => toggleVerified(u)} disabled={busyId === u.id}>
+                            {u.is_email_verified ? 'Unverify' : 'Verify'}
+                          </Button>
+                          <Button size="sm" variant="secondary" onClick={() => toggleActive(u)} disabled={busyId === u.id}>
                             {u.is_active ? 'Deactivate' : 'Activate'}
-                          </button>
+                          </Button>
                         </div>
                       )}
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 );
               })}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       )}
     </div>

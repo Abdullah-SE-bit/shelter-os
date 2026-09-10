@@ -1,48 +1,63 @@
 import { useState, useEffect, useCallback } from 'react';
-import { authApi } from '../../api/authApi';
-import { useAuth } from '../../context/AuthContext';
-import useDocumentTitle from '../../hooks/useDocumentTitle';
-import LoadingSpinner from '../../components/LoadingSpinner';
-import EmptyState from '../../components/EmptyState';
-import PageHeader from '../../components/PageHeader';
-import { formatDateTime } from '../../utils/dateUtils';
+import { Stethoscope, FileText } from 'lucide-react';
+import { authApi } from '@/api/authApi';
+import { useAuth } from '@/context/AuthContext';
+import useDocumentTitle from '@/hooks/useDocumentTitle';
+import LoadingSpinner from '@/components/LoadingSpinner';
+import EmptyState from '@/components/EmptyState';
+import PageHeader from '@/components/patterns/PageHeader';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+} from '@/components/ui/dialog';
+import { cn } from '@/lib/utils';
 
-const STATUS_META = {
-  APPROVED:     { color: '#2E6B24', bg: 'var(--cat-sage-light)', text: '✅ Approved' },
-  REJECTED:     { color: 'var(--cat-red)', bg: '#FBE3E3', text: '❌ Rejected' },
-  PENDING:      { color: '#8A6D1A', bg: '#FBEFD3', text: '⏳ Pending' },
-  NOT_REQUIRED: { color: 'var(--text-muted)', bg: '#EDE8E3', text: '— N/A' },
+const STATUS_TONE = {
+  APPROVED: 'bg-success/10 text-success',
+  REJECTED: 'bg-destructive/10 text-destructive',
+  PENDING: 'bg-warning/10 text-warning',
+  NOT_REQUIRED: 'bg-surface-muted text-muted-foreground',
+};
+const STATUS_LABEL = { APPROVED: 'Approved', REJECTED: 'Rejected', PENDING: 'Pending', NOT_REQUIRED: 'N/A' };
+
+const LIFECYCLE_TONE = {
+  PENDING: 'bg-warning/10 text-warning',
+  APPROVED: 'bg-success/10 text-success',
+  REJECTED: 'bg-destructive/10 text-destructive',
+  APPEAL_UNDER_REVIEW: 'bg-warning/10 text-warning',
+  SUPER_FINAL_REVIEW: 'bg-warning/10 text-warning',
+  SUSPENDED: 'bg-destructive/10 text-destructive',
+  FLAGGED: 'bg-destructive/10 text-destructive',
+};
+const LIFECYCLE_LABEL = {
+  PENDING: 'Round 1', APPROVED: 'Approved', REJECTED: 'Rejected (appeal open)',
+  APPEAL_UNDER_REVIEW: 'Appeal review', SUPER_FINAL_REVIEW: 'Final review',
+  SUSPENDED: 'Suspended', FLAGGED: 'Flagged',
 };
 
-const LIFECYCLE_META = {
-  PENDING:             { text: 'Round 1',        color: '#8A6D1A', bg: '#FBEFD3' },
-  APPROVED:            { text: 'Approved',        color: '#2E6B24', bg: 'var(--cat-sage-light)' },
-  REJECTED:            { text: 'Rejected (appeal open)', color: 'var(--cat-red)', bg: '#FBE3E3' },
-  APPEAL_UNDER_REVIEW: { text: 'Appeal review',   color: '#8A6D1A', bg: '#FBEFD3' },
-  SUPER_FINAL_REVIEW:  { text: 'Final review',    color: '#8A6D1A', bg: '#FBEFD3' },
-  SUSPENDED:           { text: 'Suspended',       color: 'var(--cat-red)', bg: '#FBE3E3' },
-  FLAGGED:             { text: 'Flagged',         color: 'var(--cat-red)', bg: '#FBE3E3' },
-};
-
-function Pill({ status, map = STATUS_META }) {
-  const m = map[status] || STATUS_META.PENDING;
+function Pill({ status, tone = STATUS_TONE, label = STATUS_LABEL }) {
   return (
-    <span style={{ fontWeight: 700, fontSize: '0.72rem', padding: '0.2rem 0.6rem', borderRadius: '999px', color: m.color, background: m.bg, whiteSpace: 'nowrap' }}>
-      {m.text}
+    <span className={cn('rounded-full px-2 py-0.5 text-xs font-semibold whitespace-nowrap', tone[status] || tone.PENDING)}>
+      {label[status] || status || '—'}
     </span>
   );
 }
 
 function Muted({ children, red }) {
-  return <span style={{ color: red ? 'var(--cat-red)' : 'var(--text-muted)', fontWeight: 700, fontSize: '0.8rem' }}>{children}</span>;
+  return <span className={cn('text-xs font-semibold', red ? 'text-destructive' : 'text-muted-foreground')}>{children}</span>;
 }
 
-// Modal for capturing a rejection form (details + optional anomalies).
 function RejectModal({ target, onCancel, onSubmit, busy }) {
   const [details, setDetails] = useState('');
   const [anomalies, setAnomalies] = useState('');
   const [error, setError] = useState('');
-  if (!target) return null;
+
+  useEffect(() => {
+    if (target) { setDetails(''); setAnomalies(''); setError(''); }
+  }, [target]);
 
   const submit = () => {
     if (details.trim().length < 5) { setError('Please provide the reason / details.'); return; }
@@ -51,39 +66,43 @@ function RejectModal({ target, onCancel, onSubmit, busy }) {
   };
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200, padding: '1rem' }}>
-      <div style={{ background: 'var(--surface-raised)', borderRadius: '16px', padding: '1.5rem', maxWidth: '520px', width: '100%', boxShadow: 'var(--shadow-xl)' }}>
-        <h3 style={{ margin: '0 0 0.5rem', fontWeight: 900, color: 'var(--text-primary)' }}>{target.title}</h3>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', margin: '0 0 1rem' }}>{target.subtitle}</p>
-        <div className="form-group">
-          <label className="label-base">{target.withAnomalies ? 'Details of the decision *' : 'Reason for rejection *'}</label>
-          <textarea value={details} onChange={e => setDetails(e.target.value)} className="input-base" rows={3} style={{ resize: 'vertical' }} placeholder="Explain the decision clearly." />
-        </div>
-        {target.withAnomalies && (
-          <div className="form-group">
-            <label className="label-base">Anomalies found *</label>
-            <textarea value={anomalies} onChange={e => setAnomalies(e.target.value)} className="input-base" rows={3} style={{ resize: 'vertical' }} placeholder="List the anomalies / issues found in the documents or application." />
+    <Dialog open={!!target} onOpenChange={(open) => !open && onCancel()}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{target?.title}</DialogTitle>
+          <DialogDescription>{target?.subtitle}</DialogDescription>
+        </DialogHeader>
+        <div className="flex flex-col gap-4">
+          <div>
+            <Label>{target?.withAnomalies ? 'Details of the decision *' : 'Reason for rejection *'}</Label>
+            <Textarea value={details} onChange={(e) => setDetails(e.target.value)} rows={3} className="mt-1.5" placeholder="Explain the decision clearly." />
           </div>
-        )}
-        {error && <div className="form-error" style={{ marginBottom: '0.75rem' }}>{error}</div>}
-        <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-          <button onClick={onCancel} disabled={busy} className="btn btn-secondary">Cancel</button>
-          <button onClick={submit} disabled={busy} className="btn btn-primary" style={{ background: 'var(--cat-red)', borderColor: 'var(--cat-red)' }}>
-            {busy ? 'Submitting…' : 'Confirm rejection'}
-          </button>
+          {target?.withAnomalies && (
+            <div>
+              <Label>Anomalies found *</Label>
+              <Textarea value={anomalies} onChange={(e) => setAnomalies(e.target.value)} rows={3} className="mt-1.5" placeholder="List the anomalies / issues found in the documents or application." />
+            </div>
+          )}
+          {error && <div className="rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-sm font-medium text-destructive">{error}</div>}
         </div>
-      </div>
-    </div>
+        <DialogFooter>
+          <Button variant="secondary" onClick={onCancel} disabled={busy}>Cancel</Button>
+          <Button variant="destructive" onClick={submit} disabled={busy}>
+            {busy ? 'Submitting…' : 'Confirm rejection'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
 function FormBlock({ title, details, anomalies }) {
   if (!details && !anomalies) return null;
   return (
-    <div style={{ background: 'var(--cat-linen)', border: '1px solid var(--border-default)', borderRadius: '8px', padding: '0.6rem 0.75rem', marginTop: '0.5rem', fontSize: '0.78rem' }}>
-      <div style={{ fontWeight: 800, color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>{title}</div>
+    <div className="mt-2 rounded-lg border border-border bg-surface-muted p-3 text-xs">
+      <div className="mb-1 font-semibold text-foreground">{title}</div>
       {details && <div><strong>Details:</strong> {details}</div>}
-      {anomalies && <div style={{ marginTop: '0.2rem' }}><strong>Anomalies:</strong> {anomalies}</div>}
+      {anomalies && <div className="mt-1"><strong>Anomalies:</strong> {anomalies}</div>}
     </div>
   );
 }
@@ -94,10 +113,10 @@ export default function VetApprovalsPage() {
   const isSuper = user?.role === 'SUPER_ADMIN';
   const isShelter = user?.role === 'SHELTER_ADMIN';
 
-  const [list, setList]       = useState([]);
+  const [list, setList] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [busyId, setBusyId]   = useState(null);
-  const [filter, setFilter]   = useState('pending');
+  const [busyId, setBusyId] = useState(null);
+  const [filter, setFilter] = useState('pending');
   const [rejectTarget, setRejectTarget] = useState(null);
 
   const load = useCallback(async () => {
@@ -140,15 +159,15 @@ export default function VetApprovalsPage() {
     }
   };
 
-  const ApproveReject = ({ row, admin, withAnomalies, approveLabel = '✅ Approve', rejectLabel = 'Reject', title, subtitle }) => {
+  const ApproveReject = ({ row, admin, withAnomalies, approveLabel = 'Approve', rejectLabel = 'Reject', title, subtitle }) => {
     const busy = busyId === row.user_id;
     return (
-      <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
-        <button disabled={busy} className="btn btn-primary btn-sm" onClick={() => decide(row, admin, 'APPROVED')}>{approveLabel}</button>
-        <button disabled={busy} className="btn btn-secondary btn-sm"
+      <div className="flex flex-wrap gap-1.5">
+        <Button size="sm" disabled={busy} onClick={() => decide(row, admin, 'APPROVED')}>{approveLabel}</Button>
+        <Button size="sm" variant="secondary" disabled={busy}
           onClick={() => setRejectTarget({ row, admin, withAnomalies, title: title || 'Reject request', subtitle: subtitle || '' })}>
           {rejectLabel}
-        </button>
+        </Button>
       </div>
     );
   };
@@ -162,7 +181,6 @@ export default function VetApprovalsPage() {
     if (ls === 'SUSPENDED') return <Muted red>Suspended (permanent)</Muted>;
     if (ls === 'FLAGGED') return <Muted red>Flagged (window lapsed)</Muted>;
 
-    // ---- Round 1 ----
     if (ls === 'PENDING') {
       if (isSuper) {
         if (vp.super_admin_status === 'PENDING') {
@@ -175,7 +193,7 @@ export default function VetApprovalsPage() {
         if (vp.shelter_admin_status === 'PENDING') {
           return (
             <div>
-              {vp.super_admin_status === 'REJECTED' && <div style={{ marginBottom: '0.35rem' }}><Muted red>Rejected by Super Admin</Muted></div>}
+              {vp.super_admin_status === 'REJECTED' && <div className="mb-1.5"><Muted red>Rejected by Super Admin</Muted></div>}
               <ApproveReject row={row} admin="shelter" withAnomalies={false}
                 title="Reject registration (Shelter Admin)" subtitle="The vet will get 5 days and one appeal." />
             </div>
@@ -186,14 +204,16 @@ export default function VetApprovalsPage() {
       return <Muted>Awaiting review</Muted>;
     }
 
-    // ---- Appeal under review ----
     if (ls === 'APPEAL_UNDER_REVIEW' && appeal) {
       const canSuper = isSuper && appeal.needs_super_review && appeal.super_status === 'PENDING';
       const canShelter = isShelter && appeal.needs_shelter_review && appeal.shelter_status === 'PENDING';
       return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+        <div className="flex flex-col gap-1.5">
           {appeal.has_document && (
-            <button className="btn btn-secondary btn-sm" onClick={() => viewDoc(row)}>📄 View proof (PDF)</button>
+            <Button size="sm" variant="secondary" onClick={() => viewDoc(row)}>
+              <FileText className="size-3.5" />
+              View proof (PDF)
+            </Button>
           )}
           {canSuper && <ApproveReject row={row} admin="super" withAnomalies title="Reject appeal (Super Admin)"
             subtitle="Rejecting the appeal by the Super Admin is final and suspends the account." />}
@@ -204,14 +224,18 @@ export default function VetApprovalsPage() {
       );
     }
 
-    // ---- Super admin final review (escalation) ----
     if (ls === 'SUPER_FINAL_REVIEW' && appeal) {
       if (isSuper) {
         return (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-            {appeal.has_document && <button className="btn btn-secondary btn-sm" onClick={() => viewDoc(row)}>📄 View proof (PDF)</button>}
+          <div className="flex flex-col gap-1.5">
+            {appeal.has_document && (
+              <Button size="sm" variant="secondary" onClick={() => viewDoc(row)}>
+                <FileText className="size-3.5" />
+                View proof (PDF)
+              </Button>
+            )}
             <FormBlock title="Shelter Admin's rejection" details={appeal.shelter_reject_details} anomalies={appeal.shelter_reject_anomalies} />
-            <ApproveReject row={row} admin="super" withAnomalies approveLabel="✅ Approve (override)" rejectLabel="Final reject"
+            <ApproveReject row={row} admin="super" withAnomalies approveLabel="Approve (override)" rejectLabel="Final reject"
               title="Final decision (Super Admin)" subtitle="Your decision is final. Rejecting suspends the account permanently." />
           </div>
         );
@@ -223,16 +247,16 @@ export default function VetApprovalsPage() {
   };
 
   return (
-    <div className="page-container">
+    <div className="mx-auto max-w-[1200px] px-4 py-6 sm:px-6">
       <PageHeader
-        title="🩺 Vet Approvals"
-        subtitle={isSuper
+        title="Vet Approvals"
+        description={isSuper
           ? 'Review veterinarian requests, appeals, and final escalations'
           : 'Review veterinarian requests and appeals for your shelter'}
-        action={
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button onClick={() => setFilter('pending')} className={`btn btn-sm ${filter === 'pending' ? 'btn-primary' : 'btn-secondary'}`}>Needs action</button>
-            <button onClick={() => setFilter('all')} className={`btn btn-sm ${filter === 'all' ? 'btn-primary' : 'btn-secondary'}`}>All</button>
+        actions={
+          <div className="flex gap-2">
+            <Button size="sm" variant={filter === 'pending' ? 'default' : 'secondary'} onClick={() => setFilter('pending')}>Needs action</Button>
+            <Button size="sm" variant={filter === 'all' ? 'default' : 'secondary'} onClick={() => setFilter('all')}>All</Button>
           </div>
         }
       />
@@ -240,25 +264,25 @@ export default function VetApprovalsPage() {
       {loading && <LoadingSpinner text="Loading vet requests…" />}
 
       {!loading && list.length === 0 && (
-        <EmptyState icon="🩺" title="No vet requests" message={filter === 'pending' ? 'Nothing is awaiting a decision.' : 'No veterinarian requests found.'} />
+        <EmptyState icon={Stethoscope} title="No vet requests" message={filter === 'pending' ? 'Nothing is awaiting a decision.' : 'No veterinarian requests found.'} />
       )}
 
       {!loading && list.length > 0 && (
-        <div style={{ background: 'var(--surface-card)', border: '1px solid var(--border-default)', borderRadius: '12px', overflow: 'hidden' }}>
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Applicant</th>
-                <th>Reg. No.</th>
-                <th>Practice</th>
-                <th>Stage</th>
-                <th>Super</th>
-                <th>Shelter</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {list.map(row => {
+        <div className="rounded-xl border border-border bg-card">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Applicant</TableHead>
+                <TableHead>Reg. no.</TableHead>
+                <TableHead>Practice</TableHead>
+                <TableHead>Stage</TableHead>
+                <TableHead>Super</TableHead>
+                <TableHead>Shelter</TableHead>
+                <TableHead>Action</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {list.map((row) => {
                 const vp = row.vet_profile || {};
                 const appeal = vp.latest_appeal;
                 const name = `${row.first_name || ''} ${row.last_name || ''}`.trim() || '—';
@@ -267,35 +291,31 @@ export default function VetApprovalsPage() {
                   : `Clinic${vp.clinic_name ? ` — ${vp.clinic_name}` : ''}`;
                 const showAppeal = ['APPEAL_UNDER_REVIEW', 'SUPER_FINAL_REVIEW'].includes(vp.lifecycle_status) && appeal;
                 return (
-                  <tr key={row.user_id}>
-                    <td>
-                      <div style={{ fontWeight: 700 }}>{name}</div>
-                      <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>{row.email}</div>
-                      <div style={{ color: 'var(--text-muted)', fontSize: '0.72rem', marginTop: '0.15rem' }}>
-                        {(vp.specializations || []).join(', ')}
-                      </div>
+                  <TableRow key={row.user_id}>
+                    <TableCell className="whitespace-normal">
+                      <div className="font-semibold text-foreground">{name}</div>
+                      <div className="text-xs text-muted-foreground">{row.email}</div>
+                      <div className="mt-0.5 text-[11px] text-muted-foreground">{(vp.specializations || []).join(', ')}</div>
                       {vp.rejection_reason && vp.lifecycle_status !== 'APPROVED' && (
-                        <div style={{ color: 'var(--cat-red)', fontSize: '0.72rem', marginTop: '0.2rem' }}>
-                          Reason: {vp.rejection_reason}
-                        </div>
+                        <div className="mt-1 text-[11px] text-destructive">Reason: {vp.rejection_reason}</div>
                       )}
                       {showAppeal && (
-                        <div style={{ marginTop: '0.4rem', fontSize: '0.75rem', color: 'var(--text-secondary)', maxWidth: '280px' }}>
-                          <strong>Appeal:</strong> {appeal.explanation}
+                        <div className="mt-1.5 max-w-[280px] text-xs text-muted-foreground">
+                          <strong className="text-foreground">Appeal:</strong> {appeal.explanation}
                         </div>
                       )}
-                    </td>
-                    <td style={{ fontWeight: 700 }}>{vp.license_number || '—'}</td>
-                    <td style={{ fontSize: '0.82rem' }}>{practice}</td>
-                    <td><Pill status={vp.lifecycle_status} map={LIFECYCLE_META} /></td>
-                    <td><Pill status={vp.super_admin_status} /></td>
-                    <td><Pill status={vp.shelter_admin_status} /></td>
-                    <td>{renderActions(row)}</td>
-                  </tr>
+                    </TableCell>
+                    <TableCell className="font-semibold text-foreground">{vp.license_number || '—'}</TableCell>
+                    <TableCell className="text-sm">{practice}</TableCell>
+                    <TableCell><Pill status={vp.lifecycle_status} tone={LIFECYCLE_TONE} label={LIFECYCLE_LABEL} /></TableCell>
+                    <TableCell><Pill status={vp.super_admin_status} /></TableCell>
+                    <TableCell><Pill status={vp.shelter_admin_status} /></TableCell>
+                    <TableCell className="whitespace-normal">{renderActions(row)}</TableCell>
+                  </TableRow>
                 );
               })}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       )}
 
