@@ -1,107 +1,49 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { lostFoundApi } from '../../api/lostFoundApi';
-import useApi from '../../hooks/useApi';
-import usePagination from '../../hooks/usePagination';
-import { useAuth } from '../../context/AuthContext';
-import LoadingSpinner from '../../components/LoadingSpinner';
-import EmptyState from '../../components/EmptyState';
-import Pagination from '../../components/Pagination';
-import { formatDate, timeAgo } from '../../utils/dateUtils';
-import { truncate } from '../../utils/formatters';
+import { Search, ClipboardList, Plus, Link2, Phone, CalendarDays, PawPrint } from 'lucide-react';
+import { lostFoundApi } from '@/api/lostFoundApi';
+import useApi from '@/hooks/useApi';
+import usePagination from '@/hooks/usePagination';
+import { useAuth } from '@/context/AuthContext';
+import LoadingSpinner from '@/components/LoadingSpinner';
+import EmptyState from '@/components/EmptyState';
+import Pagination from '@/components/Pagination';
+import { formatDate, timeAgo } from '@/utils/dateUtils';
+import { truncate } from '@/utils/formatters';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { NativeSelect } from '@/components/ui/native-select';
+import { cn } from '@/lib/utils';
 
 const CAT_PLACEHOLDER = 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400&q=80';
-
-const STATUS_PILL = {
-  ACTIVE:   { bg: 'linear-gradient(90deg, #C0524E, #A03B38)', label: '🔍 LOST' },
-  RESOLVED: { bg: 'linear-gradient(90deg, #7BAD6E, #5A9B50)', label: '✅ RESOLVED' },
-  EXPIRED:  { bg: 'linear-gradient(90deg, #9a8f86, #6e655d)', label: '⏰ EXPIRED' },
-};
-
-const FOUND_STATUS = {
-  OPEN:      { bg: 'var(--cat-sage-light)', color: '#2E6B24', label: '✅ FOUND' },
-  MATCHED:   { bg: 'var(--cat-amber-light, rgba(230,180,80,0.18))', color: '#7A4F00', label: '🔗 MATCHED' },
-  REUNITED:  { bg: 'var(--cat-sage-light)', color: '#2E6B24', label: '🎉 REUNITED' },
-  SHELTERED: { bg: 'var(--cat-blue-light)', color: '#2E5A80', label: '🏠 SHELTERED' },
-  CLOSED:    { bg: 'var(--cat-linen)', color: 'var(--text-muted)', label: 'CLOSED' },
-};
+const STATUS_TONE = { ACTIVE: 'bg-destructive text-white', RESOLVED: 'bg-success text-white', EXPIRED: 'bg-surface-muted text-muted-foreground' };
+const STATUS_LABEL = { ACTIVE: 'Lost', RESOLVED: 'Resolved', EXPIRED: 'Expired' };
+const FOUND_TONE = { OPEN: 'bg-success/10 text-success', MATCHED: 'bg-warning/10 text-warning', REUNITED: 'bg-success/10 text-success', SHELTERED: 'bg-info/10 text-info', CLOSED: 'bg-surface-muted text-muted-foreground' };
+const FOUND_LABEL = { OPEN: 'Found', MATCHED: 'Matched', REUNITED: 'Reunited', SHELTERED: 'Sheltered', CLOSED: 'Closed' };
 
 function LostAlertCard({ alert }) {
-  const pill = STATUS_PILL[alert.status] || STATUS_PILL.ACTIVE;
   return (
-    <Link to={`/lost-found/lost/${alert.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-      <div style={{
-        background: 'var(--surface-card)',
-        border: '1px solid var(--border-default)',
-        borderRadius: '14px',
-        overflow: 'hidden',
-        boxShadow: 'var(--shadow-sm)',
-        transition: 'all 0.2s',
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100%',
-      }}
-        onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = 'var(--shadow-md)'; }}
-        onMouseOut={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'var(--shadow-sm)'; }}
-      >
-        {/* Photo */}
-        <div style={{ height: '180px', background: 'var(--cat-linen)', position: 'relative', overflow: 'hidden' }}>
-          <img
-            src={(alert.photos && alert.photos[0]) || CAT_PLACEHOLDER}
-            alt={alert.title}
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-            onError={e => { e.currentTarget.src = CAT_PLACEHOLDER; }}
-          />
-          <div style={{
-            position: 'absolute',
-            top: '0.75rem',
-            left: '0.75rem',
-            background: pill.bg,
-            color: 'white',
-            fontSize: '0.7rem',
-            fontWeight: 700,
-            padding: '0.25rem 0.625rem',
-            borderRadius: '999px',
-            letterSpacing: '0.04em',
-          }}>
-            {pill.label}
-          </div>
-          {alert.match_count > 0 && (
-            <div style={{
-              position: 'absolute', top: '0.75rem', right: '0.75rem',
-              background: 'var(--cat-amber, #e6b450)', color: '#3d2b1f',
-              fontSize: '0.7rem', fontWeight: 800, padding: '0.25rem 0.6rem', borderRadius: '999px',
-            }}>
-              🔗 {alert.match_count} match{alert.match_count > 1 ? 'es' : ''}
-            </div>
-          )}
-          <div style={{
-            position: 'absolute',
-            bottom: 0,
-            insetInline: 0,
-            background: 'linear-gradient(to top, rgba(61,43,31,0.7), transparent)',
-            padding: '1.5rem 0.875rem 0.625rem',
-          }}>
-            <p style={{ margin: 0, color: 'white', fontWeight: 800, fontSize: '1rem' }}>{alert.cat_name || alert.title}</p>
-          </div>
+    <Link to={`/lost-found/lost/${alert.id}`} className="flex h-full flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+      <div className="relative h-[180px] overflow-hidden bg-surface-muted">
+        <img src={(alert.photos && alert.photos[0]) || CAT_PLACEHOLDER} alt={alert.title} className="size-full object-cover" onError={(e) => { e.currentTarget.src = CAT_PLACEHOLDER; }} />
+        <span className={cn('absolute top-3 left-3 rounded-full px-2.5 py-0.5 text-[11px] font-bold tracking-wide uppercase', STATUS_TONE[alert.status] || STATUS_TONE.ACTIVE)}>{STATUS_LABEL[alert.status] || alert.status}</span>
+        {alert.match_count > 0 && (
+          <span className="absolute top-3 right-3 flex items-center gap-1 rounded-full bg-warning px-2 py-0.5 text-[11px] font-bold text-warning-foreground">
+            <Link2 className="size-3" />{alert.match_count} match{alert.match_count > 1 ? 'es' : ''}
+          </span>
+        )}
+        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-3.5 pt-6 pb-2.5">
+          <p className="text-base font-extrabold text-white">{alert.cat_name || alert.title}</p>
         </div>
-
-        {/* Info */}
-        <div style={{ padding: '0.875rem 1rem 1rem', flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-          <p style={{ margin: 0, fontSize: '0.8125rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
-            {truncate(alert.description, 80)}
-          </p>
-          <div style={{ display: 'flex', gap: '0.75rem', fontSize: '0.75rem', color: 'var(--text-muted)', flexWrap: 'wrap' }}>
-            {alert.last_seen_at && <span>📅 Last seen {formatDate(alert.last_seen_at)}</span>}
-            {alert.contact_phone && <span>📞 {alert.contact_phone}</span>}
-          </div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-            Posted {timeAgo(alert.created_at)} by {alert.reporter_name || 'Anonymous'}
-          </div>
-          <div style={{ marginTop: 'auto', paddingTop: '0.5rem', fontSize: '0.8rem', color: 'var(--cat-terra)', fontWeight: 700 }}>
-            View full report &amp; matches →
-          </div>
+      </div>
+      <div className="flex flex-1 flex-col gap-2 p-4">
+        <p className="text-[13px] leading-relaxed text-muted-foreground">{truncate(alert.description, 80)}</p>
+        <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+          {alert.last_seen_at && <span className="flex items-center gap-1"><CalendarDays className="size-3" />Last seen {formatDate(alert.last_seen_at)}</span>}
+          {alert.contact_phone && <span className="flex items-center gap-1"><Phone className="size-3" />{alert.contact_phone}</span>}
         </div>
+        <div className="text-xs text-muted-foreground">Posted {timeAgo(alert.created_at)} by {alert.reporter_name || 'Anonymous'}</div>
+        <div className="mt-auto pt-1.5 text-[13px] font-bold text-primary">View full report &amp; matches →</div>
       </div>
     </Link>
   );
@@ -110,215 +52,95 @@ function LostAlertCard({ alert }) {
 export default function LostAlertsPage() {
   const { user } = useAuth();
   const { page, pageSize, nextPage, prevPage, goTo, reset } = usePagination(12);
-  const [tab, setTab] = useState('lost'); // lost | found
+  const [tab, setTab] = useState('lost');
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('ACTIVE');
 
-  const { data: lostData, loading: lostLoading } = useApi(
-    () => lostFoundApi.listLost({ page, page_size: pageSize, q: search || undefined, status: statusFilter }),
-    null,
-    [page, tab, search, statusFilter]
-  );
-  const { data: foundData, loading: foundLoading } = useApi(
-    () => lostFoundApi.listFound({ page, page_size: pageSize, q: search || undefined }),
-    null,
-    [page, tab, search]
-  );
+  const { data: lostData, loading: lostLoading } = useApi(() => lostFoundApi.listLost({ page, page_size: pageSize, q: search || undefined, status: statusFilter }), null, [page, tab, search, statusFilter]);
+  const { data: foundData, loading: foundLoading } = useApi(() => lostFoundApi.listFound({ page, page_size: pageSize, q: search || undefined }), null, [page, tab, search]);
 
-  const loading    = tab === 'lost' ? lostLoading  : foundLoading;
-  const data       = tab === 'lost' ? lostData     : foundData;
-  const items      = data?.results || [];
-  const total      = data?.count   || 0;
+  const loading = tab === 'lost' ? lostLoading : foundLoading;
+  const data = tab === 'lost' ? lostData : foundData;
+  const items = data?.results || [];
+  const total = data?.count || 0;
   const totalPages = Math.ceil(total / pageSize);
 
   return (
     <div>
-      {/* Hero */}
-      <div style={{
-        background: 'linear-gradient(135deg, var(--cat-espresso), #5A3A25)',
-        padding: '3rem 2rem 4rem',
-        position: 'relative',
-        overflow: 'hidden',
-      }}>
-        <div style={{ position: 'absolute', right: '2rem', bottom: '-1rem', fontSize: '8rem', opacity: 0.08 }}>🔍</div>
-        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-          <h1 style={{ color: 'white', margin: '0 0 0.5rem', fontSize: 'clamp(1.75rem, 4vw, 2.75rem)', fontFamily: 'Playfair Display, serif' }}>
-            Lost &amp; Found 🐾
-          </h1>
-          <p style={{ color: 'rgba(255,255,255,0.75)', margin: '0 0 1.5rem', fontSize: '1rem', maxWidth: '480px' }}>
-            Help reunite lost cats with their families. Browse alerts or report a found cat.
-          </p>
-          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-            {user && (
-              <Link to="/lost-found/create" style={{
-                background: 'white',
-                color: 'var(--cat-rust)',
-                padding: '0.75rem 1.5rem',
-                borderRadius: '10px',
-                fontWeight: 800,
-                fontSize: '0.875rem',
-                textDecoration: 'none',
-              }}>
-                + Report Lost Cat
-              </Link>
-            )}
-            <Link to="/lost-found/found" style={{
-              background: 'rgba(255,255,255,0.15)',
-              backdropFilter: 'blur(6px)',
-              color: 'white',
-              padding: '0.75rem 1.5rem',
-              borderRadius: '10px',
-              fontWeight: 700,
-              fontSize: '0.875rem',
-              textDecoration: 'none',
-              border: '1px solid rgba(255,255,255,0.25)',
-            }}>
-              📋 Found Cat Reports
-            </Link>
+      <section className="relative overflow-hidden bg-gradient-to-br from-[var(--brand-ink)] to-[#5A3A25] px-6 pt-12 pb-16">
+        <Search className="pointer-events-none absolute right-8 -bottom-4 size-32 text-white opacity-10" />
+        <div className="relative mx-auto max-w-[1200px]">
+          <h1 className="font-display mb-2 text-[clamp(1.75rem,4vw,2.75rem)] font-bold text-white">Lost &amp; Found</h1>
+          <p className="mb-6 max-w-[480px] text-white/75">Help reunite lost cats with their families. Browse alerts or report a found cat.</p>
+          <div className="flex flex-wrap gap-3">
+            {user && <Button variant="secondary" asChild><Link to="/lost-found/create"><Plus className="size-4" />Report lost cat</Link></Button>}
+            <Button variant="outline" className="border-white/25 bg-white/15 text-white hover:bg-white/25 hover:text-white" asChild>
+              <Link to="/lost-found/found"><ClipboardList className="size-4" />Found cat reports</Link>
+            </Button>
           </div>
         </div>
-        <div style={{
-          position: 'absolute',
-          bottom: '-1px',
-          left: 0,
-          right: 0,
-          height: '50px',
-          background: 'var(--cat-cream)',
-          clipPath: 'ellipse(55% 100% at 50% 100%)',
-        }} />
-      </div>
+        <div className="absolute right-0 bottom-[-1px] left-0 h-[50px] bg-background" style={{ clipPath: 'ellipse(55% 100% at 50% 100%)' }} />
+      </section>
 
-      {/* Tabs */}
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem 1.5rem 0' }}>
-        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
-          {[
-            { id: 'lost',  label: '🔍 Lost Cats',   count: lostData?.count },
-            { id: 'found', label: '📋 Found Reports', count: foundData?.count },
-          ].map(t => (
-            <button key={t.id} onClick={() => { setTab(t.id); reset(); }} style={{
-              padding: '0.625rem 1.25rem',
-              borderRadius: '10px',
-              border: `2px solid ${tab === t.id ? 'var(--cat-terra)' : 'var(--border-default)'}`,
-              background: tab === t.id ? 'var(--cat-terra)' : 'var(--surface-card)',
-              color: tab === t.id ? 'white' : 'var(--text-secondary)',
-              fontWeight: 700,
-              fontSize: '0.875rem',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              transition: 'all 0.2s',
-            }}>
+      <div className="mx-auto max-w-[1200px] px-4 pt-8 pb-10 sm:px-6">
+        <div className="mb-6 flex gap-2">
+          {[{ id: 'lost', label: 'Lost cats', count: lostData?.count }, { id: 'found', label: 'Found reports', count: foundData?.count }].map((t) => (
+            <button key={t.id} onClick={() => { setTab(t.id); reset(); }}
+              className={cn('flex items-center gap-2 rounded-lg border-2 px-4 py-2 text-sm font-bold transition-colors', tab === t.id ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card text-muted-foreground')}>
               {t.label}
-              {t.count !== undefined && (
-                <span style={{
-                  background: tab === t.id ? 'rgba(255,255,255,0.25)' : 'var(--cat-linen)',
-                  color: tab === t.id ? 'white' : 'var(--text-muted)',
-                  borderRadius: '999px',
-                  padding: '0.1rem 0.5rem',
-                  fontSize: '0.75rem',
-                }}>
-                  {t.count}
-                </span>
-              )}
+              {t.count !== undefined && <span className={cn('rounded-full px-2 py-0.5 text-xs', tab === t.id ? 'bg-white/25' : 'bg-surface-muted')}>{t.count}</span>}
             </button>
           ))}
         </div>
 
-        {/* Filter bar (J1) */}
-        <div style={{ display: 'flex', gap: '0.625rem', flexWrap: 'wrap', alignItems: 'center', marginBottom: '1.5rem', padding: '0.875rem 1.25rem', background: 'var(--surface-card)', border: '1px solid var(--border-default)', borderRadius: '12px' }}>
-          <input type="search" value={search} onChange={e => { setSearch(e.target.value); reset(); }}
-            placeholder="🔍 Search by name, description, breed…" className="input-base" style={{ flex: 1, minWidth: '200px' }} />
+        <div className="mb-6 flex flex-wrap items-center gap-2.5 rounded-xl border border-border bg-card p-3.5">
+          <Input type="search" value={search} onChange={(e) => { setSearch(e.target.value); reset(); }} placeholder="Search by name, description, breed…" className="min-w-[200px] flex-1" />
           {tab === 'lost' && (
-            <select value={statusFilter} onChange={e => { setStatusFilter(e.target.value); reset(); }} className="input-base" style={{ width: 'auto' }}>
+            <NativeSelect value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); reset(); }} className="w-auto">
               <option value="ACTIVE">Active</option>
               <option value="RESOLVED">Resolved</option>
               <option value="EXPIRED">Expired</option>
               <option value="ALL">All statuses</option>
-            </select>
+            </NativeSelect>
           )}
         </div>
 
         {loading && <LoadingSpinner size="lg" text="Loading alerts…" />}
 
         {!loading && items.length === 0 && (
-          <EmptyState
-            icon={tab === 'lost' ? '🔍' : '📋'}
-            title={tab === 'lost' ? 'No active lost alerts' : 'No found cat reports'}
-            message="Check back later or be the first to report."
-            action={user && tab === 'lost' && (
-              <Link to="/lost-found/create" className="btn btn-primary">+ Report Lost Cat</Link>
-            )}
-          />
+          <EmptyState icon={tab === 'lost' ? Search : ClipboardList} title={tab === 'lost' ? 'No active lost alerts' : 'No found cat reports'} message="Check back later or be the first to report."
+            action={user && tab === 'lost' && <Button asChild><Link to="/lost-found/create">Report lost cat</Link></Button>} />
         )}
 
         {!loading && items.length > 0 && tab === 'lost' && (
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(270px, 1fr))',
-            gap: '1.25rem',
-            marginBottom: '1.5rem',
-          }}>
-            {items.map(alert => <LostAlertCard key={alert.id} alert={alert} />)}
+          <div className="mb-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {items.map((alert) => <LostAlertCard key={alert.id} alert={alert} />)}
           </div>
         )}
 
         {!loading && items.length > 0 && tab === 'found' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem' }}>
-            {items.map(report => {
-              const fb = FOUND_STATUS[report.status] || FOUND_STATUS.OPEN;
-              return (
-                <Link key={report.id} to={`/lost-found/found/${report.id}`} style={{ textDecoration: 'none' }}>
-                  <div style={{
-                    background: 'var(--surface-card)',
-                    border: '1px solid var(--border-default)',
-                    borderRadius: '12px',
-                    padding: '1rem 1.25rem',
-                    display: 'flex',
-                    gap: '1rem',
-                    alignItems: 'flex-start',
-                    transition: 'all 0.2s',
-                  }}
-                    onMouseOver={e => { e.currentTarget.style.borderColor = 'var(--cat-terra)'; }}
-                    onMouseOut={e => { e.currentTarget.style.borderColor = 'var(--border-default)'; }}
-                  >
-                    <div style={{ width: '64px', height: '64px', borderRadius: '10px', overflow: 'hidden', flexShrink: 0, background: 'var(--cat-linen)' }}>
-                      <img
-                        src={(report.photos && report.photos[0]) || CAT_PLACEHOLDER}
-                        alt="Found cat"
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                        onError={e => { e.currentTarget.src = CAT_PLACEHOLDER; }}
-                      />
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginBottom: '0.25rem', flexWrap: 'wrap' }}>
-                        <span style={{ background: fb.bg, color: fb.color, fontSize: '0.7rem', fontWeight: 700, padding: '0.2rem 0.5rem', borderRadius: '999px' }}>
-                          {fb.label}
-                        </span>
-                        {report.match_count > 0 && (
-                          <span style={{ background: 'var(--cat-amber-light, rgba(230,180,80,0.18))', color: '#7A4F00', fontSize: '0.7rem', fontWeight: 700, padding: '0.2rem 0.5rem', borderRadius: '999px' }}>
-                            🔗 {report.match_count} match{report.match_count > 1 ? 'es' : ''}
-                          </span>
-                        )}
-                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{timeAgo(report.created_at)}</span>
-                      </div>
-                      <p style={{ margin: '0 0 0.25rem', fontSize: '0.9375rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                        {truncate(report.description, 100)}
-                      </p>
-                      {report.breed_guess && (
-                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Breed guess: {report.breed_guess}</span>
-                      )}
-                      <div style={{ marginTop: '0.35rem', fontSize: '0.8rem', color: 'var(--cat-terra)', fontWeight: 700 }}>View &amp; compare →</div>
-                    </div>
+          <div className="mb-6 flex flex-col gap-3">
+            {items.map((report) => (
+              <Link key={report.id} to={`/lost-found/found/${report.id}`} className="flex items-start gap-4 rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary">
+                <div className="size-16 shrink-0 overflow-hidden rounded-lg bg-surface-muted">
+                  <img src={(report.photos && report.photos[0]) || CAT_PLACEHOLDER} alt="Found cat" className="size-full object-cover" onError={(e) => { e.currentTarget.src = CAT_PLACEHOLDER; }} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="mb-1 flex flex-wrap items-center gap-2">
+                    <span className={cn('rounded-full px-2 py-0.5 text-[11px] font-bold', FOUND_TONE[report.status] || FOUND_TONE.OPEN)}>{FOUND_LABEL[report.status] || report.status}</span>
+                    {report.match_count > 0 && <span className="flex items-center gap-1 rounded-full bg-warning/10 px-2 py-0.5 text-[11px] font-bold text-warning"><Link2 className="size-3" />{report.match_count} match{report.match_count > 1 ? 'es' : ''}</span>}
+                    <span className="text-xs text-muted-foreground">{timeAgo(report.created_at)}</span>
                   </div>
-                </Link>
-              );
-            })}
+                  <p className="mb-1 text-[15px] font-semibold text-foreground">{truncate(report.description, 100)}</p>
+                  {report.breed_guess && <span className="text-xs text-muted-foreground">Breed guess: {report.breed_guess}</span>}
+                  <div className="mt-1.5 text-[13px] font-bold text-primary">View &amp; compare →</div>
+                </div>
+              </Link>
+            ))}
           </div>
         )}
 
-        <Pagination page={page} totalPages={totalPages} total={total} pageSize={pageSize}
-          onPrev={prevPage} onNext={nextPage} onGoTo={goTo} />
+        <Pagination page={page} totalPages={totalPages} total={total} pageSize={pageSize} onPrev={prevPage} onNext={nextPage} onGoTo={goTo} />
       </div>
     </div>
   );

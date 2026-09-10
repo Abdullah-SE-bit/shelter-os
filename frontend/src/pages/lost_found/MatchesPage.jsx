@@ -1,87 +1,47 @@
 import { useParams } from 'react-router-dom';
-import { lostFoundApi } from '../../api/lostFoundApi';
-import useApi from '../../hooks/useApi';
-import { useAuth } from '../../context/AuthContext';
-import LoadingSpinner from '../../components/LoadingSpinner';
-import EmptyState from '../../components/EmptyState';
-import PageHeader from '../../components/PageHeader';
-import ConfirmDialog from '../../components/ConfirmDialog';
 import { useState } from 'react';
-import { timeAgo } from '../../utils/dateUtils';
+import { Search, Bot, Phone, CheckCircle2, X } from 'lucide-react';
+import { lostFoundApi } from '@/api/lostFoundApi';
+import useApi from '@/hooks/useApi';
+import { useAuth } from '@/context/AuthContext';
+import LoadingSpinner from '@/components/LoadingSpinner';
+import EmptyState from '@/components/EmptyState';
+import PageHeader from '@/components/patterns/PageHeader';
+import ConfirmDialog from '@/components/ConfirmDialog';
+import { timeAgo } from '@/utils/dateUtils';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 const CAT_PLACEHOLDER = 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400&q=80';
 
+function scoreTone(pct) { return pct >= 80 ? 'text-success' : pct >= 60 ? 'text-warning' : 'text-muted-foreground'; }
+function scoreBg(pct) { return pct >= 80 ? 'bg-success/10' : pct >= 60 ? 'bg-warning/10' : 'bg-surface-muted'; }
+
 function MatchCard({ match, isOwner, onConfirm, onReject }) {
   const score = Math.round((match.score || 0) * 100);
-  const scoreColor = score >= 80 ? '#2E6B24' : score >= 60 ? '#7A4F00' : 'var(--text-muted)';
 
   return (
-    <div style={{
-      background: 'var(--surface-card)',
-      border: `2px solid ${score >= 80 ? 'rgba(123,173,110,0.5)' : 'var(--border-default)'}`,
-      borderRadius: '14px',
-      padding: '1.25rem',
-      display: 'flex',
-      gap: '1.25rem',
-      alignItems: 'flex-start',
-      boxShadow: score >= 80 ? '0 2px 12px rgba(123,173,110,0.15)' : 'var(--shadow-sm)',
-    }}>
-      {/* Found cat photo */}
-      <div style={{ width: '100px', height: '100px', borderRadius: '12px', overflow: 'hidden', flexShrink: 0, background: 'var(--cat-linen)' }}>
-        <img
-          src={(match.found_report?.photos && match.found_report.photos[0]) || CAT_PLACEHOLDER}
-          alt="Found cat"
-          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-          onError={e => { e.currentTarget.src = CAT_PLACEHOLDER; }}
-        />
+    <div className={cn('flex items-start gap-5 rounded-xl border-2 bg-card p-5', score >= 80 ? 'border-success/40 shadow-sm' : 'border-border')}>
+      <div className="size-[100px] shrink-0 overflow-hidden rounded-xl bg-surface-muted">
+        <img src={(match.found_report?.photos && match.found_report.photos[0]) || CAT_PLACEHOLDER} alt="Found cat" className="size-full object-cover" onError={(e) => { e.currentTarget.src = CAT_PLACEHOLDER; }} />
       </div>
 
-      <div style={{ flex: 1, minWidth: 0 }}>
-        {/* Score badge */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
-          <div style={{
-            background: score >= 80 ? 'var(--cat-sage-light)' : score >= 60 ? 'var(--cat-amber-light)' : 'var(--cat-linen)',
-            color: scoreColor,
-            fontWeight: 900,
-            fontSize: '0.875rem',
-            padding: '0.2rem 0.75rem',
-            borderRadius: '999px',
-          }}>
-            {score >= 80 ? '🎯' : score >= 60 ? '🔶' : '🔷'} {score}% Match
-          </div>
-          <span style={{
-            background: match.status === 'CONFIRMED' ? 'var(--cat-sage-light)' : 'var(--cat-linen)',
-            color: match.status === 'CONFIRMED' ? '#2E6B24' : 'var(--text-muted)',
-            fontSize: '0.7rem',
-            fontWeight: 700,
-            padding: '0.2rem 0.5rem',
-            borderRadius: '999px',
-          }}>
-            {match.status}
-          </span>
+      <div className="min-w-0 flex-1">
+        <div className="mb-2 flex flex-wrap items-center gap-2.5">
+          <span className={cn('rounded-full px-3 py-1 text-[13px] font-extrabold', scoreBg(score), scoreTone(score))}>{score}% match</span>
+          <span className={cn('rounded-full px-2 py-0.5 text-[11px] font-bold', match.status === 'CONFIRMED' ? 'bg-success/10 text-success' : 'bg-surface-muted text-muted-foreground')}>{match.status}</span>
         </div>
 
-        <p style={{ margin: '0 0 0.375rem', fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-          {match.found_report?.description?.slice(0, 120) || 'Found cat report'}
-        </p>
-        <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-          Found by {match.found_report?.reporter_name || 'someone'} · reported {timeAgo(match.found_report?.created_at)}
-        </p>
+        <p className="mb-1.5 text-sm leading-relaxed text-muted-foreground">{match.found_report?.description?.slice(0, 120) || 'Found cat report'}</p>
+        <p className="text-xs text-muted-foreground">Found by {match.found_report?.reporter_name || 'someone'} · reported {timeAgo(match.found_report?.created_at)}</p>
         {match.found_report?.contact_phone && (
-          <a href={`tel:${match.found_report.contact_phone}`} style={{ fontSize: '0.78rem', color: 'var(--cat-terra)', fontWeight: 700, textDecoration: 'none' }}>
-            📞 {match.found_report.contact_phone}
-          </a>
+          <a href={`tel:${match.found_report.contact_phone}`} className="flex items-center gap-1 text-[13px] font-bold text-primary"><Phone className="size-3.5" />{match.found_report.contact_phone}</a>
         )}
 
-        {/* Actions */}
         {isOwner && match.status === 'PENDING' && (
-          <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.875rem' }}>
-            <button onClick={() => onConfirm(match.id)} className="btn btn-primary btn-sm">
-              ✅ This is my cat!
-            </button>
-            <button onClick={() => onReject(match.id)} className="btn btn-secondary btn-sm">
-              ✕ Not a match
-            </button>
+          <div className="mt-3.5 flex gap-2">
+            <Button size="sm" onClick={() => onConfirm(match.id)}><CheckCircle2 className="size-3.5" />This is my cat!</Button>
+            <Button size="sm" variant="secondary" onClick={() => onReject(match.id)}><X className="size-3.5" />Not a match</Button>
           </div>
         )}
       </div>
@@ -91,9 +51,9 @@ function MatchCard({ match, isOwner, onConfirm, onReject }) {
 
 export default function MatchesPage() {
   const { alertId } = useParams();
-  const { user }    = useAuth();
+  const { user } = useAuth();
   const [confirmOpen, setConfirmOpen] = useState(null);
-  const [rejectOpen,  setRejectOpen]  = useState(null);
+  const [rejectOpen, setRejectOpen] = useState(null);
 
   const { data: matches, loading, refetch } = useApi(() => lostFoundApi.getMatches(alertId), null, [alertId]);
 
@@ -113,73 +73,34 @@ export default function MatchesPage() {
   };
 
   return (
-    <div className="page-container-sm">
-      <PageHeader
-        title="🔗 Match Results"
-        subtitle={`${matchList.length} potential matches found by our AI`}
-        backPath="/lost-found"
-      />
+    <div className="mx-auto max-w-[720px] px-4 py-6 sm:px-6">
+      <PageHeader title="Match results" description={`${matchList.length} potential matches found by our AI`} backTo="/lost-found" backLabel="Lost & Found" />
 
       {matchList.length > 0 && (
-        <div style={{
-          background: 'var(--cat-amber-light)',
-          border: '1px solid rgba(232,160,48,0.3)',
-          borderRadius: '12px',
-          padding: '0.875rem 1.25rem',
-          marginBottom: '1.5rem',
-          fontSize: '0.875rem',
-          color: '#7A4F00',
-          fontWeight: 600,
-        }}>
-          🤖 Our AI scanned {matchList.length} found cat reports and found these potential matches.
-          Review each one and confirm if it's your cat!
+        <div className="mb-6 flex items-center gap-2.5 rounded-xl border border-warning/25 bg-warning/10 px-5 py-3.5 text-sm font-semibold text-warning">
+          <Bot className="size-5 shrink-0" />
+          Our AI scanned {matchList.length} found cat reports and found these potential matches. Review each one and confirm if it's your cat!
         </div>
       )}
 
       {loading && <LoadingSpinner text="Analyzing matches…" />}
 
       {!loading && matchList.length === 0 && (
-        <EmptyState
-          icon="🔍"
-          title="No matches yet"
-          message="Our AI will scan all found cat reports and notify you when a match is found."
-        />
+        <EmptyState icon={Search} title="No matches yet" message="Our AI will scan all found cat reports and notify you when a match is found." />
       )}
 
       {!loading && matchList.length > 0 && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {matchList
-            .sort((a, b) => b.score - a.score)
-            .map(match => (
-              <MatchCard
-                key={match.id}
-                match={match}
-                isOwner={isOwner}
-                onConfirm={id => setConfirmOpen(id)}
-                onReject={id => setRejectOpen(id)}
-              />
-            ))
-          }
+        <div className="flex flex-col gap-4">
+          {matchList.sort((a, b) => b.score - a.score).map((match) => (
+            <MatchCard key={match.id} match={match} isOwner={isOwner} onConfirm={(id) => setConfirmOpen(id)} onReject={(id) => setRejectOpen(id)} />
+          ))}
         </div>
       )}
 
-      <ConfirmDialog
-        open={!!confirmOpen}
-        title="Confirm Match 🎉"
-        message="Are you sure this is your cat? This will mark your lost alert as resolved."
-        confirmLabel="Yes, found my cat!"
-        onConfirm={() => handleConfirm(confirmOpen)}
-        onCancel={() => setConfirmOpen(null)}
-      />
-      <ConfirmDialog
-        open={!!rejectOpen}
-        title="Reject Match"
-        message="Mark this as not a match? It won't be shown to you again."
-        confirmLabel="Not my cat"
-        danger
-        onConfirm={() => handleReject(rejectOpen)}
-        onCancel={() => setRejectOpen(null)}
-      />
+      <ConfirmDialog open={!!confirmOpen} title="Confirm match?" message="Are you sure this is your cat? This will mark your lost alert as resolved."
+        confirmLabel="Yes, found my cat!" onConfirm={() => handleConfirm(confirmOpen)} onCancel={() => setConfirmOpen(null)} />
+      <ConfirmDialog open={!!rejectOpen} title="Reject match" message="Mark this as not a match? It won't be shown to you again." confirmLabel="Not my cat" danger
+        onConfirm={() => handleReject(rejectOpen)} onCancel={() => setRejectOpen(null)} />
     </div>
   );
 }

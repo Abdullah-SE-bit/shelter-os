@@ -1,41 +1,35 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { adoptionApi } from '../../api/adoptionApi';
-import useApi from '../../hooks/useApi';
-import PageHeader from '../../components/PageHeader';
-import LoadingSpinner from '../../components/LoadingSpinner';
-import PhoneInput, { isValidPkMobile } from '../../components/PhoneInput';
+import { Heart, Home as HomeIcon, Cat, Briefcase, ClipboardList, LifeBuoy } from 'lucide-react';
+import { adoptionApi } from '@/api/adoptionApi';
+import PageHeader from '@/components/patterns/PageHeader';
+import StepIndicator from '@/components/patterns/StepIndicator';
+import PhoneInput, { isValidPkMobile } from '@/components/PhoneInput';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
+import { NativeSelect } from '@/components/ui/native-select';
 
-const INCOME_OPTS = ['EMPLOYED','SELF_EMPLOYED','STUDENT','RETIRED','UNEMPLOYED','OTHER'];
-const HOUSING_OPTS = ['HOUSE','APARTMENT','CONDO','OTHER'];
+const INCOME_OPTS = ['EMPLOYED', 'SELF_EMPLOYED', 'STUDENT', 'RETIRED', 'UNEMPLOYED', 'OTHER'];
+const HOUSING_OPTS = ['HOUSE', 'APARTMENT', 'CONDO', 'OTHER'];
 
 export default function ApplicationFormPage() {
   const { catId } = useParams();
-  const navigate  = useNavigate();
+  const navigate = useNavigate();
   const [form, setForm] = useState({
-    cat: catId,
-    motivation: '',
-    living_situation: 'HOUSE',
-    has_outdoor_access: false,
-    has_other_pets: false,
-    other_pets_details: '',
-    has_children: false,
-    children_ages: '',
-    experience_with_cats: '',
-    employment_status: 'EMPLOYED',
-    monthly_income: '',
-    vet_reference: '',
-    personal_reference: '',
-    emergency_contact_name: '',
-    emergency_contact_phone: '',
+    cat: catId, motivation: '', living_situation: 'HOUSE', has_outdoor_access: false, has_other_pets: false,
+    other_pets_details: '', has_children: false, children_ages: '', experience_with_cats: '', employment_status: 'EMPLOYED',
+    monthly_income: '', vet_reference: '', personal_reference: '', emergency_contact_name: '', emergency_contact_phone: '',
   });
-  const [error,   setError]   = useState('');
+  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [step,    setStep]    = useState(1);
+  const [step, setStep] = useState(1);
 
-  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+  const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
-  // Advance a step, validating step 2's emergency-contact phone before leaving it.
   const goNext = (e) => {
     e.preventDefault();
     if (step === 2 && !isValidPkMobile(form.emergency_contact_phone)) {
@@ -43,7 +37,7 @@ export default function ApplicationFormPage() {
       return;
     }
     setError('');
-    setStep(s => s + 1);
+    setStep((s) => s + 1);
   };
 
   const handleSubmit = async (e) => {
@@ -59,182 +53,100 @@ export default function ApplicationFormPage() {
     }
   };
 
-  const sectionStyle = {
-    background: 'var(--surface-card)',
-    border: '1px solid var(--border-default)',
-    borderRadius: '14px',
-    padding: '1.25rem',
-  };
-  const sectionTitle = {
-    margin: '0 0 1rem',
-    fontSize: '0.875rem',
-    fontWeight: 700,
-    color: 'var(--text-muted)',
-    textTransform: 'uppercase',
-    letterSpacing: '0.06em',
-  };
-
   return (
-    <div className="page-container-sm">
-      <PageHeader title="❤️ Adoption Application" subtitle="Tell us about yourself and your home" backPath={`/adoption/${catId}`} />
+    <div className="mx-auto max-w-[640px] px-4 py-6 sm:px-6">
+      <PageHeader title="Adoption application" description="Tell us about yourself and your home" backTo={`/adoption/${catId}`} backLabel="Cat profile" />
 
-      {/* Steps indicator */}
-      <div style={{ display: 'flex', gap: '0.375rem', marginBottom: '2rem', alignItems: 'center' }}>
-        {[1,2,3].map(s => (
-          <div key={s} style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', flex: s < 3 ? 1 : 0 }}>
-            <div style={{
-              width: '28px',
-              height: '28px',
-              borderRadius: '50%',
-              background: step >= s ? 'var(--cat-terra)' : 'var(--cat-linen)',
-              border: step >= s ? 'none' : '1.5px solid var(--border-default)',
-              color: step >= s ? 'white' : 'var(--text-muted)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '0.75rem', fontWeight: 800, flexShrink: 0,
-              transition: 'all 0.3s',
-            }}>
-              {step > s ? '✓' : s}
-            </div>
-            {s < 3 && <div style={{ flex: 1, height: '2px', background: step > s ? 'var(--cat-terra)' : 'var(--border-default)', transition: 'background 0.3s' }} />}
-          </div>
-        ))}
-      </div>
+      <StepIndicator step={step} labels={['Your home', 'About you', 'Motivation']} />
 
-      {error && <div className="form-error" style={{ marginBottom: '1.25rem' }}>🚨 {error}</div>}
+      {error && <div className="mb-5 rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-sm font-medium text-destructive">{error}</div>}
 
-      <form onSubmit={step < 3 ? goNext : handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-
-        {/* Step 1 — Your Home */}
+      <form onSubmit={step < 3 ? goNext : handleSubmit} className="flex flex-col gap-5">
         {step === 1 && (
           <>
-            <div style={sectionStyle}>
-              <h3 style={sectionTitle}>🏠 Living Situation</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
-                <div className="form-group">
-                  <label className="label-base">Housing Type</label>
-                  <select value={form.living_situation} onChange={e => set('living_situation', e.target.value)} className="input-base" id="app-housing">
-                    {HOUSING_OPTS.map(o => <option key={o} value={o}>{o.replace(/_/g,' ')}</option>)}
-                  </select>
+            <Card>
+              <CardHeader><CardTitle className="flex items-center gap-2"><HomeIcon className="size-4" />Living situation</CardTitle></CardHeader>
+              <CardContent className="flex flex-col gap-3.5">
+                <div>
+                  <Label>Housing type</Label>
+                  <NativeSelect value={form.living_situation} onChange={(e) => set('living_situation', e.target.value)} className="mt-1.5">
+                    {HOUSING_OPTS.map((o) => <option key={o} value={o}>{o.replace(/_/g, ' ')}</option>)}
+                  </NativeSelect>
                 </div>
-                <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                  {[
-                    { key: 'has_outdoor_access', label: '🌳 Has outdoor access' },
-                    { key: 'has_other_pets',     label: '🐕 Has other pets' },
-                    { key: 'has_children',       label: '👶 Has children at home' },
-                  ].map(({ key, label }) => (
-                    <label key={key} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 600 }}>
-                      <input type="checkbox" checked={form[key]} onChange={e => set(key, e.target.checked)}
-                        style={{ accentColor: 'var(--cat-terra)', width: '16px', height: '16px' }} />
+                <div className="flex flex-wrap gap-4">
+                  {[{ key: 'has_outdoor_access', label: 'Has outdoor access' }, { key: 'has_other_pets', label: 'Has other pets' }, { key: 'has_children', label: 'Has children at home' }].map(({ key, label }) => (
+                    <label key={key} className="flex cursor-pointer items-center gap-2 text-sm font-semibold text-foreground">
+                      <Checkbox checked={form[key]} onCheckedChange={(v) => set(key, !!v)} />
                       {label}
                     </label>
                   ))}
                 </div>
                 {form.has_other_pets && (
-                  <div className="form-group">
-                    <label className="label-base">Other Pets Details</label>
-                    <input value={form.other_pets_details} onChange={e => set('other_pets_details', e.target.value)}
-                      className="input-base" placeholder="e.g. 1 dog (lab, very friendly), 2 cats" id="app-otherpets" />
-                  </div>
+                  <div><Label>Other pets details</Label><Input value={form.other_pets_details} onChange={(e) => set('other_pets_details', e.target.value)} placeholder="e.g. 1 dog (lab, very friendly), 2 cats" className="mt-1.5" /></div>
                 )}
                 {form.has_children && (
-                  <div className="form-group">
-                    <label className="label-base">Children's Ages</label>
-                    <input value={form.children_ages} onChange={e => set('children_ages', e.target.value)}
-                      className="input-base" placeholder="e.g. 5, 8, 12" id="app-childages" />
-                  </div>
+                  <div><Label>Children's ages</Label><Input value={form.children_ages} onChange={(e) => set('children_ages', e.target.value)} placeholder="e.g. 5, 8, 12" className="mt-1.5" /></div>
                 )}
-              </div>
-            </div>
-            <div style={sectionStyle}>
-              <h3 style={sectionTitle}>🐱 Cat Experience</h3>
-              <div className="form-group">
-                <label className="label-base">Your Experience with Cats *</label>
-                <textarea required value={form.experience_with_cats} onChange={e => set('experience_with_cats', e.target.value)}
-                  className="input-base" placeholder="Describe your past experience with cats, any training, etc."
-                  rows={3} id="app-experience" style={{ resize: 'vertical' }} />
-              </div>
-            </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader><CardTitle className="flex items-center gap-2"><Cat className="size-4" />Cat experience</CardTitle></CardHeader>
+              <CardContent>
+                <Label>Your experience with cats *</Label>
+                <Textarea required value={form.experience_with_cats} onChange={(e) => set('experience_with_cats', e.target.value)} placeholder="Describe your past experience with cats, any training, etc." rows={3} className="mt-1.5" />
+              </CardContent>
+            </Card>
           </>
         )}
 
-        {/* Step 2 — About You */}
         {step === 2 && (
           <>
-            <div style={sectionStyle}>
-              <h3 style={sectionTitle}>💼 Employment &amp; Income</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                <div className="form-group">
-                  <label className="label-base">Employment Status</label>
-                  <select value={form.employment_status} onChange={e => set('employment_status', e.target.value)} className="input-base" id="app-employment">
-                    {INCOME_OPTS.map(o => <option key={o} value={o}>{o.replace(/_/g,' ')}</option>)}
-                  </select>
+            <Card>
+              <CardHeader><CardTitle className="flex items-center gap-2"><Briefcase className="size-4" />Employment &amp; income</CardTitle></CardHeader>
+              <CardContent className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>Employment status</Label>
+                  <NativeSelect value={form.employment_status} onChange={(e) => set('employment_status', e.target.value)} className="mt-1.5">
+                    {INCOME_OPTS.map((o) => <option key={o} value={o}>{o.replace(/_/g, ' ')}</option>)}
+                  </NativeSelect>
                 </div>
-                <div className="form-group">
-                  <label className="label-base">Monthly Income (PKR)</label>
-                  <input type="number" value={form.monthly_income} onChange={e => set('monthly_income', e.target.value)}
-                    className="input-base" placeholder="50000" id="app-income" />
-                </div>
-              </div>
-            </div>
-            <div style={sectionStyle}>
-              <h3 style={sectionTitle}>📋 References</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
-                <div className="form-group">
-                  <label className="label-base">Veterinarian Reference</label>
-                  <input value={form.vet_reference} onChange={e => set('vet_reference', e.target.value)}
-                    className="input-base" placeholder="Vet name and contact number" id="app-vetref" />
-                </div>
-                <div className="form-group">
-                  <label className="label-base">Personal Reference</label>
-                  <input value={form.personal_reference} onChange={e => set('personal_reference', e.target.value)}
-                    className="input-base" placeholder="Name, relationship, phone" id="app-personalref" />
-                </div>
-              </div>
-            </div>
-            <div style={sectionStyle}>
-              <h3 style={sectionTitle}>🆘 Emergency Contact</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                <div className="form-group">
-                  <label className="label-base">Name *</label>
-                  <input required value={form.emergency_contact_name} onChange={e => set('emergency_contact_name', e.target.value)}
-                    className="input-base" placeholder="Jane Doe" id="app-ecname" />
-                </div>
-                <div className="form-group">
-                  <label className="label-base">Phone *</label>
-                  <PhoneInput value={form.emergency_contact_phone} onChange={v => set('emergency_contact_phone', v)} id="app-ecphone" />
-                </div>
-              </div>
-            </div>
+                <div><Label>Monthly income (PKR)</Label><Input type="number" value={form.monthly_income} onChange={(e) => set('monthly_income', e.target.value)} placeholder="50000" className="mt-1.5" /></div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader><CardTitle className="flex items-center gap-2"><ClipboardList className="size-4" />References</CardTitle></CardHeader>
+              <CardContent className="flex flex-col gap-3.5">
+                <div><Label>Veterinarian reference</Label><Input value={form.vet_reference} onChange={(e) => set('vet_reference', e.target.value)} placeholder="Vet name and contact number" className="mt-1.5" /></div>
+                <div><Label>Personal reference</Label><Input value={form.personal_reference} onChange={(e) => set('personal_reference', e.target.value)} placeholder="Name, relationship, phone" className="mt-1.5" /></div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader><CardTitle className="flex items-center gap-2"><LifeBuoy className="size-4" />Emergency contact</CardTitle></CardHeader>
+              <CardContent className="grid grid-cols-2 gap-3">
+                <div><Label>Name *</Label><Input required value={form.emergency_contact_name} onChange={(e) => set('emergency_contact_name', e.target.value)} placeholder="Jane Doe" className="mt-1.5" /></div>
+                <div><Label>Phone *</Label><div className="mt-1.5"><PhoneInput value={form.emergency_contact_phone} onChange={(v) => set('emergency_contact_phone', v)} /></div></div>
+              </CardContent>
+            </Card>
           </>
         )}
 
-        {/* Step 3 — Motivation */}
         {step === 3 && (
-          <div style={sectionStyle}>
-            <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-              <div style={{ fontSize: '3rem', marginBottom: '0.5rem', animation: 'pawBounce 2s ease-in-out infinite' }}>❤️</div>
-              <h3 style={{ margin: '0 0 0.5rem', color: 'var(--text-primary)' }}>Almost there!</h3>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Tell us why you want to adopt this cat.</p>
-            </div>
-            <div className="form-group">
-              <label className="label-base">Why do you want to adopt? *</label>
-              <textarea required value={form.motivation} onChange={e => set('motivation', e.target.value)}
-                className="input-base" placeholder="Share your story — why this cat, what kind of home are you offering, what your daily life is like…"
-                rows={6} id="app-motivation" style={{ resize: 'vertical' }} />
-            </div>
-          </div>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="mb-6 text-center">
+                <Heart className="mx-auto mb-2 size-10 text-primary" />
+                <h3 className="mb-1 text-lg font-bold text-foreground">Almost there!</h3>
+                <p className="text-sm text-muted-foreground">Tell us why you want to adopt this cat.</p>
+              </div>
+              <Label>Why do you want to adopt? *</Label>
+              <Textarea required value={form.motivation} onChange={(e) => set('motivation', e.target.value)} placeholder="Share your story — why this cat, what kind of home are you offering, what your daily life is like…" rows={6} className="mt-1.5" />
+            </CardContent>
+          </Card>
         )}
 
-        {/* Navigation */}
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
-          {step > 1 && (
-            <button type="button" onClick={() => setStep(s => s - 1)} className="btn btn-secondary" style={{ flex: 1, padding: '0.875rem' }}>
-              ← Back
-            </button>
-          )}
-          <button type="submit" disabled={loading} className="btn btn-primary" style={{ flex: 2, padding: '0.875rem' }}>
-            {step < 3 ? 'Next →' : loading ? '❤️ Submitting…' : '❤️ Submit Application'}
-          </button>
+        <div className="flex gap-3">
+          {step > 1 && <Button type="button" variant="secondary" onClick={() => setStep((s) => s - 1)} className="h-11 flex-1">Back</Button>}
+          <Button type="submit" disabled={loading} className="h-11 flex-[2]">{step < 3 ? 'Next' : loading ? 'Submitting…' : 'Submit application'}</Button>
         </div>
       </form>
     </div>
