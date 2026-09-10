@@ -1,0 +1,23 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "backend",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": [
+        "/c",
+        "cd /d C:\\Users\\hp\\Documents\\Projects\\shelter-os && venv\\Scripts\\python.exe manage.py runserver"
+      ],
+      "port": 8000
+    },
+    {
+      "name": "frontend",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": [
+        "/c",
+        "cd /d C:\\Users\\hp\\Documents\\Projects\\shelter-os\\frontend && npm run dev"
+      ],
+      "port": 5173
+    }
+  ]
+}

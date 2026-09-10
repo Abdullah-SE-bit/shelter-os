@@ -1,0 +1,100 @@
+/* ============================================================
+   SHELTER OS — DESIGN TOKENS
+   Brand primitives -> semantic tokens, light + dark.
+   Consumed by globals.css's @theme block (Tailwind utilities)
+   and usable directly as var(--token-name) anywhere.
+   ============================================================ */
+
+:root {
+  /* Brand primitives — raw hex, reference these only from this file */
+  --brand-ink:   #343131; /* primary */
+  --brand-rust:  #A04747; /* accent */
+  --brand-amber: #D8A25E; /* secondary accent */
+  --brand-gold:  #EEDF7A; /* highlight */
+
+  /* Semantic — light theme (default) */
+  --background:         #FAF8F6;
+  --surface:             #FFFFFF;
+  --surface-elevated:    #FFFFFF;
+  --surface-muted:       #F2EEEA;
+  --surface-hover:       #F5F1EC;
+
+  --text-primary:        var(--brand-ink);
+  --text-secondary:      #6B6564;
+  --text-tertiary:       #8A8482;
+  --text-inverse:        #FAF8F6;
+
+  --border:              #E4DFDA;
+  --border-strong:       #CFC7BF;
+
+  --primary-action:      var(--brand-rust);
+  --primary-action-fg:   #FFFFFF;
+  --secondary-action:    var(--brand-amber);
+  --secondary-action-fg: var(--brand-ink);
+
+  --success:             #3F8F5F;
+  --success-bg:          #E6F3EA;
+  --warning:             #B8862F;
+  --warning-bg:          #FBF0DD;
+  --error:               #B4423F;
+  --error-bg:            #FAE7E6;
+  --info:                #3E6FA0;
+  --info-bg:             #E7F0F8;
+
+  --disabled:            #C7C2BD;
+  --hover:               color-mix(in srgb, var(--primary-action) 10%, transparent);
+  --focus-ring:           var(--brand-gold);
+  --selected:            color-mix(in srgb, var(--brand-amber) 18%, var(--surface));
+  --destructive:         var(--error);
+  --destructive-fg:      #FFFFFF;
+
+  --shadow-sm: 0 1px 2px rgba(52, 49, 49, 0.06), 0 1px 1px rgba(52, 49, 49, 0.04);
+  --shadow-md: 0 4px 10px rgba(52, 49, 49, 0.08), 0 2px 4px rgba(52, 49, 49, 0.05);
+  --shadow-lg: 0 12px 28px rgba(52, 49, 49, 0.12), 0 4px 8px rgba(52, 49, 49, 0.06);
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+}
+
+[data-theme='dark'] {
+  --background:          #171514;
+  --surface:              #201D1C;
+  --surface-elevated:     #272322;
+  --surface-muted:        #2B2725;
+  --surface-hover:        #302B29;
+
+  --text-primary:         #F3EFE9;
+  --text-secondary:       #B7AFA8;
+  --text-tertiary:        #8F8781;
+  --text-inverse:         #171514;
+
+  --border:               #37312E;
+  --border-strong:        #453D39;
+
+  --primary-action:       #C97A7A;
+  --primary-action-fg:    #171514;
+  --secondary-action:     #DDAD6E;
+  --secondary-action-fg:  #171514;
+
+  --success:              #5CB584;
+  --success-bg:           #1C2E22;
+  --warning:              #D9A544;
+  --warning-bg:           #332812;
+  --error:                #E0817E;
+  --error-bg:             #33201F;
+  --info:                 #7CAEE0;
+  --info-bg:              #1B2A38;
+
+  --disabled:             #4B4542;
+  --hover:                color-mix(in srgb, var(--primary-action) 14%, transparent);
+  --focus-ring:            var(--brand-gold);
+  --selected:             color-mix(in srgb, var(--secondary-action) 20%, var(--surface));
+  --destructive:          var(--error);
+  --destructive-fg:       #171514;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.30), 0 1px 1px rgba(0, 0, 0, 0.20);
+  --shadow-md: 0 4px 10px rgba(0, 0, 0, 0.36), 0 2px 4px rgba(0, 0, 0, 0.24);
+  --shadow-lg: 0 12px 28px rgba(0, 0, 0, 0.44), 0 4px 8px rgba(0, 0, 0, 0.28);
+}

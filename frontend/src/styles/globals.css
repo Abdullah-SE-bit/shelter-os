@@ -1,0 +1,61 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import './tokens.css';
+
+/* Tailwind v4: toggle dark utilities off [data-theme="dark"] on <html>,
+   not a bare .dark class or prefers-color-scheme media query. */
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
+/* ============================================================
+   Bridge semantic tokens (tokens.css) into Tailwind's utility
+   namespace, matching the var names shadcn-generated components
+   expect (--background, --primary, --border, --ring, ...).
+   ============================================================ */
+@theme inline {
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-display: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+
+  --color-background: var(--background);
+  --color-foreground: var(--text-primary);
+
+  --color-surface: var(--surface);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-surface-muted: var(--surface-muted);
+  --color-surface-hover: var(--surface-hover);
+
+  --color-muted: var(--surface-muted);
+  --color-muted-foreground: var(--text-secondary);
+  --color-tertiary-foreground: var(--text-tertiary);
+
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-input: var(--border);
+  --color-ring: var(--focus-ring);
+
+  --color-primary: var(--primary-action);
+  --color-primary-foreground: var(--primary-action-fg);
+  --color-secondary: var(--secondary-action);
+  --color-secondary-foreground: var(--secondary-action-fg);
+  --color-accent: var(--surface-muted);
+  --color-accent-foreground: var(--text-primary);
+
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-bg);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-bg);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-bg);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-fg);
+
+  --color-card: var(--surface);
+  --color-card-foreground: var(--text-primary);
+  --color-popover: var(--surface-elevated);
+  --color-popover-foreground: var(--text-primary);
+}
+
+/* Note: --radius-sm/md/lg/xl and --shadow-sm/md/lg are NOT remapped here.
+   tokens.css declares them directly under those exact names (Tailwind's own
+   theme keys), so its plain :root / [data-theme=dark] values already flow
+   into every rounded-*/shadow-* utility without a @theme indirection. */
