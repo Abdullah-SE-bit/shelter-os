@@ -1,307 +1,139 @@
 import { useState } from 'react';
-import { sheltersApi } from '../../api/sheltersApi';
-import { lostFoundApi } from '../../api/lostFoundApi';
-import useApi from '../../hooks/useApi';
-import LoadingSpinner from '../../components/LoadingSpinner';
-import EmptyState from '../../components/EmptyState';
+import { Map, Building2, Search, MapPin, Globe2, ExternalLink } from 'lucide-react';
+import { sheltersApi } from '@/api/sheltersApi';
+import { lostFoundApi } from '@/api/lostFoundApi';
+import useApi from '@/hooks/useApi';
+import LoadingSpinner from '@/components/LoadingSpinner';
+import EmptyState from '@/components/EmptyState';
+import PageHeader from '@/components/patterns/PageHeader';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+
+const FILTERS = [
+  { value: 'ALL', label: 'All locations', icon: Map },
+  { value: 'SHELTER', label: 'Shelters', icon: Building2 },
+  { value: 'LOST_ALERT', label: 'Lost cats', icon: Search },
+];
+
+const TYPE_META = {
+  SHELTER: { icon: Building2, label: 'Shelter', tone: 'border-success/40', chip: 'bg-success/10 text-success' },
+  LOST_ALERT: { icon: Search, label: 'Lost cat', chip: 'bg-warning/10 text-warning', tone: 'border-warning/40' },
+};
 
 export default function MapPage() {
   const [filterType, setFilterType] = useState('ALL');
-  
-  // Fetch shelters with location data
-  const { data: sheltersData, loading: sheltersLoading } = useApi(() => sheltersApi.list());
-  const shelters = (Array.isArray(sheltersData) ? sheltersData : sheltersData?.data || []).filter(s => s.latitude && s.longitude);
 
-  // Fetch lost/found alerts with location
+  const { data: sheltersData, loading: sheltersLoading } = useApi(() => sheltersApi.list());
+  const shelters = (Array.isArray(sheltersData) ? sheltersData : sheltersData?.data || []).filter((s) => s.latitude && s.longitude);
+
   const { data: alertsData, loading: alertsLoading } = useApi(() => lostFoundApi.listLost());
-  const alerts = (Array.isArray(alertsData) ? alertsData : alertsData?.data || []).filter(a => a.last_seen_latitude && a.last_seen_longitude);
+  const alerts = (Array.isArray(alertsData) ? alertsData : alertsData?.data || []).filter((a) => a.last_seen_latitude && a.last_seen_longitude);
 
   const loading = sheltersLoading || alertsLoading;
 
-  // Combine all locations
   const locations = [
-    ...shelters.map(s => ({
-      type: 'SHELTER',
-      id: s.id,
-      name: s.name,
-      lat: s.latitude,
-      lng: s.longitude,
-      city: s.city,
-      capacity: s.capacity_total,
-      occupancy: s.current_occupancy,
-      icon: '🏠',
-      color: 'var(--cat-sage)',
+    ...shelters.map((s) => ({
+      type: 'SHELTER', id: s.id, name: s.name, lat: s.latitude, lng: s.longitude,
+      city: s.city, capacity: s.capacity_total, occupancy: s.current_occupancy,
     })),
-    ...alerts.map(a => ({
-      type: 'LOST_ALERT',
-      id: a.id,
-      name: `Lost: ${a.cat_name || 'Cat'}`,
-      lat: a.last_seen_latitude,
-      lng: a.last_seen_longitude,
-      city: a.last_seen_city,
-      date: a.reported_at,
-      icon: '🔍',
-      color: 'var(--cat-amber)',
+    ...alerts.map((a) => ({
+      type: 'LOST_ALERT', id: a.id, name: `Lost: ${a.cat_name || 'Cat'}`, lat: a.last_seen_latitude,
+      lng: a.last_seen_longitude, city: a.last_seen_city, date: a.reported_at,
     })),
   ];
 
-  const filteredLocations = filterType === 'ALL' 
-    ? locations 
-    : locations.filter(l => l.type === filterType);
+  const filteredLocations = filterType === 'ALL' ? locations : locations.filter((l) => l.type === filterType);
 
   return (
-    <div className="page-container">
-      {/* Header */}
-      <div style={{
-        background: 'linear-gradient(135deg, var(--cat-sage), var(--cat-blue))',
-        borderRadius: '20px',
-        padding: '2rem 2.5rem',
-        marginBottom: '2rem',
-        position: 'relative',
-        overflow: 'hidden',
-        boxShadow: 'var(--shadow-lg)',
-      }}>
-        <div style={{ position: 'absolute', right: '2rem', bottom: '-0.5rem', fontSize: '6rem', opacity: 0.1 }}>🗺️</div>
-        <h1 style={{ color: 'white', margin: '0 0 0.5rem', fontSize: '2rem', fontFamily: 'Playfair Display, serif' }}>
-          Location Map
-        </h1>
-        <p style={{ color: 'rgba(255,255,255,0.7)', margin: 0, fontSize: '0.9375rem' }}>
-          View shelters and lost cat locations on the map
-        </p>
-      </div>
+    <div className="mx-auto max-w-[1200px] px-4 py-6 sm:px-6">
+      <PageHeader title="Location map" description="View shelters and lost cat locations" />
 
-      {/* Filter tabs */}
-      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
-        {[
-          { value: 'ALL', label: 'All Locations', icon: '🗺️' },
-          { value: 'SHELTER', label: 'Shelters', icon: '🏠' },
-          { value: 'LOST_ALERT', label: 'Lost Cats', icon: '🔍' },
-        ].map(({ value, label, icon }) => (
+      <div className="mb-6 flex flex-wrap gap-2">
+        {FILTERS.map(({ value, label, icon: Icon }) => (
           <button
             key={value}
             onClick={() => setFilterType(value)}
-            style={{
-              background: filterType === value ? 'var(--cat-terra)' : 'var(--surface-card)',
-              color: filterType === value ? 'white' : 'var(--text-primary)',
-              border: filterType === value ? 'none' : '1px solid var(--border-default)',
-              borderRadius: '10px',
-              padding: '0.625rem 1.125rem',
-              fontSize: '0.875rem',
-              fontWeight: 600,
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-            }}
+            className={cn(
+              'inline-flex items-center gap-1.5 rounded-lg border px-3.5 py-2 text-sm font-semibold transition-colors',
+              filterType === value ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card text-muted-foreground hover:border-border-strong',
+            )}
           >
-            <span>{icon}</span>
+            <Icon className="size-4" />
             {label}
           </button>
         ))}
       </div>
 
-      {/* Loading State */}
       {loading && <LoadingSpinner />}
 
-      {/* Empty State */}
       {!loading && filteredLocations.length === 0 && (
         <EmptyState
-          icon="🗺️"
+          icon={Map}
           title="No locations found"
-          message={
-            filterType === 'ALL'
-              ? 'No locations with coordinates available yet.'
-              : filterType === 'SHELTER'
-              ? 'No shelters with location data found.'
-              : 'No lost cat alerts with location data found.'
-          }
+          message={filterType === 'ALL' ? 'No locations with coordinates available yet.' : filterType === 'SHELTER' ? 'No shelters with location data found.' : 'No lost cat alerts with location data found.'}
         />
       )}
 
-      {/* Location Cards Grid */}
       {!loading && filteredLocations.length > 0 && (
         <>
-          {/* Summary */}
-          <div style={{
-            background: 'var(--surface-card)',
-            borderRadius: '12px',
-            padding: '1rem 1.5rem',
-            marginBottom: '1.5rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            fontSize: '0.9375rem',
-            color: 'var(--text-secondary)',
-            border: '1px solid var(--border-default)',
-          }}>
-            <span style={{ fontSize: '1.25rem' }}>📍</span>
-            <span>
-              Showing <strong style={{ color: 'var(--text-primary)' }}>{filteredLocations.length}</strong> location{filteredLocations.length !== 1 ? 's' : ''}
-              {filterType !== 'ALL' && ` (${filterType === 'SHELTER' ? 'Shelters' : 'Lost Cats'})`}
-            </span>
+          <div className="mb-6 flex items-center gap-2 rounded-xl border border-border bg-card px-5 py-3 text-sm text-muted-foreground">
+            <MapPin className="size-4 text-primary" />
+            Showing <strong className="text-foreground">{filteredLocations.length}</strong> location{filteredLocations.length !== 1 ? 's' : ''}
+            {filterType !== 'ALL' && ` (${filterType === 'SHELTER' ? 'Shelters' : 'Lost Cats'})`}
           </div>
 
-          {/* Location Cards */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
-            gap: '1.5rem',
-          }}>
-            {filteredLocations.map((location) => (
-              <div
-                key={`${location.type}-${location.id}`}
-                style={{
-                  background: 'var(--surface-card)',
-                  borderRadius: '16px',
-                  padding: '1.5rem',
-                  border: `2px solid ${location.color}`,
-                  boxShadow: 'var(--shadow-sm)',
-                  transition: 'transform 0.2s, box-shadow 0.2s',
-                  cursor: 'pointer',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-4px)';
-                  e.currentTarget.style.boxShadow = 'var(--shadow-lg)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
-                }}
-              >
-                {/* Icon & Type Badge */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                  <div style={{
-                    width: '56px',
-                    height: '56px',
-                    borderRadius: '14px',
-                    background: `${location.color}20`,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '1.75rem',
-                  }}>
-                    {location.icon}
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {filteredLocations.map((location) => {
+              const meta = TYPE_META[location.type];
+              return (
+                <div key={`${location.type}-${location.id}`} className={cn('rounded-xl border-2 bg-card p-5 shadow-sm transition-shadow hover:shadow-md', meta.tone)}>
+                  <div className="mb-3.5 flex items-center justify-between">
+                    <div className={cn('flex size-12 items-center justify-center rounded-xl', meta.chip)}>
+                      <meta.icon className="size-6" />
+                    </div>
+                    <span className={cn('rounded-md px-2.5 py-1 text-[11px] font-bold tracking-wide uppercase', meta.chip)}>{meta.label}</span>
                   </div>
-                  <span style={{
-                    background: `${location.color}20`,
-                    color: location.color,
-                    padding: '0.375rem 0.75rem',
-                    borderRadius: '8px',
-                    fontSize: '0.75rem',
-                    fontWeight: 700,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
-                  }}>
-                    {location.type === 'SHELTER' ? 'Shelter' : 'Lost Cat'}
-                  </span>
+
+                  <h3 className="mb-2.5 text-[17px] font-bold text-foreground">{location.name}</h3>
+
+                  <div className="mb-3 flex items-center gap-1.5 text-sm text-muted-foreground">
+                    <MapPin className="size-3.5" />
+                    {location.city || 'Location not specified'}
+                  </div>
+                  <div className="mb-3 flex items-center gap-1.5 font-mono text-xs text-muted-foreground">
+                    <Globe2 className="size-3.5" />
+                    {location.lat.toFixed(6)}, {location.lng.toFixed(6)}
+                  </div>
+
+                  {location.type === 'SHELTER' && (
+                    <div className="grid grid-cols-2 gap-3 border-t border-border pt-3">
+                      <div>
+                        <div className="mb-0.5 text-xs text-muted-foreground">Capacity</div>
+                        <div className="text-lg font-bold text-success">{location.capacity || 0}</div>
+                      </div>
+                      <div>
+                        <div className="mb-0.5 text-xs text-muted-foreground">Occupancy</div>
+                        <div className="text-lg font-bold text-warning">{location.occupancy || 0}</div>
+                      </div>
+                    </div>
+                  )}
+
+                  {location.type === 'LOST_ALERT' && location.date && (
+                    <div className="border-t border-border pt-3">
+                      <div className="mb-0.5 text-xs text-muted-foreground">Reported</div>
+                      <div className="text-sm font-semibold text-foreground">
+                        {new Date(location.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                      </div>
+                    </div>
+                  )}
+
+                  <Button variant="secondary" className="mt-4 w-full" onClick={() => window.open(`https://www.google.com/maps?q=${location.lat},${location.lng}`, '_blank')}>
+                    <ExternalLink className="size-3.5" />
+                    View on Google Maps
+                  </Button>
                 </div>
-
-                {/* Name */}
-                <h3 style={{
-                  margin: '0 0 0.75rem',
-                  fontSize: '1.125rem',
-                  fontWeight: 700,
-                  color: 'var(--text-primary)',
-                }}>
-                  {location.name}
-                </h3>
-
-                {/* Location Info */}
-                <div style={{ marginBottom: '1rem' }}>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    fontSize: '0.875rem',
-                    color: 'var(--text-secondary)',
-                    marginBottom: '0.5rem',
-                  }}>
-                    <span>📍</span>
-                    <span>{location.city || 'Location not specified'}</span>
-                  </div>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    fontSize: '0.8125rem',
-                    color: 'var(--text-tertiary)',
-                    fontFamily: 'monospace',
-                  }}>
-                    <span>🌐</span>
-                    <span>{location.lat.toFixed(6)}, {location.lng.toFixed(6)}</span>
-                  </div>
-                </div>
-
-                {/* Type-specific details */}
-                {location.type === 'SHELTER' && (
-                  <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: '1fr 1fr',
-                    gap: '0.75rem',
-                    paddingTop: '1rem',
-                    borderTop: '1px solid var(--border-default)',
-                  }}>
-                    <div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '0.25rem' }}>
-                        Capacity
-                      </div>
-                      <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--cat-sage)' }}>
-                        {location.capacity || 0}
-                      </div>
-                    </div>
-                    <div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '0.25rem' }}>
-                        Occupancy
-                      </div>
-                      <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--cat-amber)' }}>
-                        {location.occupancy || 0}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {location.type === 'LOST_ALERT' && location.date && (
-                  <div style={{
-                    paddingTop: '1rem',
-                    borderTop: '1px solid var(--border-default)',
-                  }}>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '0.25rem' }}>
-                      Reported
-                    </div>
-                    <div style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                      {new Date(location.date).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                      })}
-                    </div>
-                  </div>
-                )}
-
-                {/* View on External Map Button */}
-                <button
-                  onClick={() => window.open(`https://www.google.com/maps?q=${location.lat},${location.lng}`, '_blank')}
-                  style={{
-                    width: '100%',
-                    marginTop: '1rem',
-                    padding: '0.625rem',
-                    background: location.color,
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '10px',
-                    fontSize: '0.875rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    transition: 'opacity 0.2s',
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.opacity = '0.85'}
-                  onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
-                >
-                  View on Google Maps →
-                </button>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </>
       )}
