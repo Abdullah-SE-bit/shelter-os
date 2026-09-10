@@ -1,50 +1,48 @@
 import { useState } from 'react';
-import { analyticsApi } from '../../api/analyticsApi';
-import useApi from '../../hooks/useApi';
-import LoadingSpinner from '../../components/LoadingSpinner';
-import PageHeader from '../../components/PageHeader';
-import { formatCurrency } from '../../utils/formatters';
+import { Download, Cat, Heart, Siren, HeartHandshake, Gift } from 'lucide-react';
+import { analyticsApi } from '@/api/analyticsApi';
+import useApi from '@/hooks/useApi';
+import LoadingSpinner from '@/components/LoadingSpinner';
+import PageHeader from '@/components/patterns/PageHeader';
+import { formatCurrency } from '@/utils/formatters';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
-function StatBar({ label, value, max, color = 'var(--cat-terra)' }) {
+const TONE_TEXT = { primary: 'text-primary', success: 'text-success', warning: 'text-warning', destructive: 'text-destructive', info: 'text-info' };
+const TONE_BG = { primary: 'bg-primary', success: 'bg-success', warning: 'bg-warning', destructive: 'bg-destructive', info: 'bg-info' };
+const TONE_BG_TINT = { primary: 'bg-primary/10', success: 'bg-success/10', warning: 'bg-warning/10', destructive: 'bg-destructive/10', info: 'bg-info/10' };
+
+function StatBar({ label, value, max, tone = 'primary' }) {
   const pct = Math.min(100, ((value || 0) / (max || 1)) * 100);
   return (
-    <div style={{ marginBottom: '0.875rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.375rem', fontSize: '0.875rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
+    <div className="mb-3.5">
+      <div className="mb-1.5 flex justify-between text-sm font-medium text-muted-foreground">
         <span>{label}</span>
-        <span style={{ color, fontWeight: 800 }}>{value}</span>
+        <span className={cn('font-bold', TONE_TEXT[tone])}>{value}</span>
       </div>
-      <div style={{ height: '8px', background: 'var(--cat-linen)', borderRadius: '999px', overflow: 'hidden' }}>
-        <div style={{ height: '100%', width: `${pct}%`, background: `linear-gradient(90deg, ${color}, ${color}cc)`, borderRadius: '999px', transition: 'width 0.6s ease' }} />
+      <div className="h-2 overflow-hidden rounded-full bg-surface-muted">
+        <div className={cn('h-full rounded-full transition-all', TONE_BG[tone])} style={{ width: `${pct}%` }} />
       </div>
     </div>
   );
 }
 
-function NumberCard({ icon, label, value, sub, color = 'var(--cat-terra)', wide }) {
+function NumberCard({ icon: Icon, label, value, tone = 'primary', wide }) {
   return (
-    <div style={{
-      background: 'var(--surface-card)',
-      border: '1px solid var(--border-default)',
-      borderRadius: '14px',
-      padding: '1.25rem 1.5rem',
-      gridColumn: wide ? 'span 2' : undefined,
-      position: 'relative',
-      overflow: 'hidden',
-    }}>
-      <div style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', fontSize: '3.5rem', opacity: 0.08 }}>{icon}</div>
-      <div style={{ fontSize: '2rem', fontWeight: 900, color, lineHeight: 1, marginBottom: '0.25rem' }}>{value}</div>
-      <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</div>
-      {sub && <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>{sub}</div>}
+    <div className={cn('relative overflow-hidden rounded-xl border border-border bg-card p-5', wide && 'col-span-2')}>
+      <Icon className="pointer-events-none absolute top-1/2 right-3 size-14 -translate-y-1/2 opacity-[0.08]" />
+      <div className={cn('text-[28px] leading-none font-bold', TONE_TEXT[tone])}>{value}</div>
+      <div className="mt-1.5 text-xs font-semibold tracking-wide text-muted-foreground uppercase">{label}</div>
     </div>
   );
 }
 
 export default function ReportsPage() {
   const [period, setPeriod] = useState('month');
-  const { data, loading }   = useApi(() => analyticsApi.reports({ period }), null, [period]);
+  const { data, loading } = useApi(() => analyticsApi.reports({ period }), null, [period]);
   const r = data?.data || data || {};
 
-  const maxBreed  = Math.max(...Object.values(r.cats_by_breed || {}).map(Number), 1);
+  const maxBreed = Math.max(...Object.values(r.cats_by_breed || {}).map(Number), 1);
   const maxStatus = Math.max(...Object.values(r.cats_by_status || {}).map(Number), 1);
 
   const handleExport = async (type) => {
@@ -63,39 +61,34 @@ export default function ReportsPage() {
     }
   };
 
+  const funnelStages = [
+    { label: 'Applications', value: r.total_applications || 0, tone: 'primary' },
+    { label: 'Reviewed', value: r.reviewed_applications || 0, tone: 'info' },
+    { label: 'Interviews', value: r.interviews_done || 0, tone: 'warning' },
+    { label: 'Approved', value: r.approved_applications || 0, tone: 'success' },
+  ];
+
   return (
-    <div className="page-container">
+    <div className="mx-auto max-w-[1200px] px-4 py-6 sm:px-6">
       <PageHeader
-        title="📊 Reports &amp; Analytics"
-        subtitle="Shelter performance metrics and insights"
-        action={
-          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-            <button onClick={() => handleExport('adoptions')} className="btn btn-secondary btn-sm">⬇ Adoptions CSV</button>
-            <button onClick={() => handleExport('rescues')} className="btn btn-secondary btn-sm">⬇ Rescues CSV</button>
-            <button onClick={() => handleExport('donations')} className="btn btn-secondary btn-sm">⬇ Donations CSV</button>
+        title="Reports & analytics"
+        description="Shelter performance metrics and insights"
+        actions={
+          <div className="flex flex-wrap gap-2">
+            <Button variant="secondary" size="sm" onClick={() => handleExport('adoptions')}><Download className="size-3.5" />Adoptions CSV</Button>
+            <Button variant="secondary" size="sm" onClick={() => handleExport('rescues')}><Download className="size-3.5" />Rescues CSV</Button>
+            <Button variant="secondary" size="sm" onClick={() => handleExport('donations')}><Download className="size-3.5" />Donations CSV</Button>
           </div>
         }
       />
 
-      {/* Period selector */}
-      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '2rem' }}>
-        {[
-          { id: 'week', label: 'This Week' },
-          { id: 'month', label: 'This Month' },
-          { id: 'year', label: 'This Year' },
-          { id: 'all', label: 'All Time' },
-        ].map(p => (
-          <button key={p.id} onClick={() => setPeriod(p.id)} style={{
-            padding: '0.5rem 1.125rem',
-            borderRadius: '8px',
-            border: `2px solid ${period === p.id ? 'var(--cat-terra)' : 'var(--border-default)'}`,
-            background: period === p.id ? 'var(--cat-terra)' : 'var(--surface-card)',
-            color: period === p.id ? 'white' : 'var(--text-secondary)',
-            fontWeight: 700,
-            fontSize: '0.8125rem',
-            cursor: 'pointer',
-            transition: 'all 0.2s',
-          }}>
+      <div className="mb-8 flex flex-wrap gap-2">
+        {[{ id: 'week', label: 'This week' }, { id: 'month', label: 'This month' }, { id: 'year', label: 'This year' }, { id: 'all', label: 'All time' }].map((p) => (
+          <button
+            key={p.id}
+            onClick={() => setPeriod(p.id)}
+            className={cn('rounded-lg border-2 px-4 py-2 text-sm font-semibold transition-colors', period === p.id ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card text-muted-foreground')}
+          >
             {p.label}
           </button>
         ))}
@@ -104,56 +97,40 @@ export default function ReportsPage() {
       {loading && <LoadingSpinner size="lg" text="Generating report…" />}
 
       {!loading && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          {/* KPI grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '1rem' }}>
-            <NumberCard icon="🐱" label="Total Cats"         value={r.total_cats || 0}              color="var(--cat-terra)" />
-            <NumberCard icon="❤️" label="Adoptions"          value={r.adoptions || 0}               color="var(--cat-sage)" />
-            <NumberCard icon="🚨" label="Rescues"            value={r.rescues_resolved || 0}        color="var(--cat-red)"  />
-            <NumberCard icon="🙋" label="Volunteers"         value={r.active_volunteers || 0}       color="var(--cat-blue)" />
-            <NumberCard icon="💝" label="Donations"          value={formatCurrency(r.total_donations)} color="var(--cat-amber)" wide />
+        <div className="flex flex-col gap-6">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+            <NumberCard icon={Cat} label="Total cats" value={r.total_cats || 0} tone="primary" />
+            <NumberCard icon={Heart} label="Adoptions" value={r.adoptions || 0} tone="success" />
+            <NumberCard icon={Siren} label="Rescues" value={r.rescues_resolved || 0} tone="destructive" />
+            <NumberCard icon={HeartHandshake} label="Volunteers" value={r.active_volunteers || 0} tone="info" />
+            <NumberCard icon={Gift} label="Donations" value={formatCurrency(r.total_donations)} tone="warning" wide />
           </div>
 
-          {/* Charts row */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', alignItems: 'start' }}>
-            {/* By status */}
-            <div style={{ background: 'var(--surface-card)', border: '1px solid var(--border-default)', borderRadius: '14px', padding: '1.25rem' }}>
-              <h3 style={{ margin: '0 0 1.25rem', fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                🐱 Cats by Status
-              </h3>
+          <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
+            <div className="rounded-xl border border-border bg-card p-5">
+              <h3 className="mb-5 text-xs font-semibold tracking-wide text-muted-foreground uppercase">Cats by status</h3>
               {Object.entries(r.cats_by_status || {}).map(([status, count]) => (
-                <StatBar key={status} label={status.replace(/_/g, ' ')} value={Number(count)} max={maxStatus} color="var(--cat-terra)" />
+                <StatBar key={status} label={status.replace(/_/g, ' ')} value={Number(count)} max={maxStatus} tone="primary" />
               ))}
-              {Object.keys(r.cats_by_status || {}).length === 0 && <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>No data</p>}
+              {Object.keys(r.cats_by_status || {}).length === 0 && <p className="text-sm text-muted-foreground">No data</p>}
             </div>
 
-            {/* By breed */}
-            <div style={{ background: 'var(--surface-card)', border: '1px solid var(--border-default)', borderRadius: '14px', padding: '1.25rem' }}>
-              <h3 style={{ margin: '0 0 1.25rem', fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                🦴 Cats by Breed
-              </h3>
+            <div className="rounded-xl border border-border bg-card p-5">
+              <h3 className="mb-5 text-xs font-semibold tracking-wide text-muted-foreground uppercase">Cats by breed</h3>
               {Object.entries(r.cats_by_breed || {}).slice(0, 8).map(([breed, count]) => (
-                <StatBar key={breed} label={breed.replace(/_/g, ' ')} value={Number(count)} max={maxBreed} color="var(--cat-brown)" />
+                <StatBar key={breed} label={breed.replace(/_/g, ' ')} value={Number(count)} max={maxBreed} tone="info" />
               ))}
-              {Object.keys(r.cats_by_breed || {}).length === 0 && <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>No data</p>}
+              {Object.keys(r.cats_by_breed || {}).length === 0 && <p className="text-sm text-muted-foreground">No data</p>}
             </div>
           </div>
 
-          {/* Adoption funnel */}
-          <div style={{ background: 'var(--surface-card)', border: '1px solid var(--border-default)', borderRadius: '14px', padding: '1.25rem' }}>
-            <h3 style={{ margin: '0 0 1.25rem', fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-              ❤️ Adoption Funnel
-            </h3>
-            <div style={{ display: 'flex', gap: '0', alignItems: 'stretch' }}>
-              {[
-                { label: 'Applications', value: r.total_applications || 0, color: 'var(--cat-terra)' },
-                { label: 'Reviewed',     value: r.reviewed_applications || 0, color: 'var(--cat-brown)' },
-                { label: 'Interviews',   value: r.interviews_done || 0, color: 'var(--cat-amber)' },
-                { label: 'Approved',     value: r.approved_applications || 0, color: 'var(--cat-sage)' },
-              ].map((stage, i, arr) => (
-                <div key={stage.label} style={{ flex: 1, textAlign: 'center', padding: '1rem 0.5rem', background: `${stage.color}18`, borderRadius: i === 0 ? '10px 0 0 10px' : i === arr.length - 1 ? '0 10px 10px 0' : '0', borderRight: i < arr.length - 1 ? `2px solid white` : 'none' }}>
-                  <div style={{ fontWeight: 900, fontSize: '1.5rem', color: stage.color }}>{stage.value}</div>
-                  <div style={{ fontSize: '0.7rem', fontWeight: 700, color: stage.color, textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: '0.25rem' }}>{stage.label}</div>
+          <div className="rounded-xl border border-border bg-card p-5">
+            <h3 className="mb-5 text-xs font-semibold tracking-wide text-muted-foreground uppercase">Adoption funnel</h3>
+            <div className="flex overflow-hidden rounded-lg">
+              {funnelStages.map((stage, i) => (
+                <div key={stage.label} className={cn('flex-1 py-4 text-center', TONE_BG_TINT[stage.tone], i > 0 && 'border-l-2 border-background')}>
+                  <div className={cn('text-2xl font-bold', TONE_TEXT[stage.tone])}>{stage.value}</div>
+                  <div className={cn('mt-1 text-[11px] font-semibold tracking-wide uppercase', TONE_TEXT[stage.tone])}>{stage.label}</div>
                 </div>
               ))}
             </div>
