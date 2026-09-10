@@ -1,20 +1,33 @@
 import { useState } from 'react';
-import { wellnessApi } from '../../api/wellnessApi';
-import { catsApi } from '../../api/catsApi';
-import { accountsApi } from '../../api/accountsApi';
-import useApi from '../../hooks/useApi';
-import LoadingSpinner from '../../components/LoadingSpinner';
-import EmptyState from '../../components/EmptyState';
-import Modal from '../../components/Modal';
-import ConfirmDialog from '../../components/ConfirmDialog';
-import { formatDate, formatDateTime } from '../../utils/dateUtils';
-import { useAuth } from '../../context/AuthContext';
 import { Link } from 'react-router-dom';
+import { CalendarDays, Stethoscope, Syringe, Scissors, ClipboardList, Siren, TriangleAlert, Check, X, Stethoscope as VetIcon, User, Cat } from 'lucide-react';
+import { wellnessApi } from '@/api/wellnessApi';
+import { catsApi } from '@/api/catsApi';
+import { accountsApi } from '@/api/accountsApi';
+import useApi from '@/hooks/useApi';
+import { useAuth } from '@/context/AuthContext';
+import LoadingSpinner from '@/components/LoadingSpinner';
+import EmptyState from '@/components/EmptyState';
+import PageHeader from '@/components/patterns/PageHeader';
+import Modal from '@/components/Modal';
+import ConfirmDialog from '@/components/ConfirmDialog';
+import { formatDateTime } from '@/utils/dateUtils';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { NativeSelect } from '@/components/ui/native-select';
+import { cn } from '@/lib/utils';
+
+const STATUS_TONE = { SCHEDULED: 'bg-info/10 text-info', CONFIRMED: 'bg-success/10 text-success', COMPLETED: 'bg-surface-muted text-muted-foreground', CANCELLED: 'bg-destructive/10 text-destructive', NO_SHOW: 'bg-warning/10 text-warning' };
+const STATUS_BORDER = { SCHEDULED: 'border-l-info', CONFIRMED: 'border-l-success', COMPLETED: 'border-l-border', CANCELLED: 'border-l-destructive', NO_SHOW: 'border-l-warning' };
+const TYPE_ICONS = { CHECKUP: Stethoscope, VACCINATION: Syringe, SURGERY: Scissors, FOLLOWUP: ClipboardList, EMERGENCY: Siren };
 
 export default function AppointmentsPage() {
   const { user } = useAuth();
-  // Cat owners, shelter admins and volunteers can all request appointments.
   const canBook = ['CAT_OWNER', 'SHELTER_ADMIN', 'VOLUNTEER', 'ADOPTER'].includes(user?.role);
+  const isVet = user?.role === 'VET';
+
   const [bookModalOpen, setBookModalOpen] = useState(false);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
@@ -24,60 +37,19 @@ export default function AppointmentsPage() {
   const [outcomeSummary, setOutcomeSummary] = useState('');
   const [filterStatus, setFilterStatus] = useState('ALL');
 
-  // Fetch appointments
   const { data: appointmentsData, loading, refetch } = useApi(() => wellnessApi.myAppointments());
-  // /appointments/me/ returns a bare array, which useApi surfaces directly.
   const appointments = Array.isArray(appointmentsData) ? appointmentsData : (appointmentsData?.results || []);
 
-  // For booking form
-  const [bookForm, setBookForm] = useState({
-    cat: '',
-    vet: '',
-    appointment_type: 'CHECKUP',
-    scheduled_at: '',
-    notes: '',
-  });
+  const [bookForm, setBookForm] = useState({ cat: '', vet: '', appointment_type: 'CHECKUP', scheduled_at: '', notes: '' });
 
-  // Fetch user's cats (for Cat Owners)
-  const { data: catsData } = useApi(
-    () => catsApi.list(),
-    { skip: !canBook }
-  );
-  // /cats/ returns { results, count, ... }, so read the results array (guarding
-  // for a bare array too).
+  const { data: catsData } = useApi(() => catsApi.list(), { skip: !canBook });
   const userCats = Array.isArray(catsData) ? catsData : (catsData?.results || []);
 
-  // Fetch vets (for booking). useApi already unwraps the envelope to res.data.data,
-  // and GET /users/ returns a bare array, so vetsData IS the array of vets.
   const { data: vetsData } = useApi(() => accountsApi.list({ role: 'VET' }));
   const vets = Array.isArray(vetsData) ? vetsData : (vetsData?.results || []);
 
-  const isVet = user?.role === 'VET';
-  const isCatOwner = user?.role === 'CAT_OWNER';
-
-  const statusColors = {
-    SCHEDULED: 'var(--cat-blue)',
-    CONFIRMED: 'var(--cat-sage)',
-    COMPLETED: 'var(--text-muted)',
-    CANCELLED: 'var(--cat-red)',
-    NO_SHOW: 'var(--cat-amber)',
-  };
-
-  const typeIcons = {
-    CHECKUP: '🩺',
-    VACCINATION: '💉',
-    SURGERY: '⚕️',
-    FOLLOWUP: '📋',
-    EMERGENCY: '🚨',
-  };
-
-  const filteredAppointments = filterStatus === 'ALL' 
-    ? appointments 
-    : appointments.filter(a => a.status === filterStatus);
-
-  const upcomingAppointments = appointments.filter(a => 
-    new Date(a.scheduled_at) >= new Date() && a.status !== 'CANCELLED' && a.status !== 'COMPLETED'
-  );
+  const filteredAppointments = filterStatus === 'ALL' ? appointments : appointments.filter((a) => a.status === filterStatus);
+  const upcomingAppointments = appointments.filter((a) => new Date(a.scheduled_at) >= new Date() && a.status !== 'CANCELLED' && a.status !== 'COMPLETED');
 
   const handleBookAppointment = async (e) => {
     e.preventDefault();
@@ -86,9 +58,8 @@ export default function AppointmentsPage() {
       setBookModalOpen(false);
       setBookForm({ cat: '', vet: '', appointment_type: 'CHECKUP', scheduled_at: '', notes: '' });
       refetch();
-      alert('Appointment booked successfully! The vet will receive a notification.');
-    } catch (error) {
-      console.error('Failed to book appointment:', error);
+    } catch (err) {
+      console.error('Failed to book appointment:', err);
       alert('Failed to book appointment. Please try again.');
     }
   };
@@ -100,9 +71,8 @@ export default function AppointmentsPage() {
       setConfirmDialogOpen(false);
       setSelectedAppointment(null);
       refetch();
-    } catch (error) {
-      console.error('Failed to confirm appointment:', error);
-      alert('Failed to confirm appointment. Please try again.');
+    } catch (err) {
+      console.error('Failed to confirm appointment:', err);
     }
   };
 
@@ -114,9 +84,8 @@ export default function AppointmentsPage() {
       setSelectedAppointment(null);
       setCancellationReason('');
       refetch();
-    } catch (error) {
-      console.error('Failed to cancel appointment:', error);
-      alert('Failed to cancel appointment. Please try again.');
+    } catch (err) {
+      console.error('Failed to cancel appointment:', err);
     }
   };
 
@@ -128,183 +97,97 @@ export default function AppointmentsPage() {
       setSelectedAppointment(null);
       setOutcomeSummary('');
       refetch();
-    } catch (error) {
-      console.error('Failed to complete appointment:', error);
-      alert('Failed to complete appointment. Please try again.');
+    } catch (err) {
+      console.error('Failed to complete appointment:', err);
     }
   };
 
   const AppointmentCard = ({ appointment }) => {
     const isPast = new Date(appointment.scheduled_at) < new Date();
-    // Actions follow the appointment status, not the clock, so a vet always has
-    // a path to Confirm -> Complete (or Cancel) an open appointment.
     const isOpen = appointment.status === 'SCHEDULED' || appointment.status === 'CONFIRMED';
     const canConfirm = isVet && appointment.status === 'SCHEDULED';
     const canComplete = isVet && isOpen;
     const canCancel = (isVet || canBook) && isOpen;
+    const TypeIcon = TYPE_ICONS[appointment.appointment_type] || CalendarDays;
 
     return (
-      <div style={{
-        background: 'var(--surface-card)',
-        border: '1px solid var(--border-default)',
-        borderLeft: `4px solid ${statusColors[appointment.status] || 'var(--border-default)'}`,
-        borderRadius: '12px',
-        padding: '1.25rem',
-        marginBottom: '0.75rem',
-      }}>
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
-          {/* Icon */}
-          <div style={{
-            width: '48px',
-            height: '48px',
-            borderRadius: '12px',
-            background: 'var(--cat-linen)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '1.5rem',
-            flexShrink: 0,
-          }}>
-            {typeIcons[appointment.appointment_type] || '📅'}
+      <div className={cn('mb-3 rounded-xl border border-l-4 border-border bg-card p-5', STATUS_BORDER[appointment.status])}>
+        <div className="flex items-start gap-4">
+          <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-surface-muted">
+            <TypeIcon className="size-5 text-foreground" />
           </div>
 
-          {/* Details */}
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
+          <div className="min-w-0 flex-1">
+            <div className="mb-2 flex flex-wrap items-start justify-between gap-2">
               <div>
-                <h3 style={{ margin: 0, fontSize: '0.9375rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                  {appointment.appointment_type?.replace(/_/g, ' ')}
-                </h3>
-                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginTop: '0.25rem' }}>
-                  <span style={{
-                    fontSize: '0.75rem',
-                    fontWeight: 700,
-                    padding: '0.2rem 0.5rem',
-                    borderRadius: '6px',
-                    background: statusColors[appointment.status] + '20',
-                    color: statusColors[appointment.status],
-                  }}>
-                    {appointment.status}
-                  </span>
+                <h3 className="text-[15px] font-bold text-foreground">{appointment.appointment_type?.replace(/_/g, ' ')}</h3>
+                <div className="mt-1 flex items-center gap-2">
+                  <span className={cn('rounded-md px-2 py-0.5 text-xs font-bold', STATUS_TONE[appointment.status])}>{appointment.status}</span>
                   {isPast && appointment.status !== 'COMPLETED' && appointment.status !== 'CANCELLED' && (
-                    <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--cat-amber)' }}>
-                      ⚠️ Past due
-                    </span>
+                    <span className="flex items-center gap-1 text-xs font-semibold text-warning"><TriangleAlert className="size-3.5" />Past due</span>
                   )}
                 </div>
               </div>
-              
-              {/* Action buttons for Vets */}
+
               {isVet && (
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  {canConfirm && (
-                    <button
-                      onClick={() => { setSelectedAppointment(appointment); setConfirmDialogOpen(true); }}
-                      className="btn btn-sm"
-                      style={{ background: 'var(--cat-sage)', color: 'white', border: 'none' }}
-                    >
-                      ✓ Confirm
-                    </button>
-                  )}
-                  {canComplete && (
-                    <button
-                      onClick={() => { setSelectedAppointment(appointment); setCompleteDialogOpen(true); }}
-                      className="btn btn-sm"
-                      style={{ background: 'var(--cat-blue)', color: 'white', border: 'none' }}
-                    >
-                      ✓ Complete
-                    </button>
-                  )}
-                  {canCancel && (
-                    <button
-                      onClick={() => { setSelectedAppointment(appointment); setCancelDialogOpen(true); }}
-                      className="btn btn-secondary btn-sm"
-                    >
-                      ✕ Cancel
-                    </button>
-                  )}
+                <div className="flex gap-2">
+                  {canConfirm && <Button size="sm" onClick={() => { setSelectedAppointment(appointment); setConfirmDialogOpen(true); }}><Check className="size-3.5" />Confirm</Button>}
+                  {canComplete && <Button size="sm" variant="secondary" onClick={() => { setSelectedAppointment(appointment); setCompleteDialogOpen(true); }}><Check className="size-3.5" />Complete</Button>}
+                  {canCancel && <Button size="sm" variant="secondary" onClick={() => { setSelectedAppointment(appointment); setCancelDialogOpen(true); }}><X className="size-3.5" />Cancel</Button>}
                 </div>
               )}
-
-              {/* Cancel button for the booker (owner / shelter admin / volunteer) */}
               {!isVet && canBook && canCancel && (
-                <button
-                  onClick={() => { setSelectedAppointment(appointment); setCancelDialogOpen(true); }}
-                  className="btn btn-secondary btn-sm"
-                >
-                  Cancel
-                </button>
+                <Button size="sm" variant="secondary" onClick={() => { setSelectedAppointment(appointment); setCancelDialogOpen(true); }}>Cancel</Button>
               )}
             </div>
 
-            {/* Info grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem', marginTop: '0.75rem' }}>
-              {/* Appointment type — shown to both the vet and whoever booked it. */}
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>📋 Type</div>
-                <div style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                  {typeIcons[appointment.appointment_type] || '📅'} {appointment.appointment_type?.replace(/_/g, ' ')}
-                </div>
-              </div>
-              <div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>📅 Scheduled</div>
-                <div style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                  {formatDateTime(appointment.scheduled_at)}
-                </div>
+                <div className="mb-0.5 text-xs text-muted-foreground">Scheduled</div>
+                <div className="text-sm font-semibold text-foreground">{formatDateTime(appointment.scheduled_at)}</div>
               </div>
               {appointment.cat && (
                 <div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>🐱 Cat</div>
-                  <div style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                    {appointment.cat_name || 'Unnamed'}
-                  </div>
+                  <div className="mb-0.5 flex items-center gap-1 text-xs text-muted-foreground"><Cat className="size-3" />Cat</div>
+                  <div className="text-sm font-semibold text-foreground">{appointment.cat_name || 'Unnamed'}</div>
                 </div>
               )}
               {isVet && appointment.owner && (
                 <div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>👤 Booked by</div>
-                  <div style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                    {appointment.owner_name || appointment.owner_email || '—'}
-                  </div>
+                  <div className="mb-0.5 flex items-center gap-1 text-xs text-muted-foreground"><User className="size-3" />Booked by</div>
+                  <div className="text-sm font-semibold text-foreground">{appointment.owner_name || appointment.owner_email || '—'}</div>
                 </div>
               )}
               {!isVet && appointment.vet && (
                 <div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>🩺 Vet</div>
-                  <div style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                    {appointment.vet_name || '—'}
-                  </div>
+                  <div className="mb-0.5 flex items-center gap-1 text-xs text-muted-foreground"><VetIcon className="size-3" />Vet</div>
+                  <div className="text-sm font-semibold text-foreground">{appointment.vet_name || '—'}</div>
                 </div>
               )}
             </div>
 
-            {/* Vet reaches their patient's records only through the appointment. */}
             {isVet && appointment.cat && (
-              <div style={{ marginTop: '0.75rem' }}>
-                <Link to={`/cats/${appointment.cat}/medical`} className="btn btn-secondary btn-sm">
-                  🩺 Open medical record
-                </Link>
-              </div>
+              <Button size="sm" variant="secondary" className="mt-3" asChild>
+                <Link to={`/cats/${appointment.cat}/medical`}><Stethoscope className="size-3.5" />Open medical record</Link>
+              </Button>
             )}
 
             {appointment.notes && (
-              <div style={{ marginTop: '0.75rem', padding: '0.75rem', background: 'var(--cat-linen)', borderRadius: '8px' }}>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>📝 Notes</div>
-                <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>{appointment.notes}</div>
+              <div className="mt-3 rounded-lg bg-surface-muted px-3 py-2.5">
+                <div className="mb-0.5 text-xs text-muted-foreground">Notes</div>
+                <div className="text-sm text-foreground">{appointment.notes}</div>
               </div>
             )}
-
             {appointment.outcome_summary && (
-              <div style={{ marginTop: '0.75rem', padding: '0.75rem', background: 'rgba(136,176,136,0.1)', borderRadius: '8px' }}>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>✓ Outcome</div>
-                <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>{appointment.outcome_summary}</div>
+              <div className="mt-3 rounded-lg bg-success/10 px-3 py-2.5">
+                <div className="mb-0.5 text-xs text-muted-foreground">Outcome</div>
+                <div className="text-sm text-foreground">{appointment.outcome_summary}</div>
               </div>
             )}
-
             {appointment.cancellation_reason && (
-              <div style={{ marginTop: '0.75rem', padding: '0.75rem', background: 'rgba(201,71,71,0.1)', borderRadius: '8px' }}>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>✕ Cancellation Reason</div>
-                <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>{appointment.cancellation_reason}</div>
+              <div className="mt-3 rounded-lg bg-destructive/10 px-3 py-2.5">
+                <div className="mb-0.5 text-xs text-muted-foreground">Cancellation reason</div>
+                <div className="text-sm text-foreground">{appointment.cancellation_reason}</div>
               </div>
             )}
           </div>
@@ -314,287 +197,93 @@ export default function AppointmentsPage() {
   };
 
   return (
-    <div className="page-container">
-      {/* Header */}
-      <div style={{
-        background: 'linear-gradient(135deg, var(--cat-blue), var(--cat-sage))',
-        borderRadius: '20px',
-        padding: '2rem 2.5rem',
-        marginBottom: '2rem',
-        position: 'relative',
-        overflow: 'hidden',
-        boxShadow: 'var(--shadow-lg)',
-      }}>
-        <div style={{ position: 'absolute', right: '2rem', bottom: '-0.5rem', fontSize: '6rem', opacity: 0.1 }}>📅</div>
-        <h1 style={{ color: 'white', margin: '0 0 0.5rem', fontSize: '2rem', fontFamily: 'Playfair Display, serif' }}>
-          Appointments
-        </h1>
-        <p style={{ color: 'rgba(255,255,255,0.7)', margin: '0 0 1rem', fontSize: '0.9375rem' }}>
-          {isVet ? 'Manage your vet appointments' : 'Book and manage appointments with veterinarians'}
-        </p>
-        {canBook && (
-          <button onClick={() => setBookModalOpen(true)} className="btn btn-primary">
-            📅 Book Appointment
-          </button>
-        )}
+    <div className="mx-auto max-w-[900px] px-4 py-6 sm:px-6">
+      <div className="relative mb-6 overflow-hidden rounded-xl bg-gradient-to-br from-[var(--brand-rust)] to-[var(--brand-ink)] px-6 py-6 text-white sm:px-8">
+        <CalendarDays className="pointer-events-none absolute right-4 -bottom-2 size-20 opacity-10" />
+        <h1 className="font-display text-[26px] font-bold">Appointments</h1>
+        <p className="mt-1 text-sm opacity-80">{isVet ? 'Manage your vet appointments' : 'Book and manage appointments with veterinarians'}</p>
+        {canBook && <Button variant="secondary" className="mt-4" onClick={() => setBookModalOpen(true)}><CalendarDays className="size-4" />Book appointment</Button>}
       </div>
 
-      {/* Upcoming alert */}
       {upcomingAppointments.length > 0 && (
-        <div style={{
-          background: 'rgba(136,176,136,0.12)',
-          border: '1px solid rgba(136,176,136,0.35)',
-          borderRadius: '12px',
-          padding: '0.875rem 1.25rem',
-          marginBottom: '1.5rem',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.75rem',
-        }}>
-          <span style={{ fontSize: '1.25rem' }}>📅</span>
-          <span style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--text-primary)' }}>
-            You have {upcomingAppointments.length} upcoming appointment{upcomingAppointments.length !== 1 ? 's' : ''}
-          </span>
+        <div className="mb-6 flex items-center gap-2.5 rounded-xl border border-success/25 bg-success/10 px-4 py-3">
+          <CalendarDays className="size-5 text-success" />
+          <span className="text-sm font-semibold text-foreground">You have {upcomingAppointments.length} upcoming appointment{upcomingAppointments.length !== 1 ? 's' : ''}</span>
         </div>
       )}
 
-      {/* Filter tabs */}
-      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
-        {['ALL', 'SCHEDULED', 'CONFIRMED', 'COMPLETED', 'CANCELLED'].map(status => (
-          <button
-            key={status}
-            onClick={() => setFilterStatus(status)}
-            style={{
-              background: filterStatus === status ? 'var(--cat-terra)' : 'var(--surface-card)',
-              color: filterStatus === status ? 'white' : 'var(--text-primary)',
-              border: filterStatus === status ? 'none' : '1px solid var(--border-default)',
-              borderRadius: '10px',
-              padding: '0.625rem 1.125rem',
-              fontSize: '0.875rem',
-              fontWeight: 600,
-              cursor: 'pointer',
-              whiteSpace: 'nowrap',
-              transition: 'all 0.2s',
-            }}
-          >
+      <div className="mb-6 flex gap-2 overflow-x-auto pb-1">
+        {['ALL', 'SCHEDULED', 'CONFIRMED', 'COMPLETED', 'CANCELLED'].map((status) => (
+          <button key={status} onClick={() => setFilterStatus(status)}
+            className={cn('shrink-0 rounded-lg border px-3.5 py-2 text-sm font-semibold whitespace-nowrap transition-colors', filterStatus === status ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card text-muted-foreground')}>
             {status}
           </button>
         ))}
       </div>
 
-      {/* Content */}
       {loading ? (
-        <LoadingSpinner size="lg" text="Loading appointments..." />
+        <LoadingSpinner size="lg" text="Loading appointments…" />
       ) : filteredAppointments.length === 0 ? (
-        <EmptyState
-          icon="📅"
-          title="No appointments"
-          message={filterStatus === 'ALL' 
-            ? "You don't have any appointments yet." 
-            : `No ${filterStatus.toLowerCase()} appointments.`}
-          action={canBook && filterStatus === 'ALL' && (
-            <button onClick={() => setBookModalOpen(true)} className="btn btn-primary">
-              Book Your First Appointment
-            </button>
-          )}
-        />
+        <EmptyState icon={CalendarDays} title="No appointments" message={filterStatus === 'ALL' ? "You don't have any appointments yet." : `No ${filterStatus.toLowerCase()} appointments.`}
+          action={canBook && filterStatus === 'ALL' && <Button onClick={() => setBookModalOpen(true)}>Book your first appointment</Button>} />
       ) : (
-        <div>
-          {filteredAppointments.map(appointment => (
-            <AppointmentCard key={appointment.id} appointment={appointment} />
-          ))}
-        </div>
+        <div>{filteredAppointments.map((appointment) => <AppointmentCard key={appointment.id} appointment={appointment} />)}</div>
       )}
 
-      {/* Book Appointment Modal */}
-      <Modal
-        open={bookModalOpen}
-        onClose={() => setBookModalOpen(false)}
-        title="📅 Book Appointment"
-        footer={
-          <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
-            <button onClick={() => setBookModalOpen(false)} className="btn btn-secondary">
-              Cancel
-            </button>
-            <button form="book-form" type="submit" className="btn btn-primary">
-              Book Appointment
-            </button>
-          </div>
-        }
+      <Modal open={bookModalOpen} onClose={() => setBookModalOpen(false)} title="Book appointment"
+        footer={<><Button variant="secondary" onClick={() => setBookModalOpen(false)}>Cancel</Button><Button form="book-form" type="submit">Book appointment</Button></>}
       >
-        <form id="book-form" onSubmit={handleBookAppointment} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <form id="book-form" onSubmit={handleBookAppointment} className="flex flex-col gap-4">
           <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.875rem' }}>
-              Select Cat *
-            </label>
-            <select
-              required
-              value={bookForm.cat}
-              onChange={(e) => setBookForm({ ...bookForm, cat: e.target.value })}
-              style={{ width: '100%', padding: '0.625rem', borderRadius: '8px', border: '1px solid var(--border-default)' }}
-            >
-              <option value="">Choose a cat...</option>
-              {userCats.map(cat => (
-                <option key={cat.id} value={cat.id}>{cat.name || 'Unnamed Cat'}</option>
-              ))}
-            </select>
+            <Label>Select cat *</Label>
+            <NativeSelect required value={bookForm.cat} onChange={(e) => setBookForm({ ...bookForm, cat: e.target.value })} className="mt-1.5">
+              <option value="">Choose a cat…</option>
+              {userCats.map((cat) => <option key={cat.id} value={cat.id}>{cat.name || 'Unnamed cat'}</option>)}
+            </NativeSelect>
           </div>
-
           <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.875rem' }}>
-              Select Vet *
-            </label>
-            <select
-              required
-              value={bookForm.vet}
-              onChange={(e) => setBookForm({ ...bookForm, vet: e.target.value })}
-              style={{ width: '100%', padding: '0.625rem', borderRadius: '8px', border: '1px solid var(--border-default)' }}
-            >
-              <option value="">Choose a vet...</option>
-              {vets.map(vet => (
-                <option key={vet.id} value={vet.id}>
-                  {vet.profile?.first_name && vet.profile?.last_name 
-                    ? `Dr. ${vet.profile.first_name} ${vet.profile.last_name}`
-                    : vet.email}
-                </option>
-              ))}
-            </select>
+            <Label>Select vet *</Label>
+            <NativeSelect required value={bookForm.vet} onChange={(e) => setBookForm({ ...bookForm, vet: e.target.value })} className="mt-1.5">
+              <option value="">Choose a vet…</option>
+              {vets.map((vet) => <option key={vet.id} value={vet.id}>{vet.profile?.first_name && vet.profile?.last_name ? `Dr. ${vet.profile.first_name} ${vet.profile.last_name}` : vet.email}</option>)}
+            </NativeSelect>
           </div>
-
           <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.875rem' }}>
-              Appointment Type *
-            </label>
-            <select
-              required
-              value={bookForm.appointment_type}
-              onChange={(e) => setBookForm({ ...bookForm, appointment_type: e.target.value })}
-              style={{ width: '100%', padding: '0.625rem', borderRadius: '8px', border: '1px solid var(--border-default)' }}
-            >
-              <option value="CHECKUP">🩺 Checkup</option>
-              <option value="VACCINATION">💉 Vaccination</option>
-              <option value="SURGERY">⚕️ Surgery</option>
-              <option value="FOLLOWUP">📋 Follow-up</option>
-              <option value="EMERGENCY">🚨 Emergency</option>
-            </select>
+            <Label>Appointment type *</Label>
+            <NativeSelect required value={bookForm.appointment_type} onChange={(e) => setBookForm({ ...bookForm, appointment_type: e.target.value })} className="mt-1.5">
+              <option value="CHECKUP">Checkup</option>
+              <option value="VACCINATION">Vaccination</option>
+              <option value="SURGERY">Surgery</option>
+              <option value="FOLLOWUP">Follow-up</option>
+              <option value="EMERGENCY">Emergency</option>
+            </NativeSelect>
           </div>
-
           <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.875rem' }}>
-              Date & Time *
-            </label>
-            <input
-              required
-              type="datetime-local"
-              value={bookForm.scheduled_at}
-              onChange={(e) => setBookForm({ ...bookForm, scheduled_at: e.target.value })}
-              min={new Date().toISOString().slice(0, 16)}
-              style={{ width: '100%', padding: '0.625rem', borderRadius: '8px', border: '1px solid var(--border-default)' }}
-            />
+            <Label>Date &amp; time *</Label>
+            <Input required type="datetime-local" value={bookForm.scheduled_at} onChange={(e) => setBookForm({ ...bookForm, scheduled_at: e.target.value })} min={new Date().toISOString().slice(0, 16)} className="mt-1.5" />
           </div>
-
           <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.875rem' }}>
-              Notes (Optional)
-            </label>
-            <textarea
-              value={bookForm.notes}
-              onChange={(e) => setBookForm({ ...bookForm, notes: e.target.value })}
-              rows={3}
-              placeholder="Any additional information for the vet..."
-              style={{
-                width: '100%',
-                padding: '0.625rem',
-                borderRadius: '8px',
-                border: '1px solid var(--border-default)',
-                resize: 'vertical',
-              }}
-            />
+            <Label>Notes (optional)</Label>
+            <Textarea value={bookForm.notes} onChange={(e) => setBookForm({ ...bookForm, notes: e.target.value })} rows={3} placeholder="Any additional information for the vet…" className="mt-1.5" />
           </div>
         </form>
       </Modal>
 
-      {/* Confirm Dialog */}
-      <ConfirmDialog
-        open={confirmDialogOpen}
-        onClose={() => setConfirmDialogOpen(false)}
-        onConfirm={handleConfirm}
-        title="Confirm Appointment"
-        message="Are you sure you want to confirm this appointment? The owner will be notified."
-        confirmText="Confirm"
-        confirmColor="var(--cat-sage)"
-      />
+      <ConfirmDialog open={confirmDialogOpen} title="Confirm appointment" message="Are you sure you want to confirm this appointment? The owner will be notified."
+        confirmLabel="Confirm" onConfirm={handleConfirm} onCancel={() => setConfirmDialogOpen(false)} />
 
-      {/* Cancel Dialog */}
-      <Modal
-        open={cancelDialogOpen}
-        onClose={() => setCancelDialogOpen(false)}
-        title="Cancel Appointment"
-        footer={
-          <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
-            <button onClick={() => setCancelDialogOpen(false)} className="btn btn-secondary">
-              Go Back
-            </button>
-            <button onClick={handleCancel} className="btn" style={{ background: 'var(--cat-red)', color: 'white', border: 'none' }}>
-              Cancel Appointment
-            </button>
-          </div>
-        }
+      <Modal open={cancelDialogOpen} onClose={() => setCancelDialogOpen(false)} title="Cancel appointment"
+        footer={<><Button variant="secondary" onClick={() => setCancelDialogOpen(false)}>Go back</Button><Button variant="destructive" onClick={handleCancel}>Cancel appointment</Button></>}
       >
-        <div>
-          <p style={{ marginBottom: '1rem', color: 'var(--text-secondary)' }}>
-            Please provide a reason for cancelling this appointment:
-          </p>
-          <textarea
-            value={cancellationReason}
-            onChange={(e) => setCancellationReason(e.target.value)}
-            rows={3}
-            placeholder="Reason for cancellation..."
-            style={{
-              width: '100%',
-              padding: '0.625rem',
-              borderRadius: '8px',
-              border: '1px solid var(--border-default)',
-              resize: 'vertical',
-            }}
-          />
-        </div>
+        <p className="mb-3 text-sm text-muted-foreground">Please provide a reason for cancelling this appointment:</p>
+        <Textarea value={cancellationReason} onChange={(e) => setCancellationReason(e.target.value)} rows={3} placeholder="Reason for cancellation…" />
       </Modal>
 
-      {/* Complete Dialog */}
-      <Modal
-        open={completeDialogOpen}
-        onClose={() => setCompleteDialogOpen(false)}
-        title="Complete Appointment"
-        footer={
-          <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
-            <button onClick={() => setCompleteDialogOpen(false)} className="btn btn-secondary">
-              Cancel
-            </button>
-            <button onClick={handleComplete} className="btn" style={{ background: 'var(--cat-blue)', color: 'white', border: 'none' }}>
-              Mark Complete
-            </button>
-          </div>
-        }
+      <Modal open={completeDialogOpen} onClose={() => setCompleteDialogOpen(false)} title="Complete appointment"
+        footer={<><Button variant="secondary" onClick={() => setCompleteDialogOpen(false)}>Cancel</Button><Button onClick={handleComplete}>Mark complete</Button></>}
       >
-        <div>
-          <p style={{ marginBottom: '1rem', color: 'var(--text-secondary)' }}>
-            Please provide a summary of the appointment outcome:
-          </p>
-          <textarea
-            value={outcomeSummary}
-            onChange={(e) => setOutcomeSummary(e.target.value)}
-            rows={4}
-            placeholder="Summary of examination, diagnosis, treatment, and follow-up recommendations..."
-            style={{
-              width: '100%',
-              padding: '0.625rem',
-              borderRadius: '8px',
-              border: '1px solid var(--border-default)',
-              resize: 'vertical',
-            }}
-          />
-        </div>
+        <p className="mb-3 text-sm text-muted-foreground">Please provide a summary of the appointment outcome:</p>
+        <Textarea value={outcomeSummary} onChange={(e) => setOutcomeSummary(e.target.value)} rows={4} placeholder="Summary of examination, diagnosis, treatment, and follow-up recommendations…" />
       </Modal>
     </div>
   );

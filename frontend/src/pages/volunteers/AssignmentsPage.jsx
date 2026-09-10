@@ -1,21 +1,22 @@
 import { useState } from 'react';
-import { volunteerApi } from '../../api/volunteersApi';
-import useApi from '../../hooks/useApi';
-import usePagination from '../../hooks/usePagination';
-import LoadingSpinner from '../../components/LoadingSpinner';
-import EmptyState from '../../components/EmptyState';
-import Pagination from '../../components/Pagination';
-import PageHeader from '../../components/PageHeader';
-import { formatDate, timeAgo } from '../../utils/dateUtils';
 import { Link } from 'react-router-dom';
+import { HeartHandshake, CalendarDays, Building2, Siren } from 'lucide-react';
+import { volunteerApi } from '@/api/volunteersApi';
+import useApi from '@/hooks/useApi';
+import usePagination from '@/hooks/usePagination';
+import LoadingSpinner from '@/components/LoadingSpinner';
+import EmptyState from '@/components/EmptyState';
+import Pagination from '@/components/Pagination';
+import PageHeader from '@/components/patterns/PageHeader';
+import { formatDate } from '@/utils/dateUtils';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
-const STATUS_CONFIG = {
-  PENDING:     { bg: 'var(--cat-amber-light)', color: '#7A4F00', label: '⏳ Pending' },
-  ACCEPTED:    { bg: 'var(--cat-blue-light)',  color: '#2E5A80', label: '✅ Accepted' },
-  IN_PROGRESS: { bg: 'rgba(201,123,84,0.15)', color: 'var(--cat-rust)', label: '🔄 In Progress' },
-  COMPLETED:   { bg: 'var(--cat-sage-light)',  color: '#2E6B24', label: '🎉 Completed' },
-  REJECTED:    { bg: 'var(--cat-red-light)',   color: '#8B2C2A', label: '❌ Rejected' },
+const STATUS_TONE = {
+  PENDING: 'bg-warning/10 text-warning', ACCEPTED: 'bg-info/10 text-info', IN_PROGRESS: 'bg-primary/10 text-primary',
+  COMPLETED: 'bg-success/10 text-success', REJECTED: 'bg-destructive/10 text-destructive',
 };
+const STATUS_LABEL = { PENDING: 'Pending', ACCEPTED: 'Accepted', IN_PROGRESS: 'In progress', COMPLETED: 'Completed', REJECTED: 'Rejected' };
 
 export default function AssignmentsPage() {
   const { page, pageSize, nextPage, prevPage, goTo, reset } = usePagination(16);
@@ -24,92 +25,64 @@ export default function AssignmentsPage() {
   const { data, loading } = useApi(
     () => volunteerApi.myAssignments({ page, page_size: pageSize, status: statusFilter || undefined }),
     null,
-    [page, statusFilter]
+    [page, statusFilter],
   );
 
   const assignments = data?.results || [];
-  const total       = data?.count   || 0;
-  const totalPages  = Math.ceil(total / pageSize);
+  const total = data?.count || 0;
+  const totalPages = Math.ceil(total / pageSize);
 
   return (
-    <div className="page-container">
-      <PageHeader title="🤝 My Assignments" subtitle={`${total} volunteer assignments`} />
+    <div className="mx-auto max-w-[1200px] px-4 py-6 sm:px-6">
+      <PageHeader title="My assignments" description={`${total} volunteer assignments`} />
 
-      {/* Status filter */}
-      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
-        {['', 'PENDING', 'ACCEPTED', 'IN_PROGRESS', 'COMPLETED'].map(s => {
-          const cfg = STATUS_CONFIG[s];
-          return (
-            <button key={s} onClick={() => { setStatusFilter(s); reset(); }} style={{
-              padding: '0.4rem 0.875rem',
-              borderRadius: '8px',
-              border: `1.5px solid ${statusFilter === s ? 'var(--cat-terra)' : 'var(--border-default)'}`,
-              background: statusFilter === s ? 'var(--cat-terra)' : 'var(--surface-card)',
-              color: statusFilter === s ? 'white' : 'var(--text-secondary)',
-              fontWeight: 700,
-              fontSize: '0.8125rem',
-              cursor: 'pointer',
-            }}>
-              {s ? (cfg?.label || s) : 'All'}
-            </button>
-          );
-        })}
+      <div className="mb-6 flex flex-wrap gap-2">
+        {['', 'PENDING', 'ACCEPTED', 'IN_PROGRESS', 'COMPLETED'].map((s) => (
+          <button
+            key={s || 'ALL'}
+            onClick={() => { setStatusFilter(s); reset(); }}
+            className={cn(
+              'rounded-lg border px-3.5 py-1.5 text-sm font-semibold transition-colors',
+              statusFilter === s ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card text-muted-foreground hover:border-border-strong',
+            )}
+          >
+            {s ? STATUS_LABEL[s] || s : 'All'}
+          </button>
+        ))}
       </div>
 
       {loading && <LoadingSpinner text="Loading assignments…" />}
 
       {!loading && assignments.length === 0 && (
-        <EmptyState icon="🤝" title="No assignments" message={statusFilter ? `No ${statusFilter.toLowerCase()} assignments.` : 'You have no volunteer assignments yet. Browse rescue reports to get started!'} />
+        <EmptyState icon={HeartHandshake} title="No assignments" message={statusFilter ? `No ${statusFilter.toLowerCase()} assignments.` : 'You have no volunteer assignments yet. Browse rescue reports to get started!'} />
       )}
 
       {!loading && assignments.length > 0 && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
-          {assignments.map(asgn => {
-            const cfg = STATUS_CONFIG[asgn.status] || STATUS_CONFIG.PENDING;
-            return (
-              <div key={asgn.id} style={{
-                background: 'var(--surface-card)',
-                border: '1px solid var(--border-default)',
-                borderRadius: '12px',
-                padding: '1.25rem',
-                boxShadow: 'var(--shadow-sm)',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '0.75rem',
-              }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.5rem' }}>
-                  <div style={{ flex: 1 }}>
-                    <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                      {asgn.assignment_type?.replace(/_/g, ' ') || 'Assignment'}
-                    </span>
-                    <h3 style={{ margin: '0.2rem 0 0', fontSize: '0.9375rem', fontWeight: 800, color: 'var(--text-primary)' }}>
-                      {asgn.rescue_description || asgn.title || 'Task'}
-                    </h3>
-                  </div>
-                  <span style={{ background: cfg.bg, color: cfg.color, fontSize: '0.7rem', fontWeight: 700, padding: '0.25rem 0.625rem', borderRadius: '999px', flexShrink: 0 }}>
-                    {cfg.label}
-                  </span>
+        <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {assignments.map((asgn) => (
+            <div key={asgn.id} className="flex flex-col gap-3 rounded-xl border border-border bg-card p-5 shadow-sm">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex-1">
+                  <span className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">{asgn.assignment_type?.replace(/_/g, ' ') || 'Assignment'}</span>
+                  <h3 className="mt-0.5 text-[15px] font-bold text-foreground">{asgn.rescue_description || asgn.title || 'Task'}</h3>
                 </div>
-
-                <div style={{ display: 'flex', gap: '1rem', fontSize: '0.8125rem', color: 'var(--text-muted)', flexWrap: 'wrap' }}>
-                  {asgn.scheduled_at && <span>📅 {formatDate(asgn.scheduled_at)}</span>}
-                  {asgn.shelter_name && <span>🏠 {asgn.shelter_name}</span>}
-                </div>
-
-                {asgn.notes && (
-                  <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5, background: 'var(--cat-linen)', borderRadius: '8px', padding: '0.5rem 0.75rem' }}>
-                    {asgn.notes}
-                  </p>
-                )}
-
-                {asgn.rescue_id && (
-                  <Link to={`/rescue/${asgn.rescue_id}`} className="btn btn-secondary btn-sm" style={{ alignSelf: 'flex-start' }}>
-                    🚨 View Rescue →
-                  </Link>
-                )}
+                <span className={cn('shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-semibold', STATUS_TONE[asgn.status] || STATUS_TONE.PENDING)}>{STATUS_LABEL[asgn.status] || asgn.status}</span>
               </div>
-            );
-          })}
+
+              <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+                {asgn.scheduled_at && <span className="flex items-center gap-1"><CalendarDays className="size-3.5" />{formatDate(asgn.scheduled_at)}</span>}
+                {asgn.shelter_name && <span className="flex items-center gap-1"><Building2 className="size-3.5" />{asgn.shelter_name}</span>}
+              </div>
+
+              {asgn.notes && <p className="rounded-lg bg-surface-muted px-3 py-2 text-sm leading-relaxed text-muted-foreground">{asgn.notes}</p>}
+
+              {asgn.rescue_id && (
+                <Button size="sm" variant="secondary" className="self-start" asChild>
+                  <Link to={`/rescue/${asgn.rescue_id}`}><Siren className="size-3.5" />View rescue</Link>
+                </Button>
+              )}
+            </div>
+          ))}
         </div>
       )}
 

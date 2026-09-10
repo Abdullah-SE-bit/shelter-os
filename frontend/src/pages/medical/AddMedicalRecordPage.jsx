@@ -1,34 +1,39 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { medicalApi } from '../../api/medicalApi';
-import PageHeader from '../../components/PageHeader';
+import { Stethoscope, Syringe, Scissors, Pill, Smile, FlaskConical, Siren, ClipboardList, Paperclip, FileText, Image as ImageIcon, Lock, X } from 'lucide-react';
+import { medicalApi } from '@/api/medicalApi';
+import PageHeader from '@/components/patterns/PageHeader';
+import StepIndicator from '@/components/patterns/StepIndicator';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
+import { cn } from '@/lib/utils';
 
 const RECORD_TYPES = [
-  { id: 'CHECKUP',       icon: '🩺', label: 'Checkup',        desc: 'Routine health examination' },
-  { id: 'VACCINATION',   icon: '💉', label: 'Vaccination',    desc: 'Vaccine administration' },
-  { id: 'SURGERY',       icon: '⚕️', label: 'Surgery',        desc: 'Surgical procedure' },
-  { id: 'TREATMENT',     icon: '💊', label: 'Treatment',      desc: 'Medical treatment / medication' },
-  { id: 'DENTAL',        icon: '🦷', label: 'Dental',         desc: 'Dental care procedure' },
-  { id: 'DIAGNOSTIC',    icon: '🔬', label: 'Diagnostic',     desc: 'Tests, bloodwork, X-ray' },
-  { id: 'EMERGENCY',     icon: '🚨', label: 'Emergency',      desc: 'Emergency care' },
-  { id: 'FOLLOW_UP',     icon: '📋', label: 'Follow-up',      desc: 'Post-treatment follow-up' },
+  { id: 'CHECKUP', icon: Stethoscope, label: 'Checkup', desc: 'Routine health examination' },
+  { id: 'VACCINATION', icon: Syringe, label: 'Vaccination', desc: 'Vaccine administration' },
+  { id: 'SURGERY', icon: Scissors, label: 'Surgery', desc: 'Surgical procedure' },
+  { id: 'TREATMENT', icon: Pill, label: 'Treatment', desc: 'Medical treatment / medication' },
+  { id: 'DENTAL', icon: Smile, label: 'Dental', desc: 'Dental care procedure' },
+  { id: 'DIAGNOSTIC', icon: FlaskConical, label: 'Diagnostic', desc: 'Tests, bloodwork, X-ray' },
+  { id: 'EMERGENCY', icon: Siren, label: 'Emergency', desc: 'Emergency care' },
+  { id: 'FOLLOW_UP', icon: ClipboardList, label: 'Follow-up', desc: 'Post-treatment follow-up' },
 ];
 
 export default function AddMedicalRecordPage() {
   const { id: catId } = useParams();
-  const navigate       = useNavigate();
+  const navigate = useNavigate();
 
-  const [step,  setStep]  = useState(1);
-  const [form,  setForm]  = useState({
-    cat: catId, record_type: '', date: new Date().toISOString().split('T')[0],
-    vet_name: '', clinic_name: '', diagnosis: '', treatment: '',
-    notes: '', follow_up_date: '', cost: '', is_confidential: false,
-  });
-  const [files,   setFiles]   = useState([]);
+  const [step, setStep] = useState(1);
+  const [form, setForm] = useState({ cat: catId, record_type: '', date: new Date().toISOString().split('T')[0], vet_name: '', clinic_name: '', diagnosis: '', treatment: '', notes: '', follow_up_date: '', cost: '', is_confidential: false });
+  const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error,   setError]   = useState('');
+  const [error, setError] = useState('');
 
-  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+  const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -37,7 +42,7 @@ export default function AddMedicalRecordPage() {
     try {
       const fd = new FormData();
       Object.entries(form).forEach(([k, v]) => fd.append(k, v));
-      files.forEach(f => fd.append('attachments', f));
+      files.forEach((f) => fd.append('attachments', f));
       await medicalApi.addRecord(catId, fd);
       navigate(`/cats/${catId}/medical`);
     } catch (err) {
@@ -47,206 +52,124 @@ export default function AddMedicalRecordPage() {
     }
   };
 
-  const sec = { background: 'var(--surface-card)', border: '1px solid var(--border-default)', borderRadius: '14px', padding: '1.25rem' };
-  const ttl = { margin: '0 0 1rem', fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' };
+  const selectedType = RECORD_TYPES.find((r) => r.id === form.record_type);
 
   return (
-    <div className="page-container-sm">
-      <PageHeader title="🏥 Add Medical Record" backPath={`/cats/${catId}/medical`} />
+    <div className="mx-auto max-w-[640px] px-4 py-6 sm:px-6">
+      <PageHeader title="Add medical record" backTo={`/cats/${catId}/medical`} backLabel="Medical history" />
 
-      {/* Step indicator */}
-      <div style={{ display: 'flex', gap: '0.375rem', marginBottom: '2rem', alignItems: 'center' }}>
-        {[1, 2, 3].map(s => (
-          <div key={s} style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', flex: s < 3 ? 1 : 0 }}>
-            <div style={{
-              width: '32px', height: '32px', borderRadius: '50%',
-              background: step > s ? 'var(--cat-sage)' : step === s ? 'var(--cat-terra)' : 'var(--cat-linen)',
-              border: step >= s ? 'none' : '1.5px solid var(--border-default)',
-              color: step >= s ? 'white' : 'var(--text-muted)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontWeight: 900, fontSize: '0.875rem', flexShrink: 0, transition: 'all 0.3s',
-            }}>
-              {step > s ? '✓' : s}
-            </div>
-            {s < 3 && (
-              <div style={{ flex: 1, height: '2px', background: step > s ? 'var(--cat-sage)' : 'var(--border-default)', transition: 'background 0.3s' }} />
-            )}
-          </div>
-        ))}
-        <span style={{ marginLeft: '0.75rem', fontSize: '0.8125rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-          {['Record Type', 'Clinical Details', 'Attachments'][step - 1]}
-        </span>
-      </div>
+      <StepIndicator step={step} labels={['Record type', 'Clinical details', 'Attachments']} />
 
-      {error && <div className="form-error" style={{ marginBottom: '1.25rem' }}>🙀 {error}</div>}
+      {error && <div className="mb-5 rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-sm font-medium text-destructive">{error}</div>}
 
-      <form onSubmit={step < 3 ? (e) => { e.preventDefault(); if (step === 1 && !form.record_type) { setError('Please select a record type.'); return; } setError(''); setStep(s => s + 1); } : handleSubmit}
-        style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-
-        {/* Step 1 — Record Type */}
+      <form
+        onSubmit={step < 3 ? (e) => { e.preventDefault(); if (step === 1 && !form.record_type) { setError('Please select a record type.'); return; } setError(''); setStep((s) => s + 1); } : handleSubmit}
+        className="flex flex-col gap-5"
+      >
         {step === 1 && (
-          <div style={sec}>
-            <h3 style={ttl}>Choose Record Type</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.75rem' }}>
-              {RECORD_TYPES.map(rt => (
-                <button key={rt.id} type="button" onClick={() => { set('record_type', rt.id); setError(''); }} style={{
-                  padding: '0.875rem 1rem',
-                  borderRadius: '12px',
-                  border: `2px solid ${form.record_type === rt.id ? 'var(--cat-terra)' : 'var(--border-default)'}`,
-                  background: form.record_type === rt.id ? 'rgba(201,123,84,0.07)' : 'var(--cat-linen)',
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                  transition: 'all 0.15s',
-                  display: 'flex',
-                  gap: '0.75rem',
-                  alignItems: 'center',
-                }}>
-                  <span style={{ fontSize: '1.5rem', flexShrink: 0 }}>{rt.icon}</span>
-                  <div>
-                    <div style={{ fontWeight: 800, fontSize: '0.875rem', color: form.record_type === rt.id ? 'var(--cat-terra)' : 'var(--text-primary)' }}>{rt.label}</div>
-                    <div style={{ fontSize: '0.73rem', color: 'var(--text-muted)', marginTop: '0.1rem' }}>{rt.desc}</div>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
+          <Card>
+            <CardHeader><CardTitle>Choose record type</CardTitle></CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-3">
+                {RECORD_TYPES.map((rt) => (
+                  <button
+                    key={rt.id}
+                    type="button"
+                    onClick={() => { set('record_type', rt.id); setError(''); }}
+                    className={cn('flex items-center gap-3 rounded-xl border-2 p-3.5 text-left transition-colors', form.record_type === rt.id ? 'border-primary bg-primary/5' : 'border-border bg-surface-muted')}
+                  >
+                    <rt.icon className={cn('size-6 shrink-0', form.record_type === rt.id ? 'text-primary' : 'text-muted-foreground')} strokeWidth={1.75} />
+                    <div>
+                      <div className={cn('text-sm font-bold', form.record_type === rt.id ? 'text-primary' : 'text-foreground')}>{rt.label}</div>
+                      <div className="mt-0.5 text-xs text-muted-foreground">{rt.desc}</div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         )}
 
-        {/* Step 2 — Clinical Details */}
         {step === 2 && (
           <>
-            <div style={sec}>
-              <h3 style={ttl}>📋 Clinical Details</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                  <div className="form-group">
-                    <label className="label-base">Date *</label>
-                    <input required type="date" value={form.date} onChange={e => set('date', e.target.value)} className="input-base" id="mr-date" />
-                  </div>
-                  <div className="form-group">
-                    <label className="label-base">Follow-up Date</label>
-                    <input type="date" value={form.follow_up_date} onChange={e => set('follow_up_date', e.target.value)} className="input-base" id="mr-followup" />
-                  </div>
-                  <div className="form-group">
-                    <label className="label-base">Veterinarian</label>
-                    <input value={form.vet_name} onChange={e => set('vet_name', e.target.value)} className="input-base" placeholder="Dr. Ahmed" id="mr-vet" />
-                  </div>
-                  <div className="form-group">
-                    <label className="label-base">Clinic / Hospital</label>
-                    <input value={form.clinic_name} onChange={e => set('clinic_name', e.target.value)} className="input-base" placeholder="City Vet Clinic" id="mr-clinic" />
-                  </div>
-                  <div className="form-group">
-                    <label className="label-base">Cost (PKR)</label>
-                    <input type="number" min="0" value={form.cost} onChange={e => set('cost', e.target.value)} className="input-base" placeholder="0" id="mr-cost" />
-                  </div>
+            <Card>
+              <CardHeader><CardTitle>Clinical details</CardTitle></CardHeader>
+              <CardContent className="flex flex-col gap-3.5">
+                <div className="grid grid-cols-2 gap-3">
+                  <div><Label>Date *</Label><Input required type="date" value={form.date} onChange={(e) => set('date', e.target.value)} className="mt-1.5" /></div>
+                  <div><Label>Follow-up date</Label><Input type="date" value={form.follow_up_date} onChange={(e) => set('follow_up_date', e.target.value)} className="mt-1.5" /></div>
+                  <div><Label>Veterinarian</Label><Input value={form.vet_name} onChange={(e) => set('vet_name', e.target.value)} placeholder="Dr. Ahmed" className="mt-1.5" /></div>
+                  <div><Label>Clinic / hospital</Label><Input value={form.clinic_name} onChange={(e) => set('clinic_name', e.target.value)} placeholder="City Vet Clinic" className="mt-1.5" /></div>
+                  <div><Label>Cost (PKR)</Label><Input type="number" min="0" value={form.cost} onChange={(e) => set('cost', e.target.value)} placeholder="0" className="mt-1.5" /></div>
                 </div>
-                <div className="form-group">
-                  <label className="label-base">Diagnosis</label>
-                  <textarea value={form.diagnosis} onChange={e => set('diagnosis', e.target.value)}
-                    className="input-base" rows={3} placeholder="What was found / diagnosed?" style={{ resize: 'vertical' }} id="mr-diagnosis" />
-                </div>
-                <div className="form-group">
-                  <label className="label-base">Treatment / Procedure</label>
-                  <textarea value={form.treatment} onChange={e => set('treatment', e.target.value)}
-                    className="input-base" rows={3} placeholder="What was done / prescribed?" style={{ resize: 'vertical' }} id="mr-treatment" />
-                </div>
-                <div className="form-group">
-                  <label className="label-base">Additional Notes</label>
-                  <textarea value={form.notes} onChange={e => set('notes', e.target.value)}
-                    className="input-base" rows={2} placeholder="Any other relevant information…" style={{ resize: 'vertical' }} id="mr-notes" />
-                </div>
-              </div>
-            </div>
+                <div><Label>Diagnosis</Label><Textarea value={form.diagnosis} onChange={(e) => set('diagnosis', e.target.value)} rows={3} placeholder="What was found / diagnosed?" className="mt-1.5" /></div>
+                <div><Label>Treatment / procedure</Label><Textarea value={form.treatment} onChange={(e) => set('treatment', e.target.value)} rows={3} placeholder="What was done / prescribed?" className="mt-1.5" /></div>
+                <div><Label>Additional notes</Label><Textarea value={form.notes} onChange={(e) => set('notes', e.target.value)} rows={2} placeholder="Any other relevant information…" className="mt-1.5" /></div>
+              </CardContent>
+            </Card>
 
-            <div style={{ ...sec }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', cursor: 'pointer' }}>
-                <input type="checkbox" checked={form.is_confidential} onChange={e => set('is_confidential', e.target.checked)}
-                  style={{ accentColor: 'var(--cat-terra)', width: '16px', height: '16px' }} id="mr-conf" />
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>🔒 Mark as Confidential</div>
-                  <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Only admins and vets can view this record</div>
-                </div>
-              </label>
-            </div>
+            <Card>
+              <CardContent>
+                <label className="flex cursor-pointer items-start gap-3">
+                  <Checkbox checked={form.is_confidential} onCheckedChange={(v) => set('is_confidential', !!v)} className="mt-0.5" />
+                  <div>
+                    <div className="flex items-center gap-1.5 text-sm font-bold text-foreground"><Lock className="size-3.5" />Mark as confidential</div>
+                    <div className="mt-0.5 text-xs text-muted-foreground">Only admins and vets can view this record</div>
+                  </div>
+                </label>
+              </CardContent>
+            </Card>
           </>
         )}
 
-        {/* Step 3 — Attachments */}
         {step === 3 && (
-          <div style={sec}>
-            <h3 style={ttl}>📎 Attachments (Optional)</h3>
-            <p style={{ margin: '0 0 1rem', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
-              Upload lab results, X-rays, prescriptions, or any relevant documents.
-            </p>
+          <Card>
+            <CardHeader><CardTitle>Attachments (optional)</CardTitle></CardHeader>
+            <CardContent>
+              <p className="mb-4 text-sm text-muted-foreground">Upload lab results, X-rays, prescriptions, or any relevant documents.</p>
 
-            <label style={{
-              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-              minHeight: '140px', border: '2px dashed var(--border-default)', borderRadius: '12px',
-              cursor: 'pointer', color: 'var(--text-muted)', gap: '0.5rem', transition: 'all 0.2s', padding: '1rem',
-            }}
-              onMouseOver={e => { e.currentTarget.style.borderColor = 'var(--cat-terra)'; e.currentTarget.style.background = 'rgba(201,123,84,0.04)'; }}
-              onMouseOut={e => { e.currentTarget.style.borderColor = 'var(--border-default)'; e.currentTarget.style.background = 'none'; }}
-            >
-              <span style={{ fontSize: '3rem' }}>📎</span>
-              <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>
-                {files.length > 0 ? `${files.length} file(s) selected` : 'Click to upload files'}
-              </span>
-              <span style={{ fontSize: '0.78rem' }}>PDF, JPG, PNG — up to 5 files, 10MB each</span>
-              <input type="file" accept=".pdf,.jpg,.jpeg,.png" multiple style={{ display: 'none' }}
-                onChange={e => setFiles(Array.from(e.target.files).slice(0, 5))} />
-            </label>
+              <label className="flex min-h-[140px] cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border p-4 text-center text-muted-foreground transition-colors hover:border-primary hover:bg-primary/5">
+                <Paperclip className="size-8" strokeWidth={1.5} />
+                <span className="text-sm font-bold text-foreground">{files.length > 0 ? `${files.length} file(s) selected` : 'Click to upload files'}</span>
+                <span className="text-xs">PDF, JPG, PNG — up to 5 files, 10MB each</span>
+                <input type="file" accept=".pdf,.jpg,.jpeg,.png" multiple className="hidden" onChange={(e) => setFiles(Array.from(e.target.files).slice(0, 5))} />
+              </label>
 
-            {files.length > 0 && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.875rem' }}>
-                {files.map((f, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', background: 'var(--cat-linen)', borderRadius: '8px', padding: '0.5rem 0.875rem' }}>
-                    <span style={{ fontSize: '1rem' }}>{f.type.includes('pdf') ? '📄' : '🖼️'}</span>
-                    <span style={{ flex: 1, fontSize: '0.8125rem', fontWeight: 600, color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {f.name}
-                    </span>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                      {(f.size / 1024).toFixed(0)} KB
-                    </span>
-                    <button type="button" onClick={() => setFiles(fs => fs.filter((_, j) => j !== i))}
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', fontSize: '1rem', lineHeight: 1 }}>
-                      ×
-                    </button>
+              {files.length > 0 && (
+                <div className="mt-3.5 flex flex-col gap-2">
+                  {files.map((f, i) => (
+                    <div key={i} className="flex items-center gap-2.5 rounded-lg bg-surface-muted px-3.5 py-2">
+                      {f.type.includes('pdf') ? <FileText className="size-4 shrink-0 text-muted-foreground" /> : <ImageIcon className="size-4 shrink-0 text-muted-foreground" />}
+                      <span className="flex-1 truncate text-[13px] font-semibold text-foreground">{f.name}</span>
+                      <span className="text-xs text-muted-foreground">{(f.size / 1024).toFixed(0)} KB</span>
+                      <button type="button" onClick={() => setFiles((fs) => fs.filter((_, j) => j !== i))} className="text-muted-foreground hover:text-foreground"><X className="size-4" /></button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="mt-5 rounded-xl border border-primary/20 bg-primary/5 p-4">
+                <h4 className="mb-2.5 text-xs font-bold tracking-wide text-primary uppercase">Record summary</h4>
+                {[
+                  { label: 'Type', value: selectedType?.label },
+                  { label: 'Date', value: form.date },
+                  { label: 'Vet', value: form.vet_name || '—' },
+                  { label: 'Clinic', value: form.clinic_name || '—' },
+                  { label: 'Confidential', value: form.is_confidential ? 'Yes' : 'No' },
+                ].map(({ label, value }) => (
+                  <div key={label} className="flex justify-between py-0.5 text-sm text-muted-foreground">
+                    <span className="font-semibold text-foreground">{label}:</span>
+                    <span>{value}</span>
                   </div>
                 ))}
               </div>
-            )}
-
-            {/* Summary of record before submit */}
-            <div style={{ background: 'rgba(201,123,84,0.06)', border: '1px solid rgba(201,123,84,0.2)', borderRadius: '10px', padding: '1rem', marginTop: '1.25rem' }}>
-              <h4 style={{ margin: '0 0 0.625rem', fontSize: '0.8125rem', fontWeight: 700, color: 'var(--cat-rust)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                📋 Record Summary
-              </h4>
-              {[
-                { label: 'Type',        value: RECORD_TYPES.find(r => r.id === form.record_type)?.label },
-                { label: 'Date',        value: form.date },
-                { label: 'Vet',         value: form.vet_name || '—' },
-                { label: 'Clinic',      value: form.clinic_name || '—' },
-                { label: 'Confidential', value: form.is_confidential ? 'Yes 🔒' : 'No' },
-              ].map(({ label, value }) => (
-                <div key={label} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', padding: '0.2rem 0', color: 'var(--text-secondary)' }}>
-                  <span style={{ fontWeight: 700 }}>{label}:</span>
-                  <span>{value}</span>
-                </div>
-              ))}
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         )}
 
-        {/* Nav */}
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
-          {step > 1 && (
-            <button type="button" onClick={() => setStep(s => s - 1)} className="btn btn-secondary" style={{ flex: 1, padding: '0.875rem' }}>
-              ← Back
-            </button>
-          )}
-          <button type="submit" disabled={loading} className="btn btn-primary" style={{ flex: 2, padding: '0.875rem', fontSize: '1rem' }}>
-            {step < 3 ? 'Next →' : loading ? '🏥 Saving…' : '🏥 Add Record'}
-          </button>
+        <div className="flex gap-3">
+          {step > 1 && <Button type="button" variant="secondary" onClick={() => setStep((s) => s - 1)} className="h-11 flex-1">Back</Button>}
+          <Button type="submit" disabled={loading} className="h-11 flex-[2]">{step < 3 ? 'Next' : loading ? 'Saving…' : 'Add record'}</Button>
         </div>
       </form>
     </div>

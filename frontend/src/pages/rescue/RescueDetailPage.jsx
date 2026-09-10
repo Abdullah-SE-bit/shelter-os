@@ -1,31 +1,36 @@
 import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { rescueApi } from '../../api/rescueApi';
-import useApi from '../../hooks/useApi';
-import { useAuth } from '../../context/AuthContext';
-import LoadingSpinner from '../../components/LoadingSpinner';
-import PageHeader from '../../components/PageHeader';
-import Modal from '../../components/Modal';
-import { formatDateTime } from '../../utils/dateUtils';
-import { URGENCY_CSS } from '../../utils/constants';
+import { useParams } from 'react-router-dom';
+import { TriangleAlert, MapPin, ExternalLink, Sparkles, CheckCircle2, Frown, Trophy, Medal, Award, Building2 } from 'lucide-react';
+import { rescueApi } from '@/api/rescueApi';
+import useApi from '@/hooks/useApi';
+import { useAuth } from '@/context/AuthContext';
+import LoadingSpinner from '@/components/LoadingSpinner';
+import PageHeader from '@/components/patterns/PageHeader';
+import Modal from '@/components/Modal';
+import { formatDateTime } from '@/utils/dateUtils';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { cn } from '@/lib/utils';
 
-const URGENCY_ICONS  = { LOW: '🟢', MEDIUM: '🟡', HIGH: '🟠', CRITICAL: '🔴' };
+const URGENCY_TONE = { LOW: 'bg-success/10 text-success', MEDIUM: 'bg-warning/10 text-warning', HIGH: 'bg-warning/10 text-warning', CRITICAL: 'bg-destructive/10 text-destructive' };
+const STATUS_TONE = { RESOLVED: 'bg-success/10 text-success', PENDING: 'bg-warning/10 text-warning', ASSIGNED: 'bg-info/10 text-info', IN_PROGRESS: 'bg-primary/10 text-primary', CANCELLED: 'bg-surface-muted text-muted-foreground' };
+const RANK_ICONS = [Trophy, Medal, Award];
 
 export default function RescueDetailPage() {
-  const { id }     = useParams();
-  const { user }   = useAuth();
-  const navigate   = useNavigate();
+  const { id } = useParams();
+  const { user } = useAuth();
 
-  const [resolveOpen,  setResolveOpen]  = useState(false);
+  const [resolveOpen, setResolveOpen] = useState(false);
   const [resolveNotes, setResolveNotes] = useState('');
-  const [saving,       setSaving]       = useState(false);
-  const [suggestOpen,  setSuggestOpen]  = useState(false);
-  const [suggestions,  setSuggestions]  = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [suggestOpen, setSuggestOpen] = useState(false);
+  const [suggestions, setSuggestions] = useState(null);
   const [loadingSuggest, setLoadingSuggest] = useState(false);
 
   const { data: report, loading, refetch } = useApi(() => rescueApi.get(id), null, [id]);
 
-  const canAdmin  = ['SUPER_ADMIN', 'SHELTER_ADMIN'].includes(user?.role);
+  const canAdmin = ['SUPER_ADMIN', 'SHELTER_ADMIN'].includes(user?.role);
   const canResolve = canAdmin || report?.assigned_volunteer === user?.id;
 
   const handleResolve = async () => {
@@ -51,244 +56,129 @@ export default function RescueDetailPage() {
     setLoadingSuggest(false);
   };
 
-  if (loading) return <div className="page-container"><LoadingSpinner size="lg" text="Loading rescue report…" /></div>;
+  if (loading) return <div className="p-8"><LoadingSpinner size="lg" text="Loading rescue report…" /></div>;
   if (!report) return (
-    <div className="page-container" style={{ textAlign: 'center', padding: '4rem' }}>
-      <div style={{ fontSize: '4rem' }}>😿</div>
-      <h2>Report not found</h2>
+    <div className="flex flex-col items-center gap-3 p-16 text-center">
+      <Frown className="size-12 text-muted-foreground" />
+      <h2 className="font-display text-xl font-bold text-foreground">Report not found</h2>
     </div>
   );
 
-  const urgencyCss = URGENCY_CSS[report.urgency_level] || 'urgency-medium';
   const isCritical = report.urgency_level === 'CRITICAL';
 
   return (
-    <div className="page-container-sm">
-      <PageHeader
-        title="🚨 Rescue Report"
-        subtitle={`#${report.id?.slice(0, 8)}`}
-        backPath="/rescue"
-      />
+    <div className="mx-auto max-w-[640px] px-4 py-6 sm:px-6">
+      <PageHeader title="Rescue report" description={`#${report.id?.slice(0, 8)}`} backTo="/rescue" backLabel="Rescue" />
 
-      {/* Critical banner */}
       {isCritical && (
-        <div style={{
-          background: 'linear-gradient(90deg, var(--cat-red), #A03B38)',
-          color: 'white',
-          borderRadius: '12px',
-          padding: '0.875rem 1.25rem',
-          fontWeight: 700,
-          fontSize: '0.9375rem',
-          marginBottom: '1.5rem',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.5rem',
-          boxShadow: '0 4px 16px rgba(192,82,78,0.3)',
-          animation: 'pulse 2s ease-in-out infinite',
-        }}>
-          🔴 CRITICAL — Immediate response required!
+        <div className="mb-6 flex animate-pulse items-center gap-2 rounded-xl bg-destructive px-5 py-3.5 text-[15px] font-bold text-destructive-foreground">
+          <TriangleAlert className="size-5" />
+          CRITICAL — Immediate response required!
         </div>
       )}
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-        {/* Status card */}
-        <div style={{
-          background: 'var(--surface-card)',
-          border: '1px solid var(--border-default)',
-          borderRadius: '14px',
-          padding: '1.25rem',
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-            <span className={`badge ${urgencyCss}`} style={{ fontSize: '0.8rem' }}>
-              {URGENCY_ICONS[report.urgency_level]} {report.urgency_level}
-            </span>
-            <span style={{
-              background: report.status === 'RESOLVED' ? 'var(--cat-sage-light)' :
-                          report.status === 'PENDING'  ? 'var(--cat-amber-light)' : 'var(--cat-blue-light)',
-              color: report.status === 'RESOLVED' ? '#2E6B24' :
-                     report.status === 'PENDING'  ? '#7A4F00' : '#2E5A80',
-              fontSize: '0.8rem',
-              fontWeight: 700,
-              padding: '0.25rem 0.75rem',
-              borderRadius: '999px',
-            }}>
-              {report.status?.replace(/_/g, ' ')}
-            </span>
+      <div className="flex flex-col gap-5">
+        <div className="rounded-xl border border-border bg-card p-5">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+            <span className={cn('rounded-full px-3 py-1 text-sm font-semibold', URGENCY_TONE[report.urgency_level] || URGENCY_TONE.MEDIUM)}>{report.urgency_level}</span>
+            <span className={cn('rounded-full px-3 py-1 text-sm font-semibold', STATUS_TONE[report.status] || STATUS_TONE.PENDING)}>{report.status?.replace(/_/g, ' ')}</span>
           </div>
 
-          <p style={{ margin: '0 0 1rem', fontSize: '0.9375rem', color: 'var(--text-primary)', lineHeight: 1.6 }}>
-            {report.description}
-          </p>
+          <p className="mb-4 text-[15px] leading-relaxed text-foreground">{report.description}</p>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', fontSize: '0.875rem' }}>
+          <div className="grid grid-cols-2 gap-3.5 text-sm">
             {[
               { label: 'Reported by', value: report.reporter_name || 'Anonymous' },
               { label: 'Reported at', value: formatDateTime(report.reported_at) },
               { label: 'Assigned to', value: report.assigned_volunteer_name || '—' },
-              { label: 'Shelter',     value: report.assigned_shelter_name || '—' },
+              { label: 'Shelter', value: report.assigned_shelter_name || '—' },
               { label: 'Resolved at', value: report.resolved_at ? formatDateTime(report.resolved_at) : '—' },
             ].map(({ label, value }) => (
               <div key={label}>
-                <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.15rem' }}>{label}</div>
-                <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{value}</div>
+                <div className="mb-0.5 text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">{label}</div>
+                <div className="font-semibold text-foreground">{value}</div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Location */}
         {report.latitude && (
-          <div style={{ background: 'var(--surface-card)', border: '1px solid var(--border-default)', borderRadius: '14px', padding: '1.25rem' }}>
-            <h3 style={{ margin: '0 0 0.875rem', fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-              📍 Location
-            </h3>
-            <div style={{
-              height: '200px',
-              background: 'linear-gradient(145deg, #d4e8c4, #c8ddb8)',
-              borderRadius: '10px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexDirection: 'column',
-              gap: '0.5rem',
-              color: '#4a6b3a',
-              border: '1px solid rgba(123,173,110,0.3)',
-            }}>
-              <span style={{ fontSize: '2.5rem' }}>🗺️</span>
-              <p style={{ margin: 0, fontWeight: 700, fontSize: '0.875rem' }}>
-                {Number(report.latitude).toFixed(5)}, {Number(report.longitude).toFixed(5)}
-              </p>
-              <a
-                href={`https://maps.google.com/?q=${report.latitude},${report.longitude}`}
-                target="_blank"
-                rel="noreferrer"
-                className="btn btn-secondary btn-sm"
-                style={{ marginTop: '0.25rem' }}
-              >
-                Open in Google Maps ↗
-              </a>
+          <div className="rounded-xl border border-border bg-card p-5">
+            <h3 className="mb-3.5 text-xs font-semibold tracking-wide text-muted-foreground uppercase">Location</h3>
+            <div className="flex h-44 flex-col items-center justify-center gap-2 rounded-lg bg-surface-muted">
+              <MapPin className="size-8 text-muted-foreground" />
+              <p className="text-sm font-semibold text-foreground">{Number(report.latitude).toFixed(5)}, {Number(report.longitude).toFixed(5)}</p>
+              <Button size="sm" variant="secondary" asChild>
+                <a href={`https://maps.google.com/?q=${report.latitude},${report.longitude}`} target="_blank" rel="noreferrer">
+                  <ExternalLink className="size-3.5" />
+                  Open in Google Maps
+                </a>
+              </Button>
             </div>
           </div>
         )}
 
-        {/* Cat condition notes */}
         {report.cat_condition_notes && (
-          <div style={{ background: 'var(--cat-amber-light)', border: '1px solid rgba(232,160,48,0.3)', borderRadius: '12px', padding: '1rem 1.25rem' }}>
-            <h4 style={{ margin: '0 0 0.5rem', fontSize: '0.8125rem', fontWeight: 700, color: '#7A4F00', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-              ⚠️ Cat Condition Notes
-            </h4>
-            <p style={{ margin: 0, fontSize: '0.9rem', color: '#5A3800', lineHeight: 1.6 }}>
-              {report.cat_condition_notes}
-            </p>
+          <div className="rounded-xl border border-warning/25 bg-warning/10 p-4">
+            <h4 className="mb-2 text-xs font-semibold tracking-wide text-warning uppercase">Cat condition notes</h4>
+            <p className="text-sm leading-relaxed text-foreground">{report.cat_condition_notes}</p>
           </div>
         )}
 
-        {/* Resolution notes */}
         {report.resolution_notes && (
-          <div style={{ background: 'var(--cat-sage-light)', border: '1px solid rgba(123,173,110,0.3)', borderRadius: '12px', padding: '1rem 1.25rem' }}>
-            <h4 style={{ margin: '0 0 0.5rem', fontSize: '0.8125rem', fontWeight: 700, color: '#2E6B24', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-              ✅ Resolution Notes
-            </h4>
-            <p style={{ margin: 0, fontSize: '0.9rem', color: '#1A4A14', lineHeight: 1.6 }}>
-              {report.resolution_notes}
-            </p>
+          <div className="rounded-xl border border-success/25 bg-success/10 p-4">
+            <h4 className="mb-2 text-xs font-semibold tracking-wide text-success uppercase">Resolution notes</h4>
+            <p className="text-sm leading-relaxed text-foreground">{report.resolution_notes}</p>
           </div>
         )}
 
-        {/* Actions */}
         {report.status !== 'RESOLVED' && report.status !== 'CANCELLED' && (
-          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-            {canAdmin && (
-              <button onClick={handleSuggest} className="btn btn-secondary">
-                🤖 Suggest Assignment
-              </button>
-            )}
-            {canResolve && (
-              <button onClick={() => setResolveOpen(true)} className="btn btn-primary">
-                ✅ Mark as Resolved
-              </button>
-            )}
+          <div className="flex flex-wrap gap-3">
+            {canAdmin && <Button variant="secondary" onClick={handleSuggest}><Sparkles className="size-4" />Suggest assignment</Button>}
+            {canResolve && <Button onClick={() => setResolveOpen(true)}><CheckCircle2 className="size-4" />Mark as resolved</Button>}
           </div>
         )}
       </div>
 
-      {/* Resolve modal */}
-      <Modal open={resolveOpen} onClose={() => setResolveOpen(false)} title="✅ Resolve Rescue Report"
-        footer={
-          <>
-            <button onClick={() => setResolveOpen(false)} className="btn btn-secondary">Cancel</button>
-            <button onClick={handleResolve} disabled={saving} className="btn btn-primary">
-              {saving ? 'Saving…' : 'Confirm Resolution'}
-            </button>
-          </>
-        }
+      <Modal
+        open={resolveOpen}
+        onClose={() => setResolveOpen(false)}
+        title="Resolve rescue report"
+        footer={<><Button variant="secondary" onClick={() => setResolveOpen(false)}>Cancel</Button><Button onClick={handleResolve} disabled={saving}>{saving ? 'Saving…' : 'Confirm resolution'}</Button></>}
       >
-        <div className="form-group">
-          <label className="label-base">Resolution Notes</label>
-          <textarea
-            value={resolveNotes}
-            onChange={e => setResolveNotes(e.target.value)}
-            className="input-base"
-            placeholder="Describe how the rescue was handled…"
-            rows={4}
-            style={{ resize: 'vertical' }}
-          />
-        </div>
+        <Label>Resolution notes</Label>
+        <Textarea value={resolveNotes} onChange={(e) => setResolveNotes(e.target.value)} placeholder="Describe how the rescue was handled…" rows={4} className="mt-1.5" />
       </Modal>
 
-      {/* Suggestions modal */}
-      <Modal open={suggestOpen} onClose={() => setSuggestOpen(false)} title="🤖 AI Assignment Suggestions" size="lg">
+      <Modal open={suggestOpen} onClose={() => setSuggestOpen(false)} title="Assignment suggestions" size="lg">
         {loadingSuggest && <LoadingSpinner text="Calculating best matches…" />}
         {!loadingSuggest && suggestions && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          <div className="flex flex-col gap-5">
             <div>
-              <h4 style={{ margin: '0 0 0.75rem', fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                🏆 Ranked Volunteers
-              </h4>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                {(suggestions.ranked_volunteers || []).map((v, i) => (
-                  <div key={v.volunteer_id} style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '1rem',
-                    padding: '0.75rem 1rem',
-                    background: i === 0 ? 'rgba(201,123,84,0.08)' : 'var(--cat-linen)',
-                    border: `1px solid ${i === 0 ? 'rgba(201,123,84,0.3)' : 'var(--border-default)'}`,
-                    borderRadius: '10px',
-                  }}>
-                    <span style={{ fontSize: '1.25rem', width: '28px', textAlign: 'center' }}>
-                      {['🥇','🥈','🥉','4️⃣','5️⃣'][i]}
-                    </span>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-primary)' }}>{v.name}</div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                        {v.distance_km} km away · {v.active_assignments} active · {v.available_now ? '✅ Available now' : '⏸ Unavailable'}
+              <h4 className="mb-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">Ranked volunteers</h4>
+              <div className="flex flex-col gap-2">
+                {(suggestions.ranked_volunteers || []).map((v, i) => {
+                  const RankIcon = RANK_ICONS[i];
+                  return (
+                    <div key={v.volunteer_id} className={cn('flex items-center gap-4 rounded-lg border p-3', i === 0 ? 'border-primary/30 bg-primary/5' : 'border-border bg-surface-muted')}>
+                      <span className="flex w-7 justify-center">{RankIcon ? <RankIcon className="size-5 text-primary" /> : <span className="text-sm font-bold text-muted-foreground">{i + 1}</span>}</span>
+                      <div className="flex-1">
+                        <div className="text-sm font-semibold text-foreground">{v.name}</div>
+                        <div className="text-xs text-muted-foreground">{v.distance_km} km away · {v.active_assignments} active · {v.available_now ? 'Available now' : 'Unavailable'}</div>
                       </div>
+                      <span className="font-bold text-primary">{Math.round(v.score * 100)}%</span>
                     </div>
-                    <span style={{ fontWeight: 800, color: 'var(--cat-terra)' }}>
-                      {Math.round(v.score * 100)}%
-                    </span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
             <div>
-              <h4 style={{ margin: '0 0 0.75rem', fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                📍 Nearest Shelters
-              </h4>
-              {(suggestions.nearest_shelters || []).map(s => (
-                <div key={s.shelter_id} style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  padding: '0.625rem 0.875rem',
-                  background: 'var(--cat-linen)',
-                  borderRadius: '8px',
-                  marginBottom: '0.375rem',
-                  fontSize: '0.875rem',
-                }}>
-                  <span style={{ fontWeight: 600 }}>🏠 {s.name}</span>
-                  <span style={{ color: 'var(--text-muted)' }}>{s.distance_km} km</span>
+              <h4 className="mb-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">Nearest shelters</h4>
+              {(suggestions.nearest_shelters || []).map((s) => (
+                <div key={s.shelter_id} className="mb-1.5 flex items-center justify-between rounded-lg bg-surface-muted px-3.5 py-2.5 text-sm">
+                  <span className="flex items-center gap-1.5 font-medium text-foreground"><Building2 className="size-3.5" />{s.name}</span>
+                  <span className="text-muted-foreground">{s.distance_km} km</span>
                 </div>
               ))}
             </div>

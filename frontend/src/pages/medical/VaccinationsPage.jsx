@@ -1,26 +1,40 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { medicalApi } from '../../api/medicalApi';
-import useApi from '../../hooks/useApi';
-import { useAuth } from '../../context/AuthContext';
-import LoadingSpinner from '../../components/LoadingSpinner';
-import EmptyState from '../../components/EmptyState';
-import PageHeader from '../../components/PageHeader';
-import Modal from '../../components/Modal';
-import { formatDate } from '../../utils/dateUtils';
+import { Syringe, TriangleAlert, Clock, CheckCircle2, Plus, Circle } from 'lucide-react';
+import { medicalApi } from '@/api/medicalApi';
+import useApi from '@/hooks/useApi';
+import { useAuth } from '@/context/AuthContext';
+import LoadingSpinner from '@/components/LoadingSpinner';
+import EmptyState from '@/components/EmptyState';
+import PageHeader from '@/components/patterns/PageHeader';
+import Modal from '@/components/Modal';
+import { formatDate } from '@/utils/dateUtils';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { cn } from '@/lib/utils';
+
+const CORE_VACCINES = ['FVRCP', 'Rabies', 'FeLV', 'FIV'];
+
+const isOverdue = (dt) => dt && new Date(dt) < new Date();
+const isDueSoon = (dt) => {
+  if (!dt) return false;
+  const diff = (new Date(dt) - new Date()) / 86400000;
+  return diff >= 0 && diff <= 30;
+};
 
 export default function VaccinationsPage() {
   const { id: catId } = useParams();
-  const { user }      = useAuth();
+  const { user } = useAuth();
   const [addOpen, setAddOpen] = useState(false);
   const [form, setForm] = useState({ cat: catId, vaccine_name: '', date_given: new Date().toISOString().split('T')[0], next_due_date: '', vet_name: '', batch_number: '', notes: '' });
   const [saving, setSaving] = useState(false);
 
   const { data, loading, refetch } = useApi(() => medicalApi.listVaccinations(catId), null, [catId]);
   const vaccinations = data?.results || data || [];
-  const canAdd = ['SUPER_ADMIN','SHELTER_ADMIN','VET'].includes(user?.role);
+  const canAdd = ['SUPER_ADMIN', 'SHELTER_ADMIN', 'VET'].includes(user?.role);
 
-  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+  const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -33,38 +47,23 @@ export default function VaccinationsPage() {
     setSaving(false);
   };
 
-  const CORE_VACCINES = ['FVRCP', 'Rabies', 'FeLV', 'FIV'];
-
-  const isOverdue = (dt) => dt && new Date(dt) < new Date();
-  const isDueSoon = (dt) => {
-    if (!dt) return false;
-    const diff = (new Date(dt) - new Date()) / 86400000;
-    return diff >= 0 && diff <= 30;
-  };
-
   return (
-    <div className="page-container-sm">
+    <div className="mx-auto max-w-[720px] px-4 py-6 sm:px-6">
       <PageHeader
-        title="💉 Vaccinations"
-        backPath={`/cats/${catId}`}
-        action={canAdd && <button onClick={() => setAddOpen(true)} className="btn btn-primary">+ Add</button>}
+        title="Vaccinations"
+        backTo={`/cats/${catId}`}
+        backLabel="Cat profile"
+        actions={canAdd && <Button onClick={() => setAddOpen(true)}><Plus className="size-4" />Add</Button>}
       />
 
-      {/* Quick status grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.625rem', marginBottom: '1.5rem' }}>
-        {CORE_VACCINES.map(v => {
-          const given = vaccinations.find(vac => vac.vaccine_name?.includes(v));
+      <div className="mb-6 grid grid-cols-4 gap-2.5">
+        {CORE_VACCINES.map((v) => {
+          const given = vaccinations.find((vac) => vac.vaccine_name?.includes(v));
           return (
-            <div key={v} style={{
-              background: 'var(--surface-card)',
-              border: `1px solid ${given ? 'rgba(123,173,110,0.4)' : 'var(--border-default)'}`,
-              borderRadius: '10px',
-              padding: '0.75rem 0.5rem',
-              textAlign: 'center',
-            }}>
-              <div style={{ fontSize: '1.5rem', marginBottom: '0.25rem' }}>{given ? '💉' : '○'}</div>
-              <div style={{ fontSize: '0.75rem', fontWeight: 700, color: given ? '#2E6B24' : 'var(--text-muted)' }}>{v}</div>
-              {given && <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>{formatDate(given.date_given)}</div>}
+            <div key={v} className={cn('rounded-xl border bg-card p-3 text-center', given ? 'border-success/40' : 'border-border')}>
+              {given ? <Syringe className="mx-auto mb-1 size-6 text-success" /> : <Circle className="mx-auto mb-1 size-6 text-muted-foreground" strokeWidth={1.5} />}
+              <div className={cn('text-xs font-bold', given ? 'text-success' : 'text-muted-foreground')}>{v}</div>
+              {given && <div className="mt-0.5 text-[11px] text-muted-foreground">{formatDate(given.date_given)}</div>}
             </div>
           );
         })}
@@ -73,38 +72,31 @@ export default function VaccinationsPage() {
       {loading && <LoadingSpinner text="Loading vaccinations…" />}
 
       {!loading && vaccinations.length === 0 && (
-        <EmptyState icon="💉" title="No vaccinations recorded" message="Add vaccination records to track this cat's immunization history."
-          action={canAdd && <button onClick={() => setAddOpen(true)} className="btn btn-primary">+ Add Vaccination</button>} />
+        <EmptyState icon={Syringe} title="No vaccinations recorded" message="Add vaccination records to track this cat's immunization history."
+          action={canAdd && <Button onClick={() => setAddOpen(true)}><Plus className="size-4" />Add vaccination</Button>} />
       )}
 
       {!loading && vaccinations.length > 0 && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-          {vaccinations.map(vac => {
+        <div className="flex flex-col gap-3">
+          {vaccinations.map((vac) => {
             const overdue = isOverdue(vac.next_due_date);
-            const soon    = isDueSoon(vac.next_due_date);
+            const soon = isDueSoon(vac.next_due_date);
             return (
-              <div key={vac.id} style={{
-                background: 'var(--surface-card)',
-                border: `1px solid ${overdue ? 'rgba(192,82,78,0.3)' : soon ? 'rgba(232,160,48,0.3)' : 'var(--border-default)'}`,
-                borderRadius: '12px',
-                padding: '1rem 1.25rem',
-                display: 'flex',
-                gap: '1rem',
-                alignItems: 'flex-start',
-              }}>
-                <div style={{ width: '44px', height: '44px', borderRadius: '10px', background: overdue ? 'var(--cat-red-light)' : 'var(--cat-sage-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.375rem', flexShrink: 0 }}>
-                  💉
+              <div key={vac.id} className={cn('flex items-start gap-4 rounded-xl border bg-card p-5', overdue ? 'border-destructive/30' : soon ? 'border-warning/30' : 'border-border')}>
+                <div className={cn('flex size-11 shrink-0 items-center justify-center rounded-lg', overdue ? 'bg-destructive/10' : 'bg-success/10')}>
+                  <Syringe className={cn('size-5', overdue ? 'text-destructive' : 'text-success')} />
                 </div>
-                <div style={{ flex: 1 }}>
-                  <h4 style={{ margin: '0 0 0.25rem', fontSize: '0.9375rem', fontWeight: 800, color: 'var(--text-primary)' }}>{vac.vaccine_name}</h4>
-                  <div style={{ display: 'flex', gap: '1rem', fontSize: '0.8rem', color: 'var(--text-muted)', flexWrap: 'wrap' }}>
-                    <span>📅 Given: {formatDate(vac.date_given)}</span>
-                    {vac.vet_name && <span>🩺 {vac.vet_name}</span>}
-                    {vac.batch_number && <span>🏷 {vac.batch_number}</span>}
+                <div className="flex-1">
+                  <h4 className="mb-0.5 text-[15px] font-bold text-foreground">{vac.vaccine_name}</h4>
+                  <div className="flex flex-wrap gap-3.5 text-xs text-muted-foreground">
+                    <span>Given: {formatDate(vac.date_given)}</span>
+                    {vac.vet_name && <span>Dr. {vac.vet_name}</span>}
+                    {vac.batch_number && <span>Batch {vac.batch_number}</span>}
                   </div>
                   {vac.next_due_date && (
-                    <div style={{ marginTop: '0.375rem', fontSize: '0.8125rem', fontWeight: 700, color: overdue ? 'var(--cat-red)' : soon ? 'var(--cat-amber)' : 'var(--cat-sage)' }}>
-                      {overdue ? '⚠️ Overdue since' : soon ? '⏰ Due soon:' : '✅ Next due:'} {formatDate(vac.next_due_date)}
+                    <div className={cn('mt-1.5 flex items-center gap-1.5 text-[13px] font-bold', overdue ? 'text-destructive' : soon ? 'text-warning' : 'text-success')}>
+                      {overdue ? <TriangleAlert className="size-3.5" /> : soon ? <Clock className="size-3.5" /> : <CheckCircle2 className="size-3.5" />}
+                      {overdue ? 'Overdue since' : soon ? 'Due soon:' : 'Next due:'} {formatDate(vac.next_due_date)}
                     </div>
                   )}
                 </div>
@@ -114,44 +106,22 @@ export default function VaccinationsPage() {
         </div>
       )}
 
-      <Modal open={addOpen} onClose={() => setAddOpen(false)} title="💉 Add Vaccination"
-        footer={
-          <>
-            <button onClick={() => setAddOpen(false)} className="btn btn-secondary">Cancel</button>
-            <button form="vac-form" type="submit" disabled={saving} className="btn btn-primary">{saving ? 'Saving…' : 'Add Vaccination'}</button>
-          </>
-        }
+      <Modal open={addOpen} onClose={() => setAddOpen(false)} title="Add vaccination"
+        footer={<><Button variant="secondary" onClick={() => setAddOpen(false)}>Cancel</Button><Button form="vac-form" type="submit" disabled={saving}>{saving ? 'Saving…' : 'Add vaccination'}</Button></>}
       >
-        <form id="vac-form" onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
-          <div className="form-group">
-            <label className="label-base">Vaccine Name *</label>
-            <input required list="vac-list" value={form.vaccine_name} onChange={e => set('vaccine_name', e.target.value)} className="input-base" placeholder="e.g. FVRCP, Rabies…" id="vac-name" />
-            <datalist id="vac-list">
-              {['FVRCP','Rabies','FeLV','FIV','Bordetella','Calicivirus'].map(v => <option key={v} value={v} />)}
-            </datalist>
+        <form id="vac-form" onSubmit={handleSave} className="flex flex-col gap-3.5">
+          <div>
+            <Label>Vaccine name *</Label>
+            <Input required list="vac-list" value={form.vaccine_name} onChange={(e) => set('vaccine_name', e.target.value)} placeholder="e.g. FVRCP, Rabies…" className="mt-1.5" />
+            <datalist id="vac-list">{['FVRCP', 'Rabies', 'FeLV', 'FIV', 'Bordetella', 'Calicivirus'].map((v) => <option key={v} value={v} />)}</datalist>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-            <div className="form-group">
-              <label className="label-base">Date Given *</label>
-              <input required type="date" value={form.date_given} onChange={e => set('date_given', e.target.value)} className="input-base" id="vac-given" />
-            </div>
-            <div className="form-group">
-              <label className="label-base">Next Due Date</label>
-              <input type="date" value={form.next_due_date} onChange={e => set('next_due_date', e.target.value)} className="input-base" id="vac-due" />
-            </div>
-            <div className="form-group">
-              <label className="label-base">Vet Name</label>
-              <input value={form.vet_name} onChange={e => set('vet_name', e.target.value)} className="input-base" id="vac-vet" />
-            </div>
-            <div className="form-group">
-              <label className="label-base">Batch Number</label>
-              <input value={form.batch_number} onChange={e => set('batch_number', e.target.value)} className="input-base" placeholder="Optional" id="vac-batch" />
-            </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div><Label>Date given *</Label><Input required type="date" value={form.date_given} onChange={(e) => set('date_given', e.target.value)} className="mt-1.5" /></div>
+            <div><Label>Next due date</Label><Input type="date" value={form.next_due_date} onChange={(e) => set('next_due_date', e.target.value)} className="mt-1.5" /></div>
+            <div><Label>Vet name</Label><Input value={form.vet_name} onChange={(e) => set('vet_name', e.target.value)} className="mt-1.5" /></div>
+            <div><Label>Batch number</Label><Input value={form.batch_number} onChange={(e) => set('batch_number', e.target.value)} placeholder="Optional" className="mt-1.5" /></div>
           </div>
-          <div className="form-group">
-            <label className="label-base">Notes</label>
-            <input value={form.notes} onChange={e => set('notes', e.target.value)} className="input-base" id="vac-notes" />
-          </div>
+          <div><Label>Notes</Label><Input value={form.notes} onChange={(e) => set('notes', e.target.value)} className="mt-1.5" /></div>
         </form>
       </Modal>
     </div>

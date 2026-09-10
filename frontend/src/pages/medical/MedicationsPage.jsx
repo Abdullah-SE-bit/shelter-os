@@ -1,37 +1,35 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { medicalApi } from '../../api/medicalApi';
-import useApi from '../../hooks/useApi';
-import { useAuth } from '../../context/AuthContext';
-import LoadingSpinner from '../../components/LoadingSpinner';
-import EmptyState from '../../components/EmptyState';
-import PageHeader from '../../components/PageHeader';
-import Modal from '../../components/Modal';
-import { formatDate } from '../../utils/dateUtils';
+import { Pill, Plus } from 'lucide-react';
+import { medicalApi } from '@/api/medicalApi';
+import useApi from '@/hooks/useApi';
+import { useAuth } from '@/context/AuthContext';
+import LoadingSpinner from '@/components/LoadingSpinner';
+import EmptyState from '@/components/EmptyState';
+import PageHeader from '@/components/patterns/PageHeader';
+import Modal from '@/components/Modal';
+import { formatDate } from '@/utils/dateUtils';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { NativeSelect } from '@/components/ui/native-select';
+import { cn } from '@/lib/utils';
 
-const FREQ_LABELS = {
-  ONCE: 'Once',
-  DAILY: 'Daily',
-  TWICE_DAILY: 'Twice Daily',
-  WEEKLY: 'Weekly',
-  MONTHLY: 'Monthly',
-  AS_NEEDED: 'As Needed',
-};
+const FREQ_LABELS = { ONCE: 'Once', DAILY: 'Daily', TWICE_DAILY: 'Twice daily', WEEKLY: 'Weekly', MONTHLY: 'Monthly', AS_NEEDED: 'As needed' };
+
+const isActive = (med) => !med.end_date || new Date(med.end_date) >= new Date();
 
 export default function MedicationsPage() {
   const { id: catId } = useParams();
-  const { user }      = useAuth();
+  const { user } = useAuth();
   const [addOpen, setAddOpen] = useState(false);
-  const [form, setForm] = useState({
-    cat: catId, medication_name: '', dosage: '', frequency: 'DAILY',
-    start_date: new Date().toISOString().split('T')[0], end_date: '', reason: '', prescribing_vet: '', notes: '',
-  });
+  const [form, setForm] = useState({ cat: catId, medication_name: '', dosage: '', frequency: 'DAILY', start_date: new Date().toISOString().split('T')[0], end_date: '', reason: '', prescribing_vet: '', notes: '' });
   const [saving, setSaving] = useState(false);
 
   const { data, loading, refetch } = useApi(() => medicalApi.listMedications(catId), null, [catId]);
   const medications = data?.results || data || [];
-  const canAdd = ['SUPER_ADMIN','SHELTER_ADMIN','VET'].includes(user?.role);
-  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+  const canAdd = ['SUPER_ADMIN', 'SHELTER_ADMIN', 'VET'].includes(user?.role);
+  const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -44,34 +42,24 @@ export default function MedicationsPage() {
     setSaving(false);
   };
 
-  const isActive = (med) => {
-    if (!med.end_date) return true;
-    return new Date(med.end_date) >= new Date();
-  };
-
   return (
-    <div className="page-container-sm">
+    <div className="mx-auto max-w-[720px] px-4 py-6 sm:px-6">
       <PageHeader
-        title="💊 Medications"
-        backPath={`/cats/${catId}`}
-        action={canAdd && <button onClick={() => setAddOpen(true)} className="btn btn-primary">+ Add</button>}
+        title="Medications"
+        backTo={`/cats/${catId}`}
+        backLabel="Cat profile"
+        actions={canAdd && <Button onClick={() => setAddOpen(true)}><Plus className="size-4" />Add</Button>}
       />
 
-      {/* Active count */}
       {medications.length > 0 && (
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: '0.875rem',
-          marginBottom: '1.5rem',
-        }}>
-          <div style={{ background: 'linear-gradient(135deg, var(--cat-terra), var(--cat-rust))', borderRadius: '12px', padding: '1rem', color: 'white', textAlign: 'center' }}>
-            <div style={{ fontWeight: 900, fontSize: '2rem', lineHeight: 1 }}>{medications.filter(isActive).length}</div>
-            <div style={{ fontSize: '0.75rem', fontWeight: 700, opacity: 0.8, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Active</div>
+        <div className="mb-6 grid grid-cols-2 gap-3.5">
+          <div className="rounded-xl bg-gradient-to-br from-[var(--brand-rust)] to-[var(--brand-ink)] p-4 text-center text-white">
+            <div className="text-[32px] leading-none font-black">{medications.filter(isActive).length}</div>
+            <div className="mt-1 text-xs font-bold tracking-wide uppercase opacity-85">Active</div>
           </div>
-          <div style={{ background: 'var(--surface-card)', border: '1px solid var(--border-default)', borderRadius: '12px', padding: '1rem', textAlign: 'center' }}>
-            <div style={{ fontWeight: 900, fontSize: '2rem', lineHeight: 1, color: 'var(--text-muted)' }}>{medications.filter(m => !isActive(m)).length}</div>
-            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Completed</div>
+          <div className="rounded-xl border border-border bg-card p-4 text-center">
+            <div className="text-[32px] leading-none font-black text-muted-foreground">{medications.filter((m) => !isActive(m)).length}</div>
+            <div className="mt-1 text-xs font-bold tracking-wide text-muted-foreground uppercase">Completed</div>
           </div>
         </div>
       )}
@@ -79,46 +67,31 @@ export default function MedicationsPage() {
       {loading && <LoadingSpinner text="Loading medications…" />}
 
       {!loading && medications.length === 0 && (
-        <EmptyState icon="💊" title="No medications" message="No medications on record for this cat."
-          action={canAdd && <button onClick={() => setAddOpen(true)} className="btn btn-primary">+ Add Medication</button>} />
+        <EmptyState icon={Pill} title="No medications" message="No medications on record for this cat."
+          action={canAdd && <Button onClick={() => setAddOpen(true)}><Plus className="size-4" />Add medication</Button>} />
       )}
 
       {!loading && medications.length > 0 && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-          {[...medications].sort((a, b) => isActive(b) - isActive(a)).map(med => {
+        <div className="flex flex-col gap-3">
+          {[...medications].sort((a, b) => isActive(b) - isActive(a)).map((med) => {
             const active = isActive(med);
             return (
-              <div key={med.id} style={{
-                background: 'var(--surface-card)',
-                border: `1px solid ${active ? 'rgba(201,123,84,0.25)' : 'var(--border-default)'}`,
-                borderRadius: '12px',
-                padding: '1rem 1.25rem',
-                opacity: active ? 1 : 0.65,
-                display: 'flex',
-                gap: '1rem',
-                alignItems: 'flex-start',
-              }}>
-                <div style={{ width: '44px', height: '44px', borderRadius: '10px', background: active ? 'rgba(201,123,84,0.1)' : 'var(--cat-linen)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', flexShrink: 0 }}>
-                  💊
+              <div key={med.id} className={cn('flex items-start gap-4 rounded-xl border bg-card p-5', active ? 'border-primary/25' : 'border-border opacity-65')}>
+                <div className={cn('flex size-11 shrink-0 items-center justify-center rounded-lg', active ? 'bg-primary/10' : 'bg-surface-muted')}>
+                  <Pill className={cn('size-5', active ? 'text-primary' : 'text-muted-foreground')} />
                 </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', marginBottom: '0.25rem', flexWrap: 'wrap' }}>
-                    <h4 style={{ margin: 0, fontSize: '0.9375rem', fontWeight: 800, color: 'var(--text-primary)' }}>{med.medication_name}</h4>
-                    <span style={{
-                      background: active ? 'rgba(201,123,84,0.12)' : 'var(--cat-linen)',
-                      color: active ? 'var(--cat-terra)' : 'var(--text-muted)',
-                      fontSize: '0.7rem', fontWeight: 700, padding: '0.15rem 0.5rem', borderRadius: '999px',
-                    }}>
-                      {active ? '● Active' : '✓ Completed'}
-                    </span>
+                <div className="flex-1">
+                  <div className="mb-0.5 flex flex-wrap items-center gap-2.5">
+                    <h4 className="text-[15px] font-bold text-foreground">{med.medication_name}</h4>
+                    <span className={cn('rounded-full px-2 py-0.5 text-[11px] font-bold', active ? 'bg-primary/10 text-primary' : 'bg-surface-muted text-muted-foreground')}>{active ? 'Active' : 'Completed'}</span>
                   </div>
-                  <div style={{ display: 'flex', gap: '1rem', fontSize: '0.8rem', color: 'var(--text-muted)', flexWrap: 'wrap' }}>
-                    {med.dosage     && <span>📏 {med.dosage}</span>}
-                    {med.frequency  && <span>🔁 {FREQ_LABELS[med.frequency] || med.frequency}</span>}
-                    <span>📅 {formatDate(med.start_date)}{med.end_date ? ` → ${formatDate(med.end_date)}` : ' (ongoing)'}</span>
-                    {med.prescribing_vet && <span>🩺 {med.prescribing_vet}</span>}
+                  <div className="flex flex-wrap gap-3.5 text-xs text-muted-foreground">
+                    {med.dosage && <span>{med.dosage}</span>}
+                    {med.frequency && <span>{FREQ_LABELS[med.frequency] || med.frequency}</span>}
+                    <span>{formatDate(med.start_date)}{med.end_date ? ` → ${formatDate(med.end_date)}` : ' (ongoing)'}</span>
+                    {med.prescribing_vet && <span>Dr. {med.prescribing_vet}</span>}
                   </div>
-                  {med.reason && <p style={{ margin: '0.375rem 0 0', fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>Reason: {med.reason}</p>}
+                  {med.reason && <p className="mt-1.5 text-sm text-muted-foreground">Reason: {med.reason}</p>}
                 </div>
               </div>
             );
@@ -126,46 +99,23 @@ export default function MedicationsPage() {
         </div>
       )}
 
-      <Modal open={addOpen} onClose={() => setAddOpen(false)} title="💊 Add Medication"
-        footer={
-          <>
-            <button onClick={() => setAddOpen(false)} className="btn btn-secondary">Cancel</button>
-            <button form="med-form" type="submit" disabled={saving} className="btn btn-primary">{saving ? 'Saving…' : 'Add Medication'}</button>
-          </>
-        }
+      <Modal open={addOpen} onClose={() => setAddOpen(false)} title="Add medication"
+        footer={<><Button variant="secondary" onClick={() => setAddOpen(false)}>Cancel</Button><Button form="med-form" type="submit" disabled={saving}>{saving ? 'Saving…' : 'Add medication'}</Button></>}
       >
-        <form id="med-form" onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
-          <div className="form-group">
-            <label className="label-base">Medication Name *</label>
-            <input required value={form.medication_name} onChange={e => set('medication_name', e.target.value)} className="input-base" placeholder="e.g. Amoxicillin, Prednisolone…" id="med-name" />
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-            <div className="form-group">
-              <label className="label-base">Dosage</label>
-              <input value={form.dosage} onChange={e => set('dosage', e.target.value)} className="input-base" placeholder="e.g. 50mg, 2ml" id="med-dose" />
-            </div>
-            <div className="form-group">
-              <label className="label-base">Frequency</label>
-              <select value={form.frequency} onChange={e => set('frequency', e.target.value)} className="input-base" id="med-freq">
+        <form id="med-form" onSubmit={handleSave} className="flex flex-col gap-3.5">
+          <div><Label>Medication name *</Label><Input required value={form.medication_name} onChange={(e) => set('medication_name', e.target.value)} placeholder="e.g. Amoxicillin, Prednisolone…" className="mt-1.5" /></div>
+          <div className="grid grid-cols-2 gap-3">
+            <div><Label>Dosage</Label><Input value={form.dosage} onChange={(e) => set('dosage', e.target.value)} placeholder="e.g. 50mg, 2ml" className="mt-1.5" /></div>
+            <div>
+              <Label>Frequency</Label>
+              <NativeSelect value={form.frequency} onChange={(e) => set('frequency', e.target.value)} className="mt-1.5">
                 {Object.entries(FREQ_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-              </select>
+              </NativeSelect>
             </div>
-            <div className="form-group">
-              <label className="label-base">Start Date *</label>
-              <input required type="date" value={form.start_date} onChange={e => set('start_date', e.target.value)} className="input-base" id="med-start" />
-            </div>
-            <div className="form-group">
-              <label className="label-base">End Date</label>
-              <input type="date" value={form.end_date} onChange={e => set('end_date', e.target.value)} className="input-base" id="med-end" />
-            </div>
-            <div className="form-group">
-              <label className="label-base">Prescribing Vet</label>
-              <input value={form.prescribing_vet} onChange={e => set('prescribing_vet', e.target.value)} className="input-base" id="med-vet" />
-            </div>
-            <div className="form-group">
-              <label className="label-base">Reason</label>
-              <input value={form.reason} onChange={e => set('reason', e.target.value)} className="input-base" placeholder="Why is this prescribed?" id="med-reason" />
-            </div>
+            <div><Label>Start date *</Label><Input required type="date" value={form.start_date} onChange={(e) => set('start_date', e.target.value)} className="mt-1.5" /></div>
+            <div><Label>End date</Label><Input type="date" value={form.end_date} onChange={(e) => set('end_date', e.target.value)} className="mt-1.5" /></div>
+            <div><Label>Prescribing vet</Label><Input value={form.prescribing_vet} onChange={(e) => set('prescribing_vet', e.target.value)} className="mt-1.5" /></div>
+            <div><Label>Reason</Label><Input value={form.reason} onChange={(e) => set('reason', e.target.value)} placeholder="Why is this prescribed?" className="mt-1.5" /></div>
           </div>
         </form>
       </Modal>
