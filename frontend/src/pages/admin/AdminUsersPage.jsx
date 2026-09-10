@@ -105,7 +105,7 @@ export default function AdminUsersPage() {
         actions={
           <div className="flex items-center gap-3">
             <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground" title={`Auto-refreshing every ${POLL_MS / 1000}s`}>
-              <span className="size-2 rounded-full bg-success shadow-[0_0_0_3px_var(--success-bg)]" />
+              <span className="size-2 rounded-full bg-success shadow-[0_0_0_3px_rgba(63,143,95,0.2)] dark:shadow-[0_0_0_3px_rgba(92,181,132,0.25)]" />
               {refreshing ? 'Updating…' : 'Live'}
             </span>
             <Button variant="secondary" size="sm" onClick={() => loadData(true)} disabled={refreshing}>

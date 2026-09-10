@@ -55,11 +55,11 @@
   --color-accent-foreground: var(--text-primary);
 
   --color-success: var(--success);
-  --color-success-foreground: var(--success-bg);
+  --color-success-foreground: var(--success-fg);
   --color-warning: var(--warning);
-  --color-warning-foreground: var(--warning-bg);
+  --color-warning-foreground: var(--warning-fg);
   --color-info: var(--info);
-  --color-info-foreground: var(--info-bg);
+  --color-info-foreground: var(--info-fg);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-fg);
 

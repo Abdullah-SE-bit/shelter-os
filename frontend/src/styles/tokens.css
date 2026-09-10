@@ -33,13 +33,13 @@
   --secondary-action-fg: var(--brand-ink);
 
   --success:             #3F8F5F;
-  --success-bg:          #E6F3EA;
+  --success-fg:          #FFFFFF;
   --warning:             #B8862F;
-  --warning-bg:          #FBF0DD;
+  --warning-fg:          #FFFFFF;
   --error:               #B4423F;
-  --error-bg:            #FAE7E6;
+  --error-fg:            #FFFFFF;
   --info:                #3E6FA0;
-  --info-bg:             #E7F0F8;
+  --info-fg:             #FFFFFF;
 
   --disabled:            #C7C2BD;
   --hover:               color-mix(in srgb, var(--primary-action) 10%, transparent);
@@ -79,13 +79,13 @@
   --secondary-action-fg:  #171514;
 
   --success:              #5CB584;
-  --success-bg:           #1C2E22;
+  --success-fg:           #171514;
   --warning:              #D9A544;
-  --warning-bg:           #332812;
+  --warning-fg:           #171514;
   --error:                #E0817E;
-  --error-bg:             #33201F;
+  --error-fg:             #171514;
   --info:                 #7CAEE0;
-  --info-bg:              #1B2A38;
+  --info-fg:              #171514;
 
   --disabled:             #4B4542;
   --hover:                color-mix(in srgb, var(--primary-action) 14%, transparent);
