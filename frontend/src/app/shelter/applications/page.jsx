@@ -21,7 +21,7 @@ import { cn } from '@/lib/utils';
 const STATUS_TONE = {
   SUBMITTED: 'bg-info/10 text-info',
   UNDER_REVIEW: 'bg-warning/10 text-warning',
-  INTERVIEW_SCHEDULED: 'bg-primary/10 text-primary',
+  INTERVIEW_SCHEDULED: 'bg-highlight-mint/20 text-primary',
   APPROVED: 'bg-success/10 text-success',
   REJECTED: 'bg-destructive/10 text-destructive',
   WITHDRAWN: 'bg-surface-muted text-muted-foreground',

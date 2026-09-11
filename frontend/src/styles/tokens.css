@@ -1,36 +1,43 @@
 /* ============================================================
    SHELTER OS — DESIGN TOKENS
-   Brand primitives -> semantic tokens, light + dark.
+   "Cohesive Compassion" palette -> semantic tokens, light + dark.
    Consumed by globals.css's @theme block (Tailwind utilities)
    and usable directly as var(--token-name) anywhere.
    ============================================================ */
 
 :root {
   /* Brand primitives — raw hex, reference these only from this file */
-  --brand-ink:   #343131; /* primary */
-  --brand-rust:  #A04747; /* accent */
-  --brand-amber: #D8A25E; /* secondary accent */
-  --brand-gold:  #EEDF7A; /* highlight */
+  --brand-ink:   #2C3E50; /* main text */
+  --brand-teal:  #16A085; /* primary accent — nav/links/borders */
+  --brand-coral: #FF6F61; /* CTA — primary buttons only */
+  --brand-mint:  #E0F2F1; /* subtle highlights */
+  --brand-amber: #D8A25E; /* warm secondary tone, paired with teal in decorative gradients */
+  --brand-gold:  var(--brand-coral); /* ambient glow accent (login page) */
 
   /* Semantic — light theme (default) */
-  --background:         #FAF8F6;
+  --background:         #FBF9F6;
   --surface:             #FFFFFF;
   --surface-elevated:    #FFFFFF;
   --surface-muted:       #F2EEEA;
   --surface-hover:       #F5F1EC;
 
   --text-primary:        var(--brand-ink);
-  --text-secondary:      #6B6564;
-  --text-tertiary:       #8A8482;
-  --text-inverse:        #FAF8F6;
+  --text-secondary:      #5B6B7B;
+  --text-tertiary:       #8896A3;
+  --text-inverse:        #FBF9F6;
 
   --border:              #E4DFDA;
   --border-strong:       #CFC7BF;
 
-  --primary-action:      var(--brand-rust);
+  --primary-action:      var(--brand-teal);
   --primary-action-fg:   #FFFFFF;
-  --secondary-action:    var(--brand-amber);
+  --secondary-action:    #D8A25E;
   --secondary-action-fg: var(--brand-ink);
+
+  --cta:                 var(--brand-coral);
+  --cta-fg:              #FFFFFF;
+  --highlight:           var(--brand-mint);
+  --highlight-fg:        var(--brand-ink);
 
   --success:             #3F8F5F;
   --success-fg:          #FFFFFF;
@@ -43,14 +50,14 @@
 
   --disabled:            #C7C2BD;
   --hover:               color-mix(in srgb, var(--primary-action) 10%, transparent);
-  --focus-ring:           var(--brand-gold);
-  --selected:            color-mix(in srgb, var(--brand-amber) 18%, var(--surface));
+  --focus-ring:           var(--brand-teal);
+  --selected:            color-mix(in srgb, var(--brand-teal) 18%, var(--surface));
   --destructive:         var(--error);
   --destructive-fg:      #FFFFFF;
 
-  --shadow-sm: 0 1px 2px rgba(52, 49, 49, 0.06), 0 1px 1px rgba(52, 49, 49, 0.04);
-  --shadow-md: 0 4px 10px rgba(52, 49, 49, 0.08), 0 2px 4px rgba(52, 49, 49, 0.05);
-  --shadow-lg: 0 12px 28px rgba(52, 49, 49, 0.12), 0 4px 8px rgba(52, 49, 49, 0.06);
+  --shadow-sm: 0 1px 2px rgba(44, 62, 80, 0.06), 0 1px 1px rgba(44, 62, 80, 0.04);
+  --shadow-md: 0 4px 10px rgba(44, 62, 80, 0.08), 0 2px 4px rgba(44, 62, 80, 0.05);
+  --shadow-lg: 0 12px 28px rgba(44, 62, 80, 0.12), 0 4px 8px rgba(44, 62, 80, 0.06);
 
   --radius-sm: 6px;
   --radius-md: 10px;
@@ -59,40 +66,45 @@
 }
 
 [data-theme='dark'] {
-  --background:          #171514;
-  --surface:              #201D1C;
-  --surface-elevated:     #272322;
-  --surface-muted:        #2B2725;
-  --surface-hover:        #302B29;
+  --background:          #1A252F;
+  --surface:              #212E3B;
+  --surface-elevated:     #253340;
+  --surface-muted:        #263440;
+  --surface-hover:        #2B3A47;
 
-  --text-primary:         #F3EFE9;
-  --text-secondary:       #B7AFA8;
-  --text-tertiary:        #8F8781;
-  --text-inverse:         #171514;
+  --text-primary:         #FBF9F6;
+  --text-secondary:       #B9C5CE;
+  --text-tertiary:        #8A98A5;
+  --text-inverse:         #1A252F;
 
-  --border:               #37312E;
-  --border-strong:        #453D39;
+  --border:               #324150;
+  --border-strong:        #3D4E5E;
 
-  --primary-action:       #C97A7A;
-  --primary-action-fg:    #171514;
+  --primary-action:       #26C6DA;
+  --primary-action-fg:    #1A252F;
   --secondary-action:     #DDAD6E;
-  --secondary-action-fg:  #171514;
+  --secondary-action-fg:  #1A252F;
+
+  --cta:                  #FF8A80;
+  --cta-fg:               #1A252F;
+  --highlight:            #4DB6AC;
+  --highlight-fg:         #FBF9F6;
 
   --success:              #5CB584;
-  --success-fg:           #171514;
+  --success-fg:           #1A252F;
   --warning:              #D9A544;
-  --warning-fg:           #171514;
+  --warning-fg:           #1A252F;
   --error:                #E0817E;
-  --error-fg:             #171514;
+  --error-fg:             #1A252F;
   --info:                 #7CAEE0;
-  --info-fg:              #171514;
+  --info-fg:              #1A252F;
 
-  --disabled:             #4B4542;
+  --disabled:             #4B5964;
   --hover:                color-mix(in srgb, var(--primary-action) 14%, transparent);
-  --focus-ring:            var(--brand-gold);
-  --selected:             color-mix(in srgb, var(--secondary-action) 20%, var(--surface));
+  --focus-ring:            #26C6DA;
+  --selected:             color-mix(in srgb, var(--primary-action) 20%, var(--surface));
   --destructive:          var(--error);
-  --destructive-fg:       #171514;
+  --destructive-fg:       #1A252F;
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.30), 0 1px 1px rgba(0, 0, 0, 0.20);
   --shadow-md: 0 4px 10px rgba(0, 0, 0, 0.36), 0 2px 4px rgba(0, 0, 0, 0.24);

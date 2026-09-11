@@ -70,7 +70,7 @@ export default function ShelterDetailPage() {
     <div>
       <div
         className="relative h-64 bg-cover bg-center"
-        style={{ backgroundImage: 'linear-gradient(135deg, var(--brand-rust), var(--brand-ink))' }}
+        style={{ backgroundImage: 'linear-gradient(135deg, var(--brand-teal), var(--brand-ink))' }}
       >
         <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
         <div className="absolute inset-x-8 bottom-6 flex flex-wrap items-end gap-5">

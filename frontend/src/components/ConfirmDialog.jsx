@@ -15,7 +15,7 @@ export default function ConfirmDialog({ open, title, message, onConfirm, onCance
   return (
     <div onClick={onCancel} className="animate-in fade-in fixed inset-0 z-[1000] flex items-center justify-center bg-black/50 p-4 duration-150">
       <div onClick={(e) => e.stopPropagation()} className="animate-in fade-in zoom-in-95 w-full max-w-[420px] rounded-xl border border-border bg-card p-8 shadow-lg duration-200">
-        <div className={`mb-5 flex size-14 items-center justify-center rounded-full ${danger ? 'bg-destructive/10 text-destructive' : 'bg-primary/10 text-primary'}`}>
+        <div className={`mb-5 flex size-14 items-center justify-center rounded-full ${danger ? 'bg-destructive/10 text-destructive' : 'bg-highlight-mint/20 text-primary'}`}>
           {danger ? <TriangleAlert className="size-6" /> : <PawPrint className="size-6" />}
         </div>
 

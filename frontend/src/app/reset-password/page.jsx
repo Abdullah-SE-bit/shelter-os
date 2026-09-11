@@ -31,7 +31,7 @@ export default function ResetPasswordPage() {
   return (
     <AuthCard>
       <div className="mb-7">
-        <div className="mb-3 flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+        <div className="mb-3 flex size-11 items-center justify-center rounded-xl bg-highlight-mint/20 text-primary">
           <Lock className="size-5" />
         </div>
         <h1 className="font-display text-2xl font-bold text-foreground">Set new password</h1>

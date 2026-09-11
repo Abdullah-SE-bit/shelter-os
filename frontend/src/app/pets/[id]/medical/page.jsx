@@ -72,7 +72,7 @@ export default function MedicalHistoryPage() {
                   <div className="flex-1 rounded-xl border border-border bg-card p-5 shadow-sm">
                     <div className="mb-2 flex flex-wrap items-start justify-between gap-2">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-bold tracking-wide text-primary uppercase">{rec.record_type}</span>
+                        <span className="rounded-full bg-highlight-mint/20 px-2 py-0.5 text-[11px] font-bold tracking-wide text-primary uppercase">{rec.record_type}</span>
                         <span className="text-xs text-muted-foreground">{formatDateTime(rec.occurred_at)}</span>
                       </div>
                       {rec.vet_name && <span className="shrink-0 text-xs text-muted-foreground">Dr. {rec.vet_name}</span>}

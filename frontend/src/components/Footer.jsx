@@ -41,7 +41,7 @@ export default function Footer() {
             <div className="mb-3.5 flex items-center gap-2.5">
               <div
                 className="flex size-10 items-center justify-center rounded-xl"
-                style={{ background: 'linear-gradient(135deg, var(--brand-rust), var(--brand-amber))' }}
+                style={{ background: 'linear-gradient(135deg, var(--brand-teal), var(--brand-amber))' }}
               >
                 <HeartHandshake className="size-5 text-white" />
               </div>

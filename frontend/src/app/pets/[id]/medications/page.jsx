@@ -51,7 +51,7 @@ export default function MedicationsPage() {
 
       {medications.length > 0 && (
         <div className="mb-6 grid grid-cols-2 gap-3.5">
-          <div className="rounded-xl bg-gradient-to-br from-[var(--brand-rust)] to-[var(--brand-ink)] p-4 text-center text-white">
+          <div className="rounded-xl bg-gradient-to-br from-[var(--brand-teal)] to-[var(--brand-ink)] p-4 text-center text-white">
             <div className="text-[32px] leading-none font-black">{medications.filter(isActive).length}</div>
             <div className="mt-1 text-xs font-bold tracking-wide uppercase opacity-85">Active</div>
           </div>
@@ -73,13 +73,13 @@ export default function MedicationsPage() {
             const active = isActive(med);
             return (
               <div key={med.id} className={cn('flex items-start gap-4 rounded-xl border bg-card p-5', active ? 'border-primary/25' : 'border-border opacity-65')}>
-                <div className={cn('flex size-11 shrink-0 items-center justify-center rounded-lg', active ? 'bg-primary/10' : 'bg-surface-muted')}>
+                <div className={cn('flex size-11 shrink-0 items-center justify-center rounded-lg', active ? 'bg-highlight-mint/20' : 'bg-surface-muted')}>
                   <Pill className={cn('size-5', active ? 'text-primary' : 'text-muted-foreground')} />
                 </div>
                 <div className="flex-1">
                   <div className="mb-0.5 flex flex-wrap items-center gap-2.5">
                     <h4 className="text-[15px] font-bold text-foreground">{med.medication_name}</h4>
-                    <span className={cn('rounded-full px-2 py-0.5 text-[11px] font-bold', active ? 'bg-primary/10 text-primary' : 'bg-surface-muted text-muted-foreground')}>{active ? 'Active' : 'Completed'}</span>
+                    <span className={cn('rounded-full px-2 py-0.5 text-[11px] font-bold', active ? 'bg-highlight-mint/20 text-primary' : 'bg-surface-muted text-muted-foreground')}>{active ? 'Active' : 'Completed'}</span>
                   </div>
                   <div className="flex flex-wrap gap-3.5 text-xs text-muted-foreground">
                     {med.dosage && <span>{med.dosage}</span>}

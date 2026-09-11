@@ -55,7 +55,7 @@ export default function EmployeeProfileView({ id }) {
 
   return (
     <div className="mx-auto max-w-[640px] px-4 py-6 sm:px-6">
-      <div className="relative mb-6 overflow-hidden rounded-2xl p-8 text-center" style={{ background: 'linear-gradient(135deg, var(--brand-ink), var(--brand-rust))' }}>
+      <div className="relative mb-6 overflow-hidden rounded-2xl p-8 text-center" style={{ background: 'linear-gradient(135deg, var(--brand-ink), var(--brand-teal))' }}>
         <div className="relative mx-auto mb-4 flex size-[88px] items-center justify-center overflow-hidden rounded-full border-4 border-white/25 bg-white/15 text-2xl font-bold text-white">
           {initials(first, last)}
           {vol.is_approved && <div className="absolute right-1 bottom-1 z-10 size-4 rounded-full border-2 border-white bg-success" title="Approved" />}
@@ -98,7 +98,7 @@ export default function EmployeeProfileView({ id }) {
             {vol.skills.map((s) => {
               const Icon = SKILL_ICONS[s] || Wrench;
               return (
-                <span key={s} className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3.5 py-1.5 text-sm font-semibold text-primary">
+                <span key={s} className="inline-flex items-center gap-1.5 rounded-full bg-highlight-mint/20 px-3.5 py-1.5 text-sm font-semibold text-primary">
                   <Icon className="size-3.5" />
                   {s}
                 </span>

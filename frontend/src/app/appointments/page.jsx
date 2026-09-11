@@ -161,7 +161,7 @@ export default function AppointmentsPage() {
 
   return (
     <div className="mx-auto max-w-[900px] px-4 py-6 sm:px-6">
-      <div className="relative mb-6 overflow-hidden rounded-xl bg-gradient-to-br from-[var(--brand-rust)] to-[var(--brand-ink)] px-6 py-6 text-white sm:px-8">
+      <div className="relative mb-6 overflow-hidden rounded-xl bg-gradient-to-br from-[var(--brand-teal)] to-[var(--brand-ink)] px-6 py-6 text-white sm:px-8">
         <CalendarDays className="pointer-events-none absolute right-4 -bottom-2 size-20 opacity-10" />
         <h1 className="font-display text-[26px] font-bold">Appointments</h1>
         <p className="mt-1 text-sm opacity-80">{isVet ? 'Manage your vet appointments' : 'Book and manage appointments with veterinarians'}</p>

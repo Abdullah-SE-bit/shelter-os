@@ -72,7 +72,7 @@ export default function EditProfilePage() {
         <Card>
           <CardContent className="pt-6 text-center">
             <div className="relative mb-4 inline-block">
-              <div className="mx-auto flex size-24 items-center justify-center overflow-hidden rounded-full border-4 border-surface-muted bg-gradient-to-br from-[var(--brand-rust)] to-[var(--brand-ink)] text-3xl font-black text-white">
+              <div className="mx-auto flex size-24 items-center justify-center overflow-hidden rounded-full border-4 border-surface-muted bg-gradient-to-br from-[var(--brand-teal)] to-[var(--brand-ink)] text-3xl font-black text-white">
                 {preview ? <img src={preview} alt="" className="size-full object-cover" /> : initials(form.first_name, form.last_name) || <User className="size-8" />}
               </div>
               <label htmlFor="photo-upload" className="absolute -right-0.5 -bottom-0.5 flex size-8 cursor-pointer items-center justify-center rounded-full border-2 border-card bg-primary text-primary-foreground">

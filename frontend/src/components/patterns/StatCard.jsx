@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
 const TONES = {
-  primary: 'text-primary bg-primary/10',
+  primary: 'text-primary bg-highlight-mint/20',
   info: 'text-info bg-info/10',
   destructive: 'text-destructive bg-destructive/10',
   success: 'text-success bg-success/10',

@@ -45,16 +45,16 @@ export default function ProfilePage() {
       <PageHeader title="My profile" actions={<Button asChild><Link href="/profile/edit">Edit profile</Link></Button>} />
 
       <div className="mb-6 overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
-        <div className="relative h-[120px] bg-gradient-to-br from-[var(--brand-rust)] via-[var(--brand-ink)] to-[var(--brand-amber)]">
+        <div className="relative h-[120px] bg-gradient-to-br from-[var(--brand-teal)] via-[var(--brand-ink)] to-[var(--brand-amber)]">
           <HeartHandshake className="pointer-events-none absolute right-6 -bottom-4 size-20 text-white opacity-15" />
         </div>
         <div className="relative px-6 pb-6">
-          <div className="-mt-11 mb-4 flex size-[88px] items-center justify-center rounded-full border-4 border-card bg-gradient-to-br from-[var(--brand-rust)] to-[var(--brand-ink)] text-3xl font-black text-white shadow-md">
+          <div className="-mt-11 mb-4 flex size-[88px] items-center justify-center rounded-full border-4 border-card bg-gradient-to-br from-[var(--brand-teal)] to-[var(--brand-ink)] text-3xl font-black text-white shadow-md">
             {p.profile_photo_url ? <img src={p.profile_photo_url} alt="avatar" className="size-full rounded-full object-cover" /> : initials(p.first_name, p.last_name)}
           </div>
           <h2 className="mb-1.5 text-2xl font-black text-foreground">{p.first_name} {p.last_name}</h2>
           <div className="flex flex-wrap items-center gap-3">
-            <span className="flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-[13px] font-bold text-primary"><roleMeta.icon className="size-3.5" />{roleMeta.label}</span>
+            <span className="flex items-center gap-1.5 rounded-full bg-highlight-mint/20 px-3 py-1 text-[13px] font-bold text-primary"><roleMeta.icon className="size-3.5" />{roleMeta.label}</span>
             <span className="text-sm text-muted-foreground">{user?.email}</span>
           </div>
         </div>

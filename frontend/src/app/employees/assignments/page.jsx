@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 const STATUS_TONE = {
-  PENDING: 'bg-warning/10 text-warning', ACCEPTED: 'bg-info/10 text-info', IN_PROGRESS: 'bg-primary/10 text-primary',
+  PENDING: 'bg-warning/10 text-warning', ACCEPTED: 'bg-info/10 text-info', IN_PROGRESS: 'bg-highlight-mint/20 text-primary',
   COMPLETED: 'bg-success/10 text-success', REJECTED: 'bg-destructive/10 text-destructive',
 };
 const STATUS_LABEL = { PENDING: 'Pending', ACCEPTED: 'Accepted', IN_PROGRESS: 'In progress', COMPLETED: 'Completed', REJECTED: 'Rejected' };

@@ -20,7 +20,7 @@ export default function InventoryHistoryPage() {
       {item && (
         <div
           className="relative mb-8 flex flex-wrap items-center gap-8 overflow-hidden rounded-xl px-8 py-6 text-white"
-          style={{ background: 'linear-gradient(135deg, var(--brand-ink), var(--brand-rust))' }}
+          style={{ background: 'linear-gradient(135deg, var(--brand-ink), var(--brand-teal))' }}
         >
           <Package className="pointer-events-none absolute right-4 -bottom-2 size-20 text-white/10" />
           <div>

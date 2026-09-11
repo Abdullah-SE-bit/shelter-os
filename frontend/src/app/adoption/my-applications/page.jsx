@@ -13,7 +13,7 @@ import { cn } from '@/lib/utils';
 const STATUS_CONFIG = {
   SUBMITTED: { tone: 'bg-info/10 text-info', icon: Inbox, label: 'Submitted' },
   UNDER_REVIEW: { tone: 'bg-warning/10 text-warning', icon: Search, label: 'Under review' },
-  INTERVIEW_SCHEDULED: { tone: 'bg-primary/10 text-primary', icon: CalendarClock, label: 'Interview' },
+  INTERVIEW_SCHEDULED: { tone: 'bg-highlight-mint/20 text-primary', icon: CalendarClock, label: 'Interview' },
   APPROVED: { tone: 'bg-success/10 text-success', icon: CheckCircle2, label: 'Approved' },
   REJECTED: { tone: 'bg-destructive/10 text-destructive', icon: XCircle, label: 'Rejected' },
   WITHDRAWN: { tone: 'bg-surface-muted text-muted-foreground', icon: Undo2, label: 'Withdrawn' },

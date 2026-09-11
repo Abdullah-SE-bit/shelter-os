@@ -24,7 +24,7 @@ export default function ForgotPasswordPage() {
   if (sent) {
     return (
       <AuthCard className="text-center">
-        <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-primary/10 text-primary">
+        <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-highlight-mint/20 text-primary">
           <Mail className="size-7" />
         </div>
         <h1 className="font-display text-2xl font-bold text-foreground">Check your email</h1>
@@ -41,7 +41,7 @@ export default function ForgotPasswordPage() {
   return (
     <AuthCard>
       <div className="mb-7">
-        <div className="mb-3 flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+        <div className="mb-3 flex size-11 items-center justify-center rounded-xl bg-highlight-mint/20 text-primary">
           <KeyRound className="size-5" />
         </div>
         <h1 className="font-display text-2xl font-bold text-foreground">Forgot password?</h1>

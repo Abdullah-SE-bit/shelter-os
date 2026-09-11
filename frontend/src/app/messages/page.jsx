@@ -19,7 +19,7 @@ function Avatar({ label, size = 40 }) {
   const initial = (label || '?').trim()[0]?.toUpperCase() || '?';
   return (
     <div
-      className="flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-[var(--brand-rust)] to-[var(--brand-ink)] font-extrabold text-white"
+      className="flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-[var(--brand-teal)] to-[var(--brand-ink)] font-extrabold text-white"
       style={{ width: size, height: size, fontSize: Math.round(size * 0.4) }}
     >
       {initial}
@@ -67,7 +67,7 @@ export default function MessagingPage() {
     return (
       <button
         onClick={() => setSelectedConversation(conversation)}
-        className={cn('flex w-full items-center gap-3 rounded-xl border p-3 text-left transition-colors', isSelected ? 'border-primary bg-primary/10' : 'border-border bg-card hover:border-primary/50')}
+        className={cn('flex w-full items-center gap-3 rounded-xl border p-3 text-left transition-colors', isSelected ? 'border-primary bg-highlight-mint/20' : 'border-border bg-card hover:border-primary/50')}
       >
         <Avatar label={conversation.other_user_name} size={42} />
         <div className="min-w-0 flex-1">

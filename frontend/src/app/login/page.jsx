@@ -51,7 +51,7 @@ export default function LoginPage() {
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background p-6">
       <div
         className="pointer-events-none absolute inset-0"
-        style={{ background: 'radial-gradient(ellipse 900px 560px at 50% 46%, color-mix(in srgb, var(--brand-rust) 8%, transparent), transparent 70%)' }}
+        style={{ background: 'radial-gradient(ellipse 900px 560px at 50% 46%, color-mix(in srgb, var(--brand-teal) 8%, transparent), transparent 70%)' }}
       />
 
       <div className="relative flex w-full max-w-[640px] items-center justify-center py-16">
@@ -59,7 +59,7 @@ export default function LoginPage() {
           <div
             className="shelteros-glow-anim size-full rounded-full blur-[90px]"
             style={{
-              background: 'conic-gradient(from 0deg, var(--brand-rust), var(--brand-amber), var(--brand-gold), var(--brand-rust))',
+              background: 'conic-gradient(from 0deg, var(--brand-teal), var(--brand-amber), var(--brand-gold), var(--brand-teal))',
               animation: 'shelteros-spin 24s linear infinite, shelteros-pulse 7s ease-in-out infinite',
             }}
           />
@@ -69,7 +69,7 @@ export default function LoginPage() {
           <div
             className="shelteros-glow-anim size-full rounded-full opacity-50 blur-[70px]"
             style={{
-              background: 'conic-gradient(from 210deg, var(--brand-amber), var(--brand-gold), var(--brand-rust), var(--brand-amber))',
+              background: 'conic-gradient(from 210deg, var(--brand-amber), var(--brand-gold), var(--brand-teal), var(--brand-amber))',
               animation: 'shelteros-spin-rev 17s linear infinite',
             }}
           />
@@ -82,7 +82,7 @@ export default function LoginPage() {
           <div className="mb-7 flex flex-col items-center gap-2.5">
             <div
               className="flex size-11 items-center justify-center rounded-xl"
-              style={{ background: 'linear-gradient(135deg, var(--brand-rust), var(--brand-amber))' }}
+              style={{ background: 'linear-gradient(135deg, var(--brand-teal), var(--brand-amber))' }}
             >
               <HeartHandshake className="size-5 text-white" />
             </div>

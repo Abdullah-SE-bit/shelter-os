@@ -17,7 +17,7 @@ const ACTION_META = {
   CREATE: { icon: Plus, tone: 'bg-success/10 text-success', label: 'CREATE' },
   UPDATE: { icon: Pencil, tone: 'bg-info/10 text-info', label: 'UPDATE' },
   DELETE: { icon: Trash2, tone: 'bg-destructive/10 text-destructive', label: 'DELETE' },
-  LOGIN: { icon: KeyRound, tone: 'bg-primary/10 text-primary', label: 'LOGIN' },
+  LOGIN: { icon: KeyRound, tone: 'bg-highlight-mint/20 text-primary', label: 'LOGIN' },
   LOGOUT: { icon: LogOut, tone: 'bg-surface-muted text-muted-foreground', label: 'LOGOUT' },
   VIEW: { icon: Eye, tone: 'bg-surface-muted text-muted-foreground', label: 'VIEW' },
   CAMPAIGN_COMPLETED: { icon: CheckCircle2, tone: 'bg-success/10 text-success', label: 'CAMPAIGN COMPLETE' },

@@ -62,7 +62,7 @@ export default function BrowsePage() {
 
   return (
     <div>
-      <section className="relative overflow-hidden bg-gradient-to-br from-[var(--brand-ink)] via-[var(--brand-rust)] to-[var(--brand-amber)] px-6 pt-16 pb-20">
+      <section className="relative overflow-hidden bg-gradient-to-br from-[var(--brand-ink)] via-[var(--brand-teal)] to-[var(--brand-amber)] px-6 pt-16 pb-20">
         <div className="relative mx-auto max-w-[1200px]">
           <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/15 px-4 py-1.5 text-[13px] font-bold text-white/90 backdrop-blur-sm">
             <PawPrint className="size-4" />Find your perfect companion
@@ -116,7 +116,7 @@ export default function BrowsePage() {
         <Pagination page={page} totalPages={totalPages} total={total} pageSize={pageSize} onPrev={prevPage} onNext={nextPage} onGoTo={goTo} />
 
         {!user && listings.length > 0 && (
-          <div className="relative mt-12 flex flex-wrap items-center justify-between gap-6 overflow-hidden rounded-2xl bg-gradient-to-br from-[var(--brand-rust)] to-[var(--brand-ink)] p-10">
+          <div className="relative mt-12 flex flex-wrap items-center justify-between gap-6 overflow-hidden rounded-2xl bg-gradient-to-br from-[var(--brand-teal)] to-[var(--brand-ink)] p-10">
             <PawPrint className="pointer-events-none absolute -right-4 -bottom-4 size-32 text-white opacity-10" />
             <div>
               <h2 className="mb-1.5 text-2xl font-bold text-white">Ready to adopt?</h2>

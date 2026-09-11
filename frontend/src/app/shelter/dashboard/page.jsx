@@ -34,7 +34,7 @@ export default function ShelterDashboardPage() {
 
   return (
     <div className="mx-auto max-w-[1200px] px-4 py-6 sm:px-6">
-      <div className="relative mb-6 overflow-hidden rounded-xl border border-border px-6 py-7 sm:px-8" style={{ background: 'linear-gradient(135deg, var(--brand-rust), var(--brand-ink))' }}>
+      <div className="relative mb-6 overflow-hidden rounded-xl border border-border px-6 py-7 sm:px-8" style={{ background: 'linear-gradient(135deg, var(--brand-teal), var(--brand-ink))' }}>
         <PawPrint className="pointer-events-none absolute -right-4 -bottom-6 size-32 text-white/10" strokeWidth={1.5} />
         <p className="text-sm font-medium text-white/70">Shelter dashboard</p>
         <h1 className="mt-1 font-display text-[26px] font-bold text-white">{shelter?.name || 'My shelter'}</h1>

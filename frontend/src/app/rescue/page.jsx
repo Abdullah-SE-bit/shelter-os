@@ -16,7 +16,7 @@ import { cn } from '@/lib/utils';
 
 const URGENCY_TONE = { LOW: 'bg-success/10 text-success', MEDIUM: 'bg-warning/10 text-warning', HIGH: 'bg-warning/10 text-warning', CRITICAL: 'bg-destructive/10 text-destructive' };
 const STATUS_TONE = {
-  PENDING: 'bg-warning/10 text-warning', ASSIGNED: 'bg-info/10 text-info', IN_PROGRESS: 'bg-primary/10 text-primary',
+  PENDING: 'bg-warning/10 text-warning', ASSIGNED: 'bg-info/10 text-info', IN_PROGRESS: 'bg-highlight-mint/20 text-primary',
   RESOLVED: 'bg-success/10 text-success', CANCELLED: 'bg-surface-muted text-muted-foreground',
 };
 

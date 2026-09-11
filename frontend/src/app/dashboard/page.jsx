@@ -160,7 +160,7 @@ export default function DashboardPage() {
 
 function UserRoleIcon({ icon: Icon }) {
   return (
-    <div className="inline-flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+    <div className="inline-flex size-8 items-center justify-center rounded-lg bg-highlight-mint/20 text-primary">
       <Icon className="size-4" />
     </div>
   );

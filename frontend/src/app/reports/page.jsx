@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 
 const TONE_TEXT = { primary: 'text-primary', success: 'text-success', warning: 'text-warning', destructive: 'text-destructive', info: 'text-info' };
 const TONE_BG = { primary: 'bg-primary', success: 'bg-success', warning: 'bg-warning', destructive: 'bg-destructive', info: 'bg-info' };
-const TONE_BG_TINT = { primary: 'bg-primary/10', success: 'bg-success/10', warning: 'bg-warning/10', destructive: 'bg-destructive/10', info: 'bg-info/10' };
+const TONE_BG_TINT = { primary: 'bg-highlight-mint/20', success: 'bg-success/10', warning: 'bg-warning/10', destructive: 'bg-destructive/10', info: 'bg-info/10' };
 
 function StatBar({ label, value, max, tone = 'primary' }) {
   const pct = Math.min(100, ((value || 0) / (max || 1)) * 100);

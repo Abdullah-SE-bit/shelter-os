@@ -49,7 +49,7 @@ export default function TermsPage() {
 
       <div className="mx-auto max-w-[820px] px-6 pt-10 pb-16">
         <div className="mb-8">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/10 px-4 py-1.5">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/25 bg-highlight-mint/20 px-4 py-1.5">
             <ScrollText className="size-3.5 text-primary" />
             <span className="text-[13px] font-semibold text-primary">Legal</span>
           </div>

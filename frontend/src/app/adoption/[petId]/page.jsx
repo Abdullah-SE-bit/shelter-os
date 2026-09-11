@@ -124,7 +124,7 @@ export default function PetAdoptionDetailPage() {
               </div>
             )}
 
-            <div className="rounded-xl bg-gradient-to-br from-[var(--brand-rust)] to-[var(--brand-ink)] p-5 text-center text-white">
+            <div className="rounded-xl bg-gradient-to-br from-[var(--brand-teal)] to-[var(--brand-ink)] p-5 text-center text-white">
               <Home className="mx-auto mb-2 size-8" strokeWidth={1.5} />
               <p className="mb-3 text-[15px] font-bold">{pet.shelter_name || 'Shelter'}</p>
               {canApply && (

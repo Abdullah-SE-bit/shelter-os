@@ -15,7 +15,7 @@ import { cn } from '@/lib/utils';
 const PET_PLACEHOLDER = 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=600&q=80';
 
 const STATUS_TONE = {
-  IN_SHELTER: 'bg-success/10 text-success', FOSTERED: 'bg-info/10 text-info', ADOPTED: 'bg-primary/10 text-primary',
+  IN_SHELTER: 'bg-success/10 text-success', FOSTERED: 'bg-info/10 text-info', ADOPTED: 'bg-highlight-mint/20 text-primary',
   LOST: 'bg-destructive/10 text-destructive', DECEASED: 'bg-surface-muted text-muted-foreground', UNKNOWN: 'bg-warning/10 text-warning',
 };
 
