@@ -10,13 +10,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-const CAT_IMAGES = [
-  'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=800&q=80',
-  'https://images.unsplash.com/photo-1573865526739-10659fec78a5?w=800&q=80',
-  'https://images.unsplash.com/photo-1592194996308-7b43878e84a6?w=800&q=80',
-];
-const randomCat = CAT_IMAGES[Math.floor(Math.random() * CAT_IMAGES.length)];
-
 const ROLE_ROUTES = {
   SUPER_ADMIN: '/dashboard',
   SHELTER_ADMIN: '/shelter/dashboard',
@@ -104,34 +97,55 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-background">
-      {/* Left panel — cat image */}
-      <div className="relative hidden flex-[0_0_46%] overflow-hidden md:block">
-        <img src={randomCat} alt="A cat looking up" className="size-full object-cover" />
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background p-6">
+      {/* faint ambient vignette behind the whole page */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{ background: 'radial-gradient(ellipse 900px 560px at 50% 46%, color-mix(in srgb, var(--brand-rust) 8%, transparent), transparent 70%)' }}
+      />
+
+      {/* glow + card */}
+      <div className="relative flex w-full max-w-[640px] items-center justify-center py-16">
+        {/* ambient glow blob 1 */}
+        <div className="pointer-events-none absolute top-1/2 left-1/2 size-[560px] -translate-x-1/2 -translate-y-1/2">
+          <div
+            className="shelteros-glow-anim size-full rounded-full blur-[90px]"
+            style={{
+              background: 'conic-gradient(from 0deg, var(--brand-rust), var(--brand-amber), var(--brand-gold), var(--brand-rust))',
+              animation: 'shelteros-spin 24s linear infinite, shelteros-pulse 7s ease-in-out infinite',
+            }}
+          />
+        </div>
+
+        {/* ambient glow blob 2 (counter-rotating, smaller) */}
+        <div className="pointer-events-none absolute top-1/2 left-1/2 size-[400px] -translate-x-1/2 -translate-y-1/2">
+          <div
+            className="shelteros-glow-anim size-full rounded-full opacity-50 blur-[70px]"
+            style={{
+              background: 'conic-gradient(from 210deg, var(--brand-amber), var(--brand-gold), var(--brand-rust), var(--brand-amber))',
+              animation: 'shelteros-spin-rev 17s linear infinite',
+            }}
+          />
+        </div>
+
+        {/* card */}
         <div
-          className="absolute inset-0 flex flex-col items-start justify-end p-12"
-          style={{ background: 'linear-gradient(135deg, rgba(23,21,20,0.65) 0%, rgba(23,21,20,0.35) 100%)' }}
+          className="shelteros-glow-anim relative z-10 w-full max-w-[440px] rounded-[20px] border border-border bg-card p-10"
+          style={{ animation: 'shelteros-card-glow 5s ease-in-out infinite' }}
         >
-          <div className="mb-auto flex items-center gap-3 pt-8">
-            <div className="flex size-11 items-center justify-center rounded-xl border border-white/25 bg-white/15 backdrop-blur-sm">
+          {/* logo */}
+          <div className="mb-7 flex flex-col items-center gap-2.5">
+            <div
+              className="flex size-11 items-center justify-center rounded-xl"
+              style={{ background: 'linear-gradient(135deg, var(--brand-rust), var(--brand-amber))' }}
+            >
               <PawPrint className="size-5 text-white" />
             </div>
-            <div className="font-display text-xl font-bold text-white">Shelter OS</div>
+            <div className="font-display text-[17px] font-extrabold tracking-tight text-foreground">Shelter OS</div>
           </div>
 
-          <div className="max-w-[380px] rounded-2xl border border-white/20 bg-white/10 p-6 backdrop-blur-md">
-            <p className="font-display text-lg leading-relaxed text-white italic">
-              "Every cat deserves a loving home. Help us make that happen."
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Right panel — form */}
-      <div className="flex flex-1 items-center justify-center p-8">
-        <div className="w-full max-w-[420px]">
-          <div className="mb-8">
-            <h1 className="font-display text-[28px] font-bold text-foreground">Sign in to your account</h1>
+          <div className="mb-6 text-center">
+            <h1 className="font-display text-[26px] font-bold text-foreground">Sign in to your account</h1>
             <p className="mt-2 text-sm text-muted-foreground">
               Don't have an account?{' '}
               <Link to="/register" className="font-semibold text-primary">

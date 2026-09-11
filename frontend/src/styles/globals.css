@@ -73,3 +73,32 @@
    tokens.css declares them directly under those exact names (Tailwind's own
    theme keys), so its plain :root / [data-theme=dark] values already flow
    into every rounded-*/shadow-* utility without a @theme indirection. */
+
+/* ============================================================
+   Ambient glow keyframes — used by LoginPage's centered auth card
+   (ambient conic-gradient blobs + a pulsing card border glow).
+   Referenced via Tailwind arbitrary `animate-[name_Ns_...]` utilities.
+   ============================================================ */
+@keyframes shelteros-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes shelteros-spin-rev {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
+}
+@keyframes shelteros-pulse {
+  0%, 100% { opacity: .45; }
+  50% { opacity: .8; }
+}
+@keyframes shelteros-card-glow {
+  0%, 100% {
+    box-shadow: var(--shadow-lg), 0 0 36px -8px color-mix(in srgb, var(--brand-rust) 35%, transparent);
+  }
+  50% {
+    box-shadow: var(--shadow-lg), 0 0 54px -6px color-mix(in srgb, var(--brand-amber) 45%, transparent);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .shelteros-glow-anim { animation: none !important; }
+}
