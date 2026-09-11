@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+'use client';
+
+import Link from 'next/link';
 import { Bell, MessageSquare, Search } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import useNotifications from '@/hooks/useNotifications';
-import { messagingApi } from '@/api/messagingApi';
+import { mockConversations } from '@/lib/mock-data/messaging';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import ThemeToggle from './ThemeToggle';
@@ -13,7 +14,7 @@ import MobileSidebar from './MobileSidebar';
 function IconLink({ to, icon: Icon, count, label }) {
   return (
     <Button variant="ghost" size="icon" className="relative" aria-label={label} asChild>
-      <Link to={to}>
+      <Link href={to}>
         <Icon className="size-[18px]" />
         {count > 0 && (
           <Badge
@@ -31,35 +32,14 @@ function IconLink({ to, icon: Icon, count, label }) {
 export default function Navbar() {
   const { user } = useAuth();
   const { unreadCount } = useNotifications();
-  const [unreadMessages, setUnreadMessages] = useState(0);
-
-  useEffect(() => {
-    if (!user) return;
-    let cancelled = false;
-    const load = async () => {
-      try {
-        const { data } = await messagingApi.listConversations();
-        const list = data?.data?.results || data?.data || [];
-        const total = list.reduce((sum, c) => sum + (c.unread_count || 0), 0);
-        if (!cancelled) setUnreadMessages(total);
-      } catch {
-        // best-effort — badge just stays at 0 if this fails
-      }
-    };
-    load();
-    const interval = setInterval(load, 30000);
-    return () => {
-      cancelled = true;
-      clearInterval(interval);
-    };
-  }, [user]);
+  const unreadMessages = user ? mockConversations.reduce((sum, c) => sum + (c.unread_count || 0), 0) : 0;
 
   return (
     <header className="sticky top-0 z-40 flex h-14 shrink-0 items-center gap-3 border-b border-border bg-surface/95 px-4 backdrop-blur supports-backdrop-filter:bg-surface/75">
       {user ? (
         <MobileSidebar />
       ) : (
-        <Link to="/adoption" className="font-display text-[15px] font-bold text-foreground">
+        <Link href="/adoption" className="font-display text-[15px] font-bold text-foreground">
           Shelter OS
         </Link>
       )}
@@ -92,10 +72,10 @@ export default function Navbar() {
             <>
               <ThemeToggle />
               <Button variant="ghost" asChild>
-                <Link to="/login">Sign in</Link>
+                <Link href="/login">Sign in</Link>
               </Button>
               <Button asChild>
-                <Link to="/register">Create account</Link>
+                <Link href="/register">Create account</Link>
               </Button>
             </>
           )}

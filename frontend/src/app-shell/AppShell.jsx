@@ -1,4 +1,6 @@
-import { useLocation } from 'react-router-dom';
+'use client';
+
+import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Toaster } from '@/components/ui/sonner';
@@ -15,11 +17,11 @@ const NO_FOOTER_PATHS = ['/messages'];
 
 export default function AppShell({ children }) {
   const { user } = useAuth();
-  const location = useLocation();
+  const pathname = usePathname();
 
-  const isFullScreen = FULL_SCREEN_PATHS.some((p) => location.pathname.startsWith(p));
-  const isPublicPage = !user && PUBLIC_PATHS.some((p) => location.pathname.startsWith(p));
-  const hideFooter = NO_FOOTER_PATHS.some((p) => location.pathname.startsWith(p));
+  const isFullScreen = FULL_SCREEN_PATHS.some((p) => pathname.startsWith(p));
+  const isPublicPage = !user && PUBLIC_PATHS.some((p) => pathname.startsWith(p));
+  const hideFooter = NO_FOOTER_PATHS.some((p) => pathname.startsWith(p));
 
   return (
     <TooltipProvider delayDuration={300}>

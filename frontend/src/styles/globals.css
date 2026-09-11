@@ -1,21 +1,7 @@
-@layer legacy;
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @import './tokens.css';
-/* The pre-redesign stylesheet, loaded into its own explicitly LOW-priority
-   layer. `legacy` is declared above before Tailwind's own `theme, base,
-   components, utilities` layers exist, which makes it first (= lowest
-   priority) in the cascade's layer order — so every Tailwind utility and
-   every new component style wins over it automatically, no matter the
-   selector specificity involved. This lets not-yet-migrated pages keep
-   using the old `.btn`/`.cat-card`/etc. classes and CSS vars unchanged
-   while new, redesigned components are never fought over by old rules
-   (e.g. index.css's global `h1,h2,h3{color:var(--text-primary)}` and its
-   own `--text-primary` definition, which previously clobbered the new
-   token of the same name). Delete this import once every page is migrated
-   off the old stylesheet. */
-@import '../index.css' layer(legacy);
 
 /* Tailwind v4: toggle dark utilities off [data-theme="dark"] on <html>,
    not a bare .dark class or prefers-color-scheme media query. */

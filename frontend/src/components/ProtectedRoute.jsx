@@ -1,4 +1,8 @@
-import { Navigate, useLocation, Link } from 'react-router-dom';
+'use client';
+
+import { useEffect } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
+import Link from 'next/link';
 import { ShieldAlert, Lock, Frown, UserRound } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import LoadingSpinner from './LoadingSpinner';
@@ -50,7 +54,7 @@ function VetPendingScreen({ vp }) {
           </div>
         )}
         <Button asChild className="w-full">
-          <Link to="/profile">
+          <Link href="/profile">
             <UserRound className="size-4" />
             Go to my profile
           </Link>
@@ -62,17 +66,20 @@ function VetPendingScreen({ vp }) {
 
 const ProtectedRoute = ({ children, roles = [] }) => {
   const { user, loading } = useAuth();
-  const location = useLocation();
+  const pathname = usePathname();
+  const router = useRouter();
 
-  if (loading) {
+  useEffect(() => {
+    if (!loading && !user) router.replace('/login');
+  }, [loading, user, router]);
+
+  if (loading || !user) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <LoadingSpinner size="lg" text="Loading your account…" />
       </div>
     );
   }
-
-  if (!user) return <Navigate to="/login" state={{ from: location }} replace />;
 
   if (roles.length > 0 && !roles.includes(user.role)) {
     return (
@@ -85,7 +92,7 @@ const ProtectedRoute = ({ children, roles = [] }) => {
           You don't have permission to view this page. Your role is <strong className="text-foreground">{user.role}</strong>.
         </p>
         <Button asChild>
-          <a href="/">Go home</a>
+          <Link href="/">Go home</Link>
         </Button>
       </div>
     );
@@ -94,7 +101,7 @@ const ProtectedRoute = ({ children, roles = [] }) => {
   // Vet gating: until both approval stages pass, only the profile pages are
   // reachable. Everything else shows the pending-approval screen.
   const vetLocked = user.role === 'VET' && user.vet_profile && !user.vet_profile.is_fully_approved;
-  if (vetLocked && !LOCKED_VET_ALLOWED.includes(location.pathname)) {
+  if (vetLocked && !LOCKED_VET_ALLOWED.includes(pathname)) {
     return <VetPendingScreen vp={user.vet_profile} />;
   }
 

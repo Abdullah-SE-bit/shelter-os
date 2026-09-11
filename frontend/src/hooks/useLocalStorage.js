@@ -1,12 +1,16 @@
+'use client';
+
 import { useCallback, useState } from 'react';
 
 /**
  * Persist a piece of state to localStorage. Same call shape as useState,
  * but the initial value is read from (and every update written to) the
- * given localStorage key.
+ * given localStorage key. SSR-safe: falls back to `initialValue` on the
+ * server, where `window` doesn't exist yet.
  */
 export function useLocalStorage(key, initialValue) {
   const [value, setValue] = useState(() => {
+    if (typeof window === 'undefined') return initialValue;
     try {
       const stored = window.localStorage.getItem(key);
       return stored !== null ? JSON.parse(stored) : initialValue;

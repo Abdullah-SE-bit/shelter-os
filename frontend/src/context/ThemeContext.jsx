@@ -1,10 +1,12 @@
+'use client';
+
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 
 const ThemeContext = createContext(null);
 
 const getSystemTheme = () =>
-  window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 
 export const ThemeProvider = ({ children }) => {
   // 'light' | 'dark' | 'system' — the user's explicit preference (or lack of one)

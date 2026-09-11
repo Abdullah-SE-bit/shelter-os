@@ -1,25 +1,8 @@
-# Python
-venv/
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
-*.egg-info/
-
-# Django
-*.log
-local_settings.py
-db.sqlite3
-media/
-
-# Environment variables — NEVER commit these
-.env
-
-# React / Node
+# Next.js / Node
 frontend/node_modules/
-frontend/dist/
-frontend/.env
+frontend/.next/
+frontend/out/
+frontend/.env*.local
 
 # VS Code
 .vscode/
@@ -29,5 +12,5 @@ frontend/.env
 .DS_Store
 Thumbs.db
 
-#kiro files
+# kiro files
 .kiro

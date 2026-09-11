@@ -1,5 +1,7 @@
+'use client';
+
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { ArrowRight, Zap } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { getNavSections, quickActions } from './navConfig';
@@ -14,16 +16,14 @@ import {
 } from '@/components/ui/command';
 
 /**
- * Ctrl/Cmd+K quick navigation. This wave wires it to the same role-aware
- * nav config that drives the Sidebar plus role-gated quick actions — a
- * fast, no-network jump-to-anything. Fanning out to live API search
- * (cats/shelters/users/donations/audit) is a Wave 5 enhancement layered
- * on top of this same dialog, not a replacement for it.
+ * Ctrl/Cmd+K quick navigation, driven by the same role-aware nav config
+ * that drives the Sidebar plus role-gated quick actions — a fast,
+ * no-network jump-to-anything.
  */
 export default function CommandPalette() {
   const [open, setOpen] = useState(false);
   const { user } = useAuth();
-  const navigate = useNavigate();
+  const router = useRouter();
 
   useEffect(() => {
     function onKeyDown(e) {
@@ -50,7 +50,7 @@ export default function CommandPalette() {
 
   const go = (path) => {
     setOpen(false);
-    navigate(path);
+    router.push(path);
   };
 
   if (!user) return null;

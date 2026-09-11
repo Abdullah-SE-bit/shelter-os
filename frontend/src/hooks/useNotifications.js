@@ -1,21 +1,12 @@
-import { useState, useEffect } from 'react';
-import { notificationsApi } from '../api/notificationsApi';
+'use client';
 
+import { useState } from 'react';
+import { mockNotifications } from '@/lib/mock-data/notifications';
+
+// Mock playground: no polling, no backend — just the unread count baked
+// into the static notifications list.
 const useNotifications = () => {
-  const [count, setCount] = useState(0);
-
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const { data } = await notificationsApi.unreadCount();
-        setCount(data.data?.count || 0);
-      } catch {}
-    };
-    load();
-    const interval = setInterval(load, 30000);
-    return () => clearInterval(interval);
-  }, []);
-
+  const [count, setCount] = useState(() => mockNotifications.filter((n) => !n.is_read).length);
   return { unreadCount: count, setCount };
 };
 

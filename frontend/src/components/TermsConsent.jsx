@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 
@@ -13,7 +13,7 @@ export default function TermsConsent({ checked, onChange, id = 'terms-consent' }
       <Checkbox id={id} checked={checked} onCheckedChange={onChange} className="mt-0.5" />
       <Label htmlFor={id} className="text-sm leading-relaxed font-normal text-muted-foreground">
         I have read and agree to the{' '}
-        <Link to="/terms" target="_blank" rel="noopener noreferrer" className="font-medium text-primary underline underline-offset-2">
+        <Link href="/terms" target="_blank" rel="noopener noreferrer" className="font-medium text-primary underline underline-offset-2">
           Terms &amp; Conditions and Licensing Agreement
         </Link>
         .

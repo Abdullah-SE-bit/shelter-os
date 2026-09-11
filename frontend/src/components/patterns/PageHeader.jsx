@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { ChevronLeft } from 'lucide-react';
 
 export default function PageHeader({ title, description, backTo, backLabel, actions }) {
@@ -7,7 +7,7 @@ export default function PageHeader({ title, description, backTo, backLabel, acti
       <div>
         {backTo && (
           <Link
-            to={backTo}
+            href={backTo}
             className="mb-2 inline-flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground"
           >
             <ChevronLeft className="size-4" />

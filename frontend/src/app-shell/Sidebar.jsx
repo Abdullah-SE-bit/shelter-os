@@ -1,6 +1,9 @@
+'use client';
+
 import { useMemo } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { PanelLeftClose, PanelLeftOpen, PawPrint, UserCircle } from 'lucide-react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { PanelLeftClose, PanelLeftOpen, HeartHandshake, UserCircle } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { getNavSections } from './navConfig';
@@ -12,14 +15,14 @@ import {
 } from '@/components/ui/tooltip';
 
 function useActivePath(items) {
-  const location = useLocation();
+  const pathname = usePathname();
   return useMemo(() => {
     const matches = items
       .map((i) => i.path)
-      .filter((p) => location.pathname === p || location.pathname.startsWith(p + '/'))
+      .filter((p) => pathname === p || pathname.startsWith(p + '/'))
       .sort((a, b) => b.length - a.length);
     return matches[0];
-  }, [items, location.pathname]);
+  }, [items, pathname]);
 }
 
 /** The user's nav sections, accounting for the vet-pending lockdown. */
@@ -39,7 +42,7 @@ export function useSidebarSections() {
 function NavItem({ icon: Icon, label, path, active, collapsed, onNavigate }) {
   const link = (
     <Link
-      to={path}
+      href={path}
       onClick={onNavigate}
       className={cn(
         'group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
@@ -74,12 +77,12 @@ export function SidebarContent({ collapsed = false, onNavigate, showBrand = true
       {showBrand && (
         <div className={cn('flex h-14 items-center border-b border-border px-4', collapsed && 'justify-center px-0')}>
           {!collapsed && (
-            <Link to="/dashboard" className="flex items-center gap-2 font-display text-[15px] font-bold text-foreground">
-              <PawPrint className="size-5 text-primary" />
+            <Link href="/dashboard" className="flex items-center gap-2 font-display text-[15px] font-bold text-foreground">
+              <HeartHandshake className="size-5 text-primary" />
               Shelter OS
             </Link>
           )}
-          {collapsed && <PawPrint className="size-5 text-primary" />}
+          {collapsed && <HeartHandshake className="size-5 text-primary" />}
         </div>
       )}
 

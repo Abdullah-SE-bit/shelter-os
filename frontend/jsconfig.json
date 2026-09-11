@@ -5,5 +5,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*", "next-env.d.js"],
+  "exclude": ["node_modules", ".next"]
 }

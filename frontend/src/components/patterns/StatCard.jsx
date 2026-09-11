@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
 const TONES = {
@@ -22,7 +22,7 @@ export default function StatCard({ icon: Icon, value, label, to, tone = 'primary
 
   if (!to) return content;
   return (
-    <Link to={to} className="block">
+    <Link href={to} className="block">
       {content}
     </Link>
   );

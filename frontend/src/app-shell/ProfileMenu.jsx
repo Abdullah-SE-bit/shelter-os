@@ -1,4 +1,6 @@
-import { useNavigate } from 'react-router-dom';
+'use client';
+
+import { useRouter } from 'next/navigation';
 import { LogOut, Settings, UserRound } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -23,7 +25,7 @@ const ROLE_LABELS = {
 
 export default function ProfileMenu() {
   const { user, logout } = useAuth();
-  const navigate = useNavigate();
+  const router = useRouter();
 
   if (!user) return null;
 
@@ -32,9 +34,9 @@ export default function ProfileMenu() {
     : user.email;
   const initial = (user.profile?.first_name?.[0] || user.email?.[0] || '?').toUpperCase();
 
-  const handleLogout = async () => {
-    await logout();
-    navigate('/login');
+  const handleLogout = () => {
+    logout();
+    router.push('/login');
   };
 
   return (
@@ -53,11 +55,11 @@ export default function ProfileMenu() {
           </span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onSelect={() => navigate('/profile')}>
+        <DropdownMenuItem onSelect={() => router.push('/profile')}>
           <UserRound className="size-4" />
           Profile
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => navigate('/profile/edit')}>
+        <DropdownMenuItem onSelect={() => router.push('/profile/edit')}>
           <Settings className="size-4" />
           Account settings
         </DropdownMenuItem>
