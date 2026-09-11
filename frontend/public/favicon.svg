@@ -1,18 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
   <!-- Background circle -->
-  <circle cx="32" cy="32" r="30" fill="#C97B54"/>
-  
-  <!-- Cat paw print -->
-  <g fill="#FFFFFF">
+  <circle cx="32" cy="32" r="30" fill="#16A085"/>
+
+  <!-- Paw print -->
+  <g fill="#FBF9F6">
     <!-- Main pad -->
     <ellipse cx="32" cy="36" rx="8" ry="10"/>
-    
+
     <!-- Top left toe -->
     <ellipse cx="22" cy="24" rx="4" ry="5" transform="rotate(-15 22 24)"/>
-    
+
     <!-- Top middle toe -->
     <ellipse cx="32" cy="22" rx="4" ry="5"/>
-    
+
     <!-- Top right toe -->
     <ellipse cx="42" cy="24" rx="4" ry="5" transform="rotate(15 42 24)"/>
   </g>

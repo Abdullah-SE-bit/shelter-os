@@ -13,7 +13,13 @@ import MobileSidebar from './MobileSidebar';
 
 function IconLink({ to, icon: Icon, count, label }) {
   return (
-    <Button variant="ghost" size="icon" className="relative" aria-label={label} asChild>
+    <Button
+      variant="ghost"
+      size="icon"
+      className="relative text-muted-foreground hover:bg-highlight-mint/30 hover:text-primary"
+      aria-label={label}
+      asChild
+    >
       <Link href={to}>
         <Icon className="size-[18px]" />
         {count > 0 && (

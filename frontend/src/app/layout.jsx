@@ -28,7 +28,7 @@ export default function RootLayout({ children }) {
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
-      <body>
+      <body className="bg-background text-foreground antialiased">
         <ThemeProvider>
           <AuthProvider>
             <AppShell>{children}</AppShell>
