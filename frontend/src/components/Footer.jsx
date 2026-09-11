@@ -1,10 +1,10 @@
 import Link from 'next/link';
-import { HeartHandshake, Mail, Phone, MapPin, Facebook, Instagram, Youtube } from 'lucide-react';
+import { HeartHandshake, Mail, Phone, MapPin, Globe2, Camera, Video } from 'lucide-react';
 
 const SOCIALS = [
-  { label: 'Facebook', Icon: Facebook, href: 'https://www.facebook.com' },
-  { label: 'Instagram', Icon: Instagram, href: 'https://www.instagram.com' },
-  { label: 'YouTube', Icon: Youtube, href: 'https://www.youtube.com' },
+  { label: 'Facebook', Icon: Globe2, href: 'https://www.facebook.com' },
+  { label: 'Instagram', Icon: Camera, href: 'https://www.instagram.com' },
+  { label: 'YouTube', Icon: Video, href: 'https://www.youtube.com' },
 ];
 
 // TODO: replace these placeholder contact details with the real ones.

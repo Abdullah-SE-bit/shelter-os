@@ -1,23 +1,27 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 /**
  * Persist a piece of state to localStorage. Same call shape as useState,
  * but the initial value is read from (and every update written to) the
- * given localStorage key. SSR-safe: falls back to `initialValue` on the
- * server, where `window` doesn't exist yet.
+ * given localStorage key. Always renders `initialValue` on the first pass
+ * (server and client alike) and only swaps in the stored value after
+ * mount, so hydration never diffs against a value only the client could
+ * have known (e.g. a theme or sidebar-collapsed flag from a prior visit).
  */
 export function useLocalStorage(key, initialValue) {
-  const [value, setValue] = useState(() => {
-    if (typeof window === 'undefined') return initialValue;
+  const [value, setValue] = useState(initialValue);
+
+  useEffect(() => {
     try {
       const stored = window.localStorage.getItem(key);
-      return stored !== null ? JSON.parse(stored) : initialValue;
+      if (stored !== null) setValue(JSON.parse(stored));
     } catch {
-      return initialValue;
+      // localStorage unavailable (private mode, quota, etc.) — keep initialValue
     }
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key]);
 
   const setStoredValue = useCallback(
     (next) => {

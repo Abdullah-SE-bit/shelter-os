@@ -11,10 +11,12 @@ const getSystemTheme = () =>
 export const ThemeProvider = ({ children }) => {
   // 'light' | 'dark' | 'system' — the user's explicit preference (or lack of one)
   const [theme, setTheme] = useLocalStorage('shelter-os-theme', 'system');
-  // The actually-applied theme, resolved from `theme` + the OS setting
-  const [resolvedTheme, setResolvedTheme] = useState(() =>
-    theme === 'system' ? getSystemTheme() : theme,
-  );
+  // The actually-applied theme, resolved from `theme` + the OS setting.
+  // Starts 'light' to match the server render exactly; the inline script in
+  // the root layout already paints the correct theme via CSS before this
+  // mounts, so this only has to catch up for React-driven bits (icons, etc)
+  // without diffing against a value the server couldn't have known.
+  const [resolvedTheme, setResolvedTheme] = useState('light');
 
   useEffect(() => {
     const next = theme === 'system' ? getSystemTheme() : theme;

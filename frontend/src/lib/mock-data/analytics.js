@@ -1,11 +1,13 @@
 export const mockDashboardStats = {
-  total_cats: 142, total_shelters: 3, active_volunteers: 41, total_donations: 187300,
-  adoptions_this_month: 12, rescues_this_month: 8, pending_applications: 6, pending_vet_approvals: 1,
-  cats_by_status: { IN_SHELTER: 68, FOSTERED: 22, ADOPTED: 41, LOST: 4, DECEASED: 7 },
+  total_cats: 142, total_shelters: 3, total_volunteers: 41, open_rescues: 5,
+  pending_adoptions: 6, active_lost_alerts: 3,
+  cats_in_shelter: 68, cats_fostered: 22, cats_adopted: 41, cats_lost: 4, cats_deceased: 7,
+  users_by_role: { SUPER_ADMIN: 1, SHELTER_ADMIN: 2, VET: 2, CAT_OWNER: 1, ADOPTER: 2, VOLUNTEER: 2 },
   recent_activity: [
-    { id: 'a1', text: 'Luna (Persian) was checked in at Happy Paws Shelter', at: '2026-09-10T14:00:00Z' },
-    { id: 'a2', text: 'Adoption application approved for Buddy', at: '2026-09-09T11:00:00Z' },
-    { id: 'a3', text: 'New donation of Rs. 10,000 received', at: '2026-08-28T09:00:00Z' },
+    { description: 'Luna (Persian) was checked in at Happy Paws Shelter', timestamp: '2026-09-10T14:00:00Z' },
+    { description: 'Adoption application approved for Buddy', timestamp: '2026-09-09T11:00:00Z' },
+    { description: 'New donation of Rs. 10,000 received', timestamp: '2026-08-28T09:00:00Z' },
+    { description: 'Rescue #R-204 marked resolved', timestamp: '2026-08-25T16:20:00Z' },
   ],
 };
 
