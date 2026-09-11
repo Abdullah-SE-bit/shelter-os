@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ClipboardList, Search, Plus, Link2, Camera, MapPin } from 'lucide-react';
 import { mockFoundReports, mockLostAlerts } from '@/lib/mock-data/lostFound';
-import { mockBreeds } from '@/lib/mock-data/cats';
+import { mockBreeds } from '@/lib/mock-data/pets';
 import usePagination from '@/hooks/usePagination';
 import EmptyState from '@/components/EmptyState';
 import Pagination from '@/components/Pagination';
@@ -20,10 +20,10 @@ import { NativeSelect } from '@/components/ui/native-select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 
-const CAT_PLACEHOLDER = 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400&q=80';
+const PET_PLACEHOLDER = 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400&q=80';
 const STATUS_TONE = { OPEN: 'bg-success text-white', MATCHED: 'bg-warning text-warning-foreground', REUNITED: 'bg-success text-white', SHELTERED: 'bg-info text-white', CLOSED: 'bg-surface-muted text-muted-foreground' };
 const BREED_DONT_KNOW = '__DONT_KNOW__';
-const EMPTY_FORM = { description: '', breed_choice: '', breed_describe: '', color: '', found_latitude: '', found_longitude: '', contact_phone: '', contact_email: '', is_lost_cat: false, possible_lost_alert: '' };
+const EMPTY_FORM = { description: '', breed_choice: '', breed_describe: '', color: '', found_latitude: '', found_longitude: '', contact_phone: '', contact_email: '', is_lost_pet: false, possible_lost_alert: '' };
 
 export default function FoundReportsPage() {
   const router = useRouter();
@@ -99,7 +99,7 @@ export default function FoundReportsPage() {
           {reports.map((rep) => (
             <Link key={rep.id} href={`/lost-found/found/${rep.id}`} className="flex h-full flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
               <div className="relative h-[160px] overflow-hidden bg-surface-muted">
-                <img src={(rep.photos && rep.photos[0]) || CAT_PLACEHOLDER} alt="Found animal" className="size-full object-cover" onError={(e) => { e.currentTarget.src = CAT_PLACEHOLDER; }} />
+                <img src={(rep.photos && rep.photos[0]) || PET_PLACEHOLDER} alt="Found animal" className="size-full object-cover" onError={(e) => { e.currentTarget.src = PET_PLACEHOLDER; }} />
                 <span className={cn('absolute top-3 left-3 rounded-full px-2.5 py-0.5 text-[11px] font-bold', STATUS_TONE[rep.status] || STATUS_TONE.OPEN)}>{rep.status}</span>
                 {rep.match_count > 0 && <span className="absolute top-3 right-3 flex items-center gap-1 rounded-full bg-warning px-2 py-0.5 text-[11px] font-bold text-warning-foreground"><Link2 className="size-3" />{rep.match_count} match{rep.match_count > 1 ? 'es' : ''}</span>}
               </div>
@@ -157,15 +157,15 @@ export default function FoundReportsPage() {
 
           <div className="rounded-lg bg-surface-muted p-3.5">
             <label className="flex cursor-pointer items-center gap-2 text-sm font-bold text-foreground">
-              <Checkbox checked={form.is_lost_cat} onCheckedChange={(v) => set('is_lost_cat', !!v)} />
+              <Checkbox checked={form.is_lost_pet} onCheckedChange={(v) => set('is_lost_pet', !!v)} />
               I think this might be someone's lost pet
             </label>
-            {form.is_lost_cat && (
+            {form.is_lost_pet && (
               <div className="mt-2.5">
                 <Label>Match it to a lost report (optional)</Label>
                 <NativeSelect value={form.possible_lost_alert} onChange={(e) => set('possible_lost_alert', e.target.value)} className="mt-1.5">
                   <option value="">Let the system find matches automatically</option>
-                  {lostOptions.map((a) => <option key={a.id} value={a.id}>{a.title}{a.cat_name ? ` — ${a.cat_name}` : ''}</option>)}
+                  {lostOptions.map((a) => <option key={a.id} value={a.id}>{a.title}{a.pet_name ? ` — ${a.pet_name}` : ''}</option>)}
                 </NativeSelect>
               </div>
             )}

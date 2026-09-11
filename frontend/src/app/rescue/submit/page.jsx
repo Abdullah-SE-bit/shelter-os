@@ -20,7 +20,7 @@ const URGENCY_OPTIONS = [
 
 export default function SubmitRescuePage() {
   const router = useRouter();
-  const [form, setForm] = useState({ description: '', latitude: '', longitude: '', urgency_level: 'MEDIUM', cat_condition_notes: '' });
+  const [form, setForm] = useState({ description: '', latitude: '', longitude: '', urgency_level: 'MEDIUM', pet_condition_notes: '' });
   const [photos, setPhotos] = useState([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -81,7 +81,7 @@ export default function SubmitRescuePage() {
             </div>
             <div>
               <Label htmlFor="rescue-notes">Condition notes</Label>
-              <Textarea id="rescue-notes" value={form.cat_condition_notes} onChange={(e) => set('cat_condition_notes', e.target.value)} placeholder="Injuries, behavior, approximate age…" rows={3} className="mt-1.5" />
+              <Textarea id="rescue-notes" value={form.pet_condition_notes} onChange={(e) => set('pet_condition_notes', e.target.value)} placeholder="Injuries, behavior, approximate age…" rows={3} className="mt-1.5" />
             </div>
           </CardContent>
         </Card>

@@ -1,1 +1,1 @@
-export { default } from '../cats/page';
+export { default } from '../pets/page';

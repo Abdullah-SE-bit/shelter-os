@@ -116,7 +116,7 @@ export default function LocationPicker({
         color: 'var(--text-primary)',
       }}>
         {label}
-        {required && <span style={{ color: 'var(--cat-red)', marginLeft: '0.25rem' }}>*</span>}
+        {required && <span style={{ color: 'var(--pet-red)', marginLeft: '0.25rem' }}>*</span>}
       </label>
 
       {/* City/Address Input */}
@@ -143,7 +143,7 @@ export default function LocationPicker({
             fontFamily: 'inherit',
             transition: 'border-color 0.2s',
           }}
-          onFocus={(e) => e.target.style.borderColor = 'var(--cat-sage)'}
+          onFocus={(e) => e.target.style.borderColor = 'var(--pet-sage)'}
           onBlur={(e) => {
             e.target.style.borderColor = 'var(--border-default)';
           }}
@@ -166,7 +166,7 @@ export default function LocationPicker({
             color: 'var(--text-secondary)',
           }}>
             Latitude
-            {required && <span style={{ color: 'var(--cat-red)', marginLeft: '0.25rem' }}>*</span>}
+            {required && <span style={{ color: 'var(--pet-red)', marginLeft: '0.25rem' }}>*</span>}
           </label>
           <input
             type="number"
@@ -185,7 +185,7 @@ export default function LocationPicker({
               fontFamily: 'monospace',
               transition: 'border-color 0.2s',
             }}
-            onFocus={(e) => e.target.style.borderColor = 'var(--cat-sage)'}
+            onFocus={(e) => e.target.style.borderColor = 'var(--pet-sage)'}
             onBlur={(e) => {
               validateCoordinates();
               e.target.style.borderColor = 'var(--border-default)';
@@ -202,7 +202,7 @@ export default function LocationPicker({
             color: 'var(--text-secondary)',
           }}>
             Longitude
-            {required && <span style={{ color: 'var(--cat-red)', marginLeft: '0.25rem' }}>*</span>}
+            {required && <span style={{ color: 'var(--pet-red)', marginLeft: '0.25rem' }}>*</span>}
           </label>
           <input
             type="number"
@@ -221,7 +221,7 @@ export default function LocationPicker({
               fontFamily: 'monospace',
               transition: 'border-color 0.2s',
             }}
-            onFocus={(e) => e.target.style.borderColor = 'var(--cat-sage)'}
+            onFocus={(e) => e.target.style.borderColor = 'var(--pet-sage)'}
             onBlur={(e) => {
               validateCoordinates();
               e.target.style.borderColor = 'var(--border-default)';
@@ -234,12 +234,12 @@ export default function LocationPicker({
       {error && (
         <div style={{
           padding: '0.75rem',
-          background: 'var(--cat-red-light)',
-          border: '1px solid var(--cat-red)',
+          background: 'var(--pet-red-light)',
+          border: '1px solid var(--pet-red)',
           borderRadius: '10px',
           marginBottom: '0.75rem',
           fontSize: '0.875rem',
-          color: 'var(--cat-red)',
+          color: 'var(--pet-red)',
         }}>
           ⚠️ {error}
         </div>
@@ -257,7 +257,7 @@ export default function LocationPicker({
           onClick={handleGetCurrentLocation}
           style={{
             padding: '0.5rem 1rem',
-            background: 'var(--cat-blue)',
+            background: 'var(--pet-blue)',
             color: 'white',
             border: 'none',
             borderRadius: '8px',
@@ -283,7 +283,7 @@ export default function LocationPicker({
             onClick={handleViewOnMap}
             style={{
               padding: '0.5rem 1rem',
-              background: 'var(--cat-sage)',
+              background: 'var(--pet-sage)',
               color: 'white',
               border: 'none',
               borderRadius: '8px',
@@ -343,7 +343,7 @@ export default function LocationPicker({
           href="https://www.google.com/maps"
           target="_blank"
           rel="noopener noreferrer"
-          style={{ color: 'var(--cat-blue)', textDecoration: 'none' }}
+          style={{ color: 'var(--pet-blue)', textDecoration: 'none' }}
         >
           Google Maps
         </a>

@@ -12,7 +12,7 @@ import { formatDateTime, timeAgo } from '@/utils/dateUtils';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
-const CAT_PLACEHOLDER = 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=600&q=80';
+const PET_PLACEHOLDER = 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=600&q=80';
 const STATUS_BADGE = {
   ACTIVE: { tone: 'bg-destructive/10 text-destructive', icon: Search, label: 'Still lost' },
   RESOLVED: { tone: 'bg-success/10 text-success', icon: PartyPopper, label: 'Resolved — back home' },
@@ -50,8 +50,8 @@ export default function LostAlertDetailPage() {
   );
 
   const badge = STATUS_BADGE[alert.status] || STATUS_BADGE.ACTIVE;
-  const photos = (alert.photos && alert.photos.length) ? alert.photos : [CAT_PLACEHOLDER];
-  const mainPhoto = photos[selectedImg] || CAT_PLACEHOLDER;
+  const photos = (alert.photos && alert.photos.length) ? alert.photos : [PET_PLACEHOLDER];
+  const mainPhoto = photos[selectedImg] || PET_PLACEHOLDER;
 
   return (
     <div className="mx-auto max-w-[720px] px-4 py-6 sm:px-6">
@@ -62,13 +62,13 @@ export default function LostAlertDetailPage() {
       <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[1fr_1.2fr]">
         <div>
           <div className="h-[300px] overflow-hidden rounded-2xl bg-surface-muted shadow-md">
-            <img src={mainPhoto} alt={alert.title} className="size-full object-cover" onError={(e) => { e.currentTarget.src = CAT_PLACEHOLDER; }} />
+            <img src={mainPhoto} alt={alert.title} className="size-full object-cover" onError={(e) => { e.currentTarget.src = PET_PLACEHOLDER; }} />
           </div>
           {photos.length > 1 && (
             <div className="mt-2.5 flex flex-wrap gap-2">
               {photos.map((p, i) => (
                 <button key={i} onClick={() => setSelectedImg(i)} className={cn('size-[60px] shrink-0 overflow-hidden rounded-lg border-2', selectedImg === i ? 'border-primary' : 'border-border')}>
-                  <img src={p} alt="" className="size-full object-cover" onError={(e) => { e.currentTarget.src = CAT_PLACEHOLDER; }} />
+                  <img src={p} alt="" className="size-full object-cover" onError={(e) => { e.currentTarget.src = PET_PLACEHOLDER; }} />
                 </button>
               ))}
             </div>
@@ -78,7 +78,7 @@ export default function LostAlertDetailPage() {
         <div className="flex flex-col gap-4">
           <div>
             <span className={cn('flex w-fit items-center gap-1 rounded-full px-3 py-1 text-[13px] font-bold', badge.tone)}><badge.icon className="size-3.5" />{badge.label}</span>
-            <h2 className="mt-2.5 mb-1 text-2xl font-bold text-foreground">{alert.cat_name || alert.title}</h2>
+            <h2 className="mt-2.5 mb-1 text-2xl font-bold text-foreground">{alert.pet_name || alert.title}</h2>
             <p className="text-[13px] text-muted-foreground">Posted {timeAgo(alert.created_at)} by {alert.reporter_name || 'someone'}</p>
           </div>
 

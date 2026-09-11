@@ -15,7 +15,7 @@ import { Label } from '@/components/ui/label';
 import { NativeSelect } from '@/components/ui/native-select';
 import { cn } from '@/lib/utils';
 
-const CAT_PLACEHOLDER = 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=600&q=80';
+const PET_PLACEHOLDER = 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=600&q=80';
 const STATUS_BADGE = {
   OPEN: { tone: 'bg-success/10 text-success', icon: Search, label: 'Open' },
   MATCHED: { tone: 'bg-warning/10 text-warning', icon: Link2, label: 'Matched' },
@@ -77,7 +77,7 @@ export default function FoundReportDetailPage() {
   );
 
   const badge = STATUS_BADGE[report.status] || STATUS_BADGE.OPEN;
-  const photo = (report.photos && report.photos[0]) || CAT_PLACEHOLDER;
+  const photo = (report.photos && report.photos[0]) || PET_PLACEHOLDER;
 
   return (
     <div className="mx-auto max-w-[720px] px-4 py-6 sm:px-6">
@@ -88,7 +88,7 @@ export default function FoundReportDetailPage() {
       <div className="mb-6 overflow-hidden rounded-2xl border border-border bg-card">
         <div className="flex flex-wrap gap-5 p-5">
           <div className="size-40 shrink-0 overflow-hidden rounded-xl bg-surface-muted">
-            <img src={photo} alt="Found animal" className="size-full object-cover" onError={(e) => { e.currentTarget.src = CAT_PLACEHOLDER; }} />
+            <img src={photo} alt="Found animal" className="size-full object-cover" onError={(e) => { e.currentTarget.src = PET_PLACEHOLDER; }} />
           </div>
           <div className="min-w-[200px] flex-1">
             <span className={cn('flex w-fit items-center gap-1 rounded-full px-3 py-1 text-[13px] font-bold', badge.tone)}><badge.icon className="size-3.5" />{badge.label}</span>
@@ -114,9 +114,9 @@ export default function FoundReportDetailPage() {
             <Button size="sm" onClick={() => setIntakeOpen(true)} disabled={busy}><Home className="size-3.5" />Take into shelter</Button>
           </div>
         )}
-        {report.resolved_cat && (
+        {report.resolved_pet && (
           <div className="border-t border-border px-5 py-4">
-            <Button size="sm" variant="secondary" asChild><Link href={`/cats/${report.resolved_cat}`}>View animal profile →</Link></Button>
+            <Button size="sm" variant="secondary" asChild><Link href={`/pets/${report.resolved_pet}`}>View animal profile →</Link></Button>
           </div>
         )}
       </div>
@@ -132,7 +132,7 @@ export default function FoundReportDetailPage() {
           <div className="mt-2 flex flex-wrap gap-2">
             <NativeSelect value={selectedLost} onChange={(e) => setSelectedLost(e.target.value)} className="min-w-[200px] flex-1">
               <option value="">Select a lost report…</option>
-              {lostOptions.map((a) => <option key={a.id} value={a.id}>{a.title}{a.cat_name ? ` — ${a.cat_name}` : ''}</option>)}
+              {lostOptions.map((a) => <option key={a.id} value={a.id}>{a.title}{a.pet_name ? ` — ${a.pet_name}` : ''}</option>)}
             </NativeSelect>
             <Button onClick={doLink} disabled={busy || !selectedLost}>Link</Button>
           </div>
@@ -148,18 +148,18 @@ export default function FoundReportDetailPage() {
           {matchList.map((m) => {
             const alert = m.lost_alert || {};
             const pct = m.score_pct ?? Math.round((m.score || 0) * 100);
-            const lostPhoto = (alert.photos && alert.photos[0]) || CAT_PLACEHOLDER;
+            const lostPhoto = (alert.photos && alert.photos[0]) || PET_PLACEHOLDER;
             return (
               <div key={m.id} className={cn('flex items-start gap-5 rounded-xl border-2 bg-card p-5', pct >= 80 ? 'border-success/40' : 'border-border')}>
                 <div className="size-[90px] shrink-0 overflow-hidden rounded-xl bg-surface-muted">
-                  <img src={lostPhoto} alt="Lost animal" className="size-full object-cover" onError={(e) => { e.currentTarget.src = CAT_PLACEHOLDER; }} />
+                  <img src={lostPhoto} alt="Lost animal" className="size-full object-cover" onError={(e) => { e.currentTarget.src = PET_PLACEHOLDER; }} />
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="mb-1.5 flex flex-wrap items-center gap-2">
                     <span className={cn('rounded-full px-2.5 py-0.5 text-[13px] font-extrabold', scoreBg(pct), scoreTone(pct))}>{pct}% match</span>
                     <span className="text-[11px] font-bold text-muted-foreground">{m.status}</span>
                   </div>
-                  <p className="mb-1 font-extrabold text-foreground">{alert.title || alert.cat_name || 'Lost animal'}</p>
+                  <p className="mb-1 font-extrabold text-foreground">{alert.title || alert.pet_name || 'Lost animal'}</p>
                   <p className="mb-1.5 text-sm leading-relaxed text-muted-foreground">{(alert.description || '').slice(0, 120)}</p>
                   <p className="text-xs text-muted-foreground">Reported by {alert.reporter_name || 'someone'}{alert.last_seen_at ? ` · last seen ${formatDate(alert.last_seen_at)}` : ''}</p>
 

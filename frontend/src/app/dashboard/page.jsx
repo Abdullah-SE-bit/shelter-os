@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import {
-  Cat,
+  PawPrint,
   Building2,
   HeartHandshake,
   Siren,
@@ -28,26 +28,26 @@ import GreetingBanner from '@/components/patterns/GreetingBanner';
 const ROLE_STATS = [
   { role: 'SHELTER_ADMIN', icon: Building2, label: 'Shelter Admins' },
   { role: 'VET', icon: Stethoscope, label: 'Vets' },
-  { role: 'CAT_OWNER', icon: Cat, label: 'Cat Owners' },
+  { role: 'PET_OWNER', icon: PawPrint, label: 'Pet Owners' },
   { role: 'ADOPTER', icon: Heart, label: 'Adopters' },
-  { role: 'VOLUNTEER', icon: HeartHandshake, label: 'Volunteers' },
+  { role: 'EMPLOYEE', icon: HeartHandshake, label: 'Employees' },
 ];
 
 const QUICK_ACTIONS = [
   { to: '/rescue/submit', icon: SirenIcon, label: 'Report Rescue' },
   { to: '/lost-found/create', icon: Search, label: 'Lost Alert' },
-  { to: '/cats/create', icon: PlusCircle, label: 'Add Cat' },
-  { to: '/shelter/intake', icon: Inbox, label: 'Intake Cat' },
+  { to: '/pets/create', icon: PlusCircle, label: 'Add Pet' },
+  { to: '/shelter/intake', icon: Inbox, label: 'Intake Pet' },
   { to: '/shelter/applications', icon: Heart, label: 'Applications' },
   { to: '/reports', icon: BarChart3, label: 'Reports' },
 ];
 
-const CAT_STATUS_ROWS = [
-  { key: 'cats_in_shelter', label: 'In Shelter' },
-  { key: 'cats_fostered', label: 'Fostered' },
-  { key: 'cats_adopted', label: 'Adopted' },
-  { key: 'cats_lost', label: 'Lost' },
-  { key: 'cats_deceased', label: 'Deceased' },
+const PET_STATUS_ROWS = [
+  { key: 'pets_in_shelter', label: 'In Shelter' },
+  { key: 'pets_fostered', label: 'Fostered' },
+  { key: 'pets_adopted', label: 'Adopted' },
+  { key: 'pets_lost', label: 'Lost' },
+  { key: 'pets_deceased', label: 'Deceased' },
 ];
 
 export default function DashboardPage() {
@@ -63,9 +63,9 @@ export default function DashboardPage() {
       />
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-        <StatCard icon={Cat} value={d.total_cats || 0} label="Total Cats" to="/cats" />
+        <StatCard icon={PawPrint} value={d.total_pets || 0} label="Total Pets" to="/pets" />
         <StatCard icon={Building2} value={d.total_shelters || 0} label="Shelters" to="/shelters" tone="info" />
-        <StatCard icon={HeartHandshake} value={d.total_volunteers || 0} label="Volunteers" to="/volunteers" tone="success" />
+        <StatCard icon={HeartHandshake} value={d.total_employees || 0} label="Employees" to="/employees" tone="success" />
         <StatCard icon={Siren} value={d.open_rescues || 0} label="Open Rescues" to="/rescue" tone="destructive" />
         <StatCard icon={Heart} value={d.pending_adoptions || 0} label="Pending Adoptions" to="/shelter/applications" tone="warning" />
         <StatCard icon={Search} value={d.active_lost_alerts || 0} label="Lost Alerts" to="/lost-found" tone="warning" />
@@ -112,14 +112,14 @@ export default function DashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-sm">
-              <Cat className="size-4 text-muted-foreground" />
-              Cat status breakdown
+              <PawPrint className="size-4 text-muted-foreground" />
+              Pet status breakdown
             </CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col gap-3">
-            {CAT_STATUS_ROWS.map(({ key, label }) => {
+            {PET_STATUS_ROWS.map(({ key, label }) => {
               const count = d[key] || 0;
-              const pct = Math.min(100, (count / (d.total_cats || 1)) * 100);
+              const pct = Math.min(100, (count / (d.total_pets || 1)) * 100);
               return (
                 <div key={key} className="flex items-center gap-3">
                   <span className="w-24 shrink-0 text-sm text-muted-foreground">{label}</span>

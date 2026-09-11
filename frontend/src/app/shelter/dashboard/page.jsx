@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Cat, HeartHandshake, Heart, Package, Inbox, Siren, PawPrint } from 'lucide-react';
+import { HeartHandshake, Heart, Package, Inbox, Siren, PawPrint } from 'lucide-react';
 import { mockShelterDashboard } from '@/lib/mock-data/analytics';
-import { mockCats } from '@/lib/mock-data/cats';
+import { mockPets } from '@/lib/mock-data/pets';
 import { mockAdoptionApplications } from '@/lib/mock-data/adoption';
 import { useAuth } from '@/context/AuthContext';
 import { getShelterById } from '@/lib/mock-data/shelters';
@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import StatCard from '@/components/patterns/StatCard';
 
-const CAT_PLACEHOLDER = 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400&q=80';
+const PET_PLACEHOLDER = 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400&q=80';
 const MY_SHELTER_ID = 'shelter-1';
 
 export default function ShelterDashboardPage() {
@@ -22,12 +22,12 @@ export default function ShelterDashboardPage() {
   const [intakeOpen, setIntakeOpen] = useState(false);
   const shelter = getShelterById(MY_SHELTER_ID);
   const d = mockShelterDashboard;
-  const recentCats = mockCats.filter((c) => c.shelter_id === MY_SHELTER_ID).slice(0, 5);
+  const recentPets = mockPets.filter((c) => c.shelter_id === MY_SHELTER_ID).slice(0, 5);
   const pendingApps = mockAdoptionApplications.filter((a) => a.status === 'UNDER_REVIEW' || a.status === 'SUBMITTED').slice(0, 5);
 
   const stats = [
-    { icon: Cat, label: 'Animals in shelter', value: d.cats_in_care, to: '/cats', tone: 'primary' },
-    { icon: HeartHandshake, label: 'Volunteers', value: d.active_volunteers, to: '/volunteers', tone: 'info' },
+    { icon: PawPrint, label: 'Animals in shelter', value: d.pets_in_care, to: '/pets', tone: 'primary' },
+    { icon: HeartHandshake, label: 'Employees', value: d.active_employees, to: '/employees', tone: 'info' },
     { icon: Heart, label: 'Pending apps', value: d.pending_applications, to: '/shelter/applications', tone: 'success' },
     { icon: Package, label: 'Low stock items', value: d.low_stock_items, to: '/inventory', tone: 'warning' },
   ];
@@ -57,19 +57,19 @@ export default function ShelterDashboardPage() {
       <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-2">
         <Card>
           <CardHeader className="flex-row items-center justify-between space-y-0">
-            <CardTitle className="flex items-center gap-2 text-sm"><Cat className="size-4 text-muted-foreground" />Recent intake</CardTitle>
-            <Link href="/cats" className="text-xs font-semibold text-primary">View all</Link>
+            <CardTitle className="flex items-center gap-2 text-sm"><PawPrint className="size-4 text-muted-foreground" />Recent intake</CardTitle>
+            <Link href="/pets" className="text-xs font-semibold text-primary">View all</Link>
           </CardHeader>
           <CardContent className="flex flex-col">
-            {recentCats.map((cat) => (
-              <Link key={cat.id} href={`/cats/${cat.id}`} className="flex items-center gap-3 border-b border-border py-2 last:border-0">
-                <img src={cat.primary_photo_url || CAT_PLACEHOLDER} alt="" className="size-10 shrink-0 rounded-lg object-cover" onError={(e) => { e.currentTarget.src = CAT_PLACEHOLDER; }} />
+            {recentPets.map((pet) => (
+              <Link key={pet.id} href={`/pets/${pet.id}`} className="flex items-center gap-3 border-b border-border py-2 last:border-0">
+                <img src={pet.primary_photo_url || PET_PLACEHOLDER} alt="" className="size-10 shrink-0 rounded-lg object-cover" onError={(e) => { e.currentTarget.src = PET_PLACEHOLDER; }} />
                 <div className="flex-1">
-                  <div className="text-sm font-semibold text-foreground">{cat.name || 'Unnamed'}</div>
+                  <div className="text-sm font-semibold text-foreground">{pet.name || 'Unnamed'}</div>
                 </div>
               </Link>
             ))}
-            {recentCats.length === 0 && <p className="py-4 text-center text-sm text-muted-foreground">No recent intake</p>}
+            {recentPets.length === 0 && <p className="py-4 text-center text-sm text-muted-foreground">No recent intake</p>}
           </CardContent>
         </Card>
 
@@ -83,7 +83,7 @@ export default function ShelterDashboardPage() {
               <div key={app.id} className="flex items-center justify-between border-b border-border py-2 last:border-0">
                 <div>
                   <div className="text-sm font-semibold text-foreground">{app.applicant_name}</div>
-                  <div className="text-xs text-muted-foreground">for {app.cat_name} · {timeAgo(app.created_at)}</div>
+                  <div className="text-xs text-muted-foreground">for {app.pet_name} · {timeAgo(app.created_at)}</div>
                 </div>
                 <Button size="sm" variant="secondary" asChild><Link href="/shelter/applications">Review</Link></Button>
               </div>
@@ -96,7 +96,7 @@ export default function ShelterDashboardPage() {
       <Modal open={intakeOpen} onClose={() => setIntakeOpen(false)} title="Intake animal" size="sm" footer={<Button variant="secondary" onClick={() => setIntakeOpen(false)}>Close</Button>}>
         <p className="text-sm text-muted-foreground">To intake a new animal, first create the animal profile, then it will be automatically linked to your shelter.</p>
         <Button className="mt-4 w-full" asChild onClick={() => setIntakeOpen(false)}>
-          <Link href="/cats/create"><Cat className="size-4" />Create new animal profile</Link>
+          <Link href="/pets/create"><PawPrint className="size-4" />Create new animal profile</Link>
         </Button>
       </Modal>
     </div>

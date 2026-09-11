@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { CalendarDays, Stethoscope, Syringe, Scissors, ClipboardList, Siren, TriangleAlert, Check, X, Stethoscope as VetIcon, User, Cat } from 'lucide-react';
+import { PawPrint, CalendarDays, Stethoscope, Syringe, Scissors, ClipboardList, Siren, TriangleAlert, Check, X, Stethoscope as VetIcon, User } from 'lucide-react';
 import { mockAppointments } from '@/lib/mock-data/wellness';
-import { mockCats } from '@/lib/mock-data/cats';
+import { mockPets } from '@/lib/mock-data/pets';
 import { mockUsers } from '@/lib/mock-data/users';
 import { useAuth } from '@/context/AuthContext';
 import EmptyState from '@/components/EmptyState';
@@ -24,7 +24,7 @@ const TYPE_ICONS = { CHECKUP: Stethoscope, VACCINATION: Syringe, SURGERY: Scisso
 
 export default function AppointmentsPage() {
   const { user } = useAuth();
-  const canBook = ['CAT_OWNER', 'SHELTER_ADMIN', 'VOLUNTEER', 'ADOPTER'].includes(user?.role);
+  const canBook = ['PET_OWNER', 'SHELTER_ADMIN', 'EMPLOYEE', 'ADOPTER'].includes(user?.role);
   const isVet = user?.role === 'VET';
 
   const [appointments, setAppointments] = useState(mockAppointments);
@@ -37,9 +37,9 @@ export default function AppointmentsPage() {
   const [outcomeSummary, setOutcomeSummary] = useState('');
   const [filterStatus, setFilterStatus] = useState('ALL');
 
-  const [bookForm, setBookForm] = useState({ cat: '', vet: '', appointment_type: 'CHECKUP', scheduled_at: '', notes: '' });
+  const [bookForm, setBookForm] = useState({ pet: '', vet: '', appointment_type: 'CHECKUP', scheduled_at: '', notes: '' });
 
-  const userCats = mockCats;
+  const userPets = mockPets;
   const vets = mockUsers.filter((u) => u.role === 'VET');
 
   const filteredAppointments = filterStatus === 'ALL' ? appointments : appointments.filter((a) => a.status === filterStatus);
@@ -47,16 +47,16 @@ export default function AppointmentsPage() {
 
   const handleBookAppointment = (e) => {
     e.preventDefault();
-    const cat = userCats.find((c) => c.id === bookForm.cat);
+    const pet = userPets.find((c) => c.id === bookForm.pet);
     const vet = vets.find((v) => v.id === bookForm.vet);
     const newAppt = {
-      id: `appt-${Date.now()}`, cat: bookForm.cat, cat_name: cat?.name, vet: bookForm.vet, vet_name: vet ? `${vet.profile.first_name} ${vet.profile.last_name}` : '',
+      id: `appt-${Date.now()}`, pet: bookForm.pet, pet_name: pet?.name, vet: bookForm.vet, vet_name: vet ? `${vet.profile.first_name} ${vet.profile.last_name}` : '',
       owner: user?.id, owner_name: `${user?.profile?.first_name} ${user?.profile?.last_name}`, appointment_type: bookForm.appointment_type,
       status: 'SCHEDULED', scheduled_at: new Date(bookForm.scheduled_at).toISOString(), notes: bookForm.notes,
     };
     setAppointments((a) => [newAppt, ...a]);
     setBookModalOpen(false);
-    setBookForm({ cat: '', vet: '', appointment_type: 'CHECKUP', scheduled_at: '', notes: '' });
+    setBookForm({ pet: '', vet: '', appointment_type: 'CHECKUP', scheduled_at: '', notes: '' });
   };
 
   const updateSelected = (patch) => setAppointments((all) => all.map((a) => (a.id === selectedAppointment.id ? { ...a, ...patch } : a)));
@@ -109,10 +109,10 @@ export default function AppointmentsPage() {
                 <div className="mb-0.5 text-xs text-muted-foreground">Scheduled</div>
                 <div className="text-sm font-semibold text-foreground">{formatDateTime(appointment.scheduled_at)}</div>
               </div>
-              {appointment.cat && (
+              {appointment.pet && (
                 <div>
-                  <div className="mb-0.5 flex items-center gap-1 text-xs text-muted-foreground"><Cat className="size-3" />Animal</div>
-                  <div className="text-sm font-semibold text-foreground">{appointment.cat_name || 'Unnamed'}</div>
+                  <div className="mb-0.5 flex items-center gap-1 text-xs text-muted-foreground"><PawPrint className="size-3" />Animal</div>
+                  <div className="text-sm font-semibold text-foreground">{appointment.pet_name || 'Unnamed'}</div>
                 </div>
               )}
               {isVet && appointment.owner && (
@@ -129,9 +129,9 @@ export default function AppointmentsPage() {
               )}
             </div>
 
-            {isVet && appointment.cat && (
+            {isVet && appointment.pet && (
               <Button size="sm" variant="secondary" className="mt-3" asChild>
-                <Link href={`/cats/${appointment.cat}/medical`}><Stethoscope className="size-3.5" />Open medical record</Link>
+                <Link href={`/pets/${appointment.pet}/medical`}><Stethoscope className="size-3.5" />Open medical record</Link>
               </Button>
             )}
 
@@ -197,9 +197,9 @@ export default function AppointmentsPage() {
         <form id="book-form" onSubmit={handleBookAppointment} className="flex flex-col gap-4">
           <div>
             <Label>Select animal *</Label>
-            <NativeSelect required value={bookForm.cat} onChange={(e) => setBookForm({ ...bookForm, cat: e.target.value })} className="mt-1.5">
+            <NativeSelect required value={bookForm.pet} onChange={(e) => setBookForm({ ...bookForm, pet: e.target.value })} className="mt-1.5">
               <option value="">Choose an animal…</option>
-              {userCats.map((cat) => <option key={cat.id} value={cat.id}>{cat.name || 'Unnamed'}</option>)}
+              {userPets.map((pet) => <option key={pet.id} value={pet.id}>{pet.name || 'Unnamed'}</option>)}
             </NativeSelect>
           </div>
           <div>

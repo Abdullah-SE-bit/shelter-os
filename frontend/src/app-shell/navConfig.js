@@ -2,7 +2,6 @@ import {
   LayoutDashboard,
   Users,
   Stethoscope,
-  Cat,
   Building2,
   CirclePlus,
   HeartHandshake,
@@ -50,7 +49,7 @@ export const navConfig = {
     },
     {
       section: 'Animals',
-      items: [{ icon: Cat, label: 'Cats', path: '/cats' }],
+      items: [{ icon: PawPrint, label: 'Pets', path: '/pets' }],
     },
     {
       section: 'Shelters',
@@ -63,7 +62,7 @@ export const navConfig = {
     {
       section: 'Community',
       items: [
-        { icon: HeartHandshake, label: 'Volunteers', path: '/volunteers' },
+        { icon: HeartHandshake, label: 'Employees', path: '/employees' },
         { icon: Siren, label: 'Rescues', path: '/rescue' },
         { icon: Search, label: 'Lost & Found', path: '/lost-found' },
       ],
@@ -92,7 +91,7 @@ export const navConfig = {
     {
       section: 'Animals',
       items: [
-        { icon: Cat, label: 'Cats', path: '/cats' },
+        { icon: PawPrint, label: 'Pets', path: '/pets' },
         { icon: LogIn, label: 'Intake', path: '/shelter/intake' },
         { icon: LogOut, label: 'Discharge', path: '/shelter/discharge' },
       ],
@@ -100,7 +99,7 @@ export const navConfig = {
     {
       section: 'People',
       items: [
-        { icon: HeartHandshake, label: 'Volunteers', path: '/volunteers' },
+        { icon: HeartHandshake, label: 'Employees', path: '/employees' },
         { icon: PawPrint, label: 'Foster', path: '/foster' },
         { icon: Stethoscope, label: 'Vet Approvals', path: '/admin/vet-approvals' },
       ],
@@ -141,12 +140,12 @@ export const navConfig = {
     { icon: MessageSquare, label: 'Messages', path: '/messages' },
   ],
 
-  VOLUNTEER: [
-    { icon: ClipboardCheck, label: 'Assignments', path: '/volunteers/assignments' },
+  EMPLOYEE: [
+    { icon: ClipboardCheck, label: 'Assignments', path: '/employees/assignments' },
     { icon: UserCircle, label: 'Profile', path: '/profile' },
-    { icon: Cat, label: 'Cats', path: '/cats' },
-    { icon: CirclePlus, label: 'Register My Cat', path: '/cats/register' },
-    { icon: Building2, label: 'Add Shelter Cat', path: '/cats/create' },
+    { icon: PawPrint, label: 'Pets', path: '/pets' },
+    { icon: CirclePlus, label: 'Register My Pet', path: '/pets/register' },
+    { icon: Building2, label: 'Add Shelter Pet', path: '/pets/create' },
     { icon: CalendarClock, label: 'Appointments', path: '/appointments' },
     { icon: Siren, label: 'Rescues', path: '/rescue' },
     { icon: Map, label: 'Map', path: '/maps' },
@@ -154,9 +153,9 @@ export const navConfig = {
     { icon: MessageSquare, label: 'Messages', path: '/messages' },
   ],
 
-  CAT_OWNER: [
-    { icon: Cat, label: 'My Cats', path: '/cats' },
-    { icon: CirclePlus, label: 'Register Cat', path: '/cats/register' },
+  PET_OWNER: [
+    { icon: PawPrint, label: 'My Pets', path: '/pets' },
+    { icon: CirclePlus, label: 'Register Pet', path: '/pets/register' },
     { icon: CalendarClock, label: 'Appointments', path: '/appointments' },
     { icon: Search, label: 'Lost & Found', path: '/lost-found' },
     { icon: Map, label: 'Map', path: '/maps' },
@@ -166,10 +165,10 @@ export const navConfig = {
   ],
 
   ADOPTER: [
-    { icon: Heart, label: 'Browse Cats', path: '/adoption' },
+    { icon: Heart, label: 'Browse Pets', path: '/adoption' },
     { icon: ClipboardList, label: 'My Applications', path: '/adoption/my-applications' },
-    { icon: Cat, label: 'My Cats', path: '/cats' },
-    { icon: CirclePlus, label: 'Register Cat', path: '/cats/register' },
+    { icon: PawPrint, label: 'My Pets', path: '/pets' },
+    { icon: CirclePlus, label: 'Register Pet', path: '/pets/register' },
     { icon: CalendarClock, label: 'Appointments', path: '/appointments' },
     { icon: Search, label: 'Lost & Found', path: '/lost-found' },
     { icon: Map, label: 'Map', path: '/maps' },
@@ -191,21 +190,21 @@ export const quickActions = [
   { label: 'Record Donation', path: '/finance/donations/record', roles: ['SHELTER_ADMIN', 'SUPER_ADMIN'] },
   { label: 'New Intake', path: '/shelter/intake', roles: ['SHELTER_ADMIN'] },
   { label: 'New Discharge', path: '/shelter/discharge', roles: ['SHELTER_ADMIN'] },
-  { label: 'Add Shelter Cat', path: '/cats/create', roles: ['SHELTER_ADMIN', 'SUPER_ADMIN', 'VOLUNTEER'] },
+  { label: 'Add Shelter Pet', path: '/pets/create', roles: ['SHELTER_ADMIN', 'SUPER_ADMIN', 'EMPLOYEE'] },
   {
-    label: 'Register My Cat',
-    path: '/cats/register',
-    roles: ['SUPER_ADMIN', 'SHELTER_ADMIN', 'VET', 'VOLUNTEER', 'CAT_OWNER', 'ADOPTER'],
+    label: 'Register My Pet',
+    path: '/pets/register',
+    roles: ['SUPER_ADMIN', 'SHELTER_ADMIN', 'VET', 'EMPLOYEE', 'PET_OWNER', 'ADOPTER'],
   },
   {
     label: 'Submit Rescue Report',
     path: '/rescue/submit',
-    roles: ['SUPER_ADMIN', 'SHELTER_ADMIN', 'VET', 'VOLUNTEER', 'CAT_OWNER', 'ADOPTER'],
+    roles: ['SUPER_ADMIN', 'SHELTER_ADMIN', 'VET', 'EMPLOYEE', 'PET_OWNER', 'ADOPTER'],
   },
   {
-    label: 'Report Lost Cat',
+    label: 'Report Lost Pet',
     path: '/lost-found/create',
-    roles: ['SUPER_ADMIN', 'SHELTER_ADMIN', 'VET', 'VOLUNTEER', 'CAT_OWNER', 'ADOPTER'],
+    roles: ['SUPER_ADMIN', 'SHELTER_ADMIN', 'VET', 'EMPLOYEE', 'PET_OWNER', 'ADOPTER'],
   },
-  { label: 'Send Message', path: '/messages', roles: ['SUPER_ADMIN', 'SHELTER_ADMIN', 'VET', 'VOLUNTEER', 'CAT_OWNER', 'ADOPTER'] },
+  { label: 'Send Message', path: '/messages', roles: ['SUPER_ADMIN', 'SHELTER_ADMIN', 'VET', 'EMPLOYEE', 'PET_OWNER', 'ADOPTER'] },
 ];

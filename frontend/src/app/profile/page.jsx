@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Crown, Home, Stethoscope, HeartHandshake, Cat, Heart, User, Shield, CheckCircle2, XCircle, MessageSquare, Bell } from 'lucide-react';
+import { PawPrint, Crown, Home, Stethoscope, HeartHandshake, Heart, User, Shield, CheckCircle2, XCircle, MessageSquare, Bell } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import PageHeader from '@/components/patterns/PageHeader';
 import { formatDate } from '@/utils/dateUtils';
@@ -13,8 +13,8 @@ const ROLE_META = {
   SUPER_ADMIN: { icon: Crown, label: 'Super Admin' },
   SHELTER_ADMIN: { icon: Home, label: 'Shelter Admin' },
   VET: { icon: Stethoscope, label: 'Veterinarian' },
-  VOLUNTEER: { icon: HeartHandshake, label: 'Volunteer' },
-  CAT_OWNER: { icon: Cat, label: 'Pet Owner' },
+  EMPLOYEE: { icon: HeartHandshake, label: 'Employee' },
+  PET_OWNER: { icon: PawPrint, label: 'Pet Owner' },
   ADOPTER: { icon: Heart, label: 'Adopter' },
 };
 
@@ -29,7 +29,7 @@ function InfoBlock({ label, value }) {
 
 const QUICK_LINKS = [
   { to: '/adoption/my-applications', Icon: Heart, label: 'My applications' },
-  { to: '/cats', Icon: Cat, label: 'My cats' },
+  { to: '/pets', Icon: PawPrint, label: 'My pets' },
   { to: '/messages', Icon: MessageSquare, label: 'Messages' },
   { to: '/notifications', Icon: Bell, label: 'Notifications' },
 ];

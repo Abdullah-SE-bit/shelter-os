@@ -14,15 +14,15 @@ const STORAGE_KEY = 'shelter-os-mock-role';
 export const MAGIC_LOGINS = {
   'super-admin': ROLES.SUPER_ADMIN,
   'shelter-admin': ROLES.SHELTER_ADMIN,
-  volunteer: ROLES.VOLUNTEER,
+  employee: ROLES.EMPLOYEE,
 };
 
 export const ROLE_HOME = {
   [ROLES.SUPER_ADMIN]: '/dashboard',
   [ROLES.SHELTER_ADMIN]: '/shelter/dashboard',
   [ROLES.VET]: '/appointments',
-  [ROLES.VOLUNTEER]: '/volunteers/assignments',
-  [ROLES.CAT_OWNER]: '/cats',
+  [ROLES.EMPLOYEE]: '/employees/assignments',
+  [ROLES.PET_OWNER]: '/pets',
   [ROLES.ADOPTER]: '/adoption',
 };
 
@@ -43,13 +43,13 @@ const MOCK_USERS = {
     created_at: '2024-02-14T00:00:00Z',
     profile: { first_name: 'Jordan', last_name: 'Blake', bio: 'Running day-to-day operations at Happy Paws Shelter.', phone: '', date_of_birth: '' },
   },
-  [ROLES.VOLUNTEER]: {
-    id: 'mock-volunteer',
-    role: ROLES.VOLUNTEER,
-    email: 'volunteer@shelteros.mock',
+  [ROLES.EMPLOYEE]: {
+    id: 'mock-employee',
+    role: ROLES.EMPLOYEE,
+    email: 'employee@shelteros.mock',
     is_email_verified: true,
     created_at: '2024-05-20T00:00:00Z',
-    profile: { first_name: 'Casey', last_name: 'Nguyen', bio: 'Weekend dog walker and cat socializer.', phone: '', date_of_birth: '' },
+    profile: { first_name: 'Casey', last_name: 'Nguyen', bio: 'Weekend dog walker and pet socializer.', phone: '', date_of_birth: '' },
   },
 };
 

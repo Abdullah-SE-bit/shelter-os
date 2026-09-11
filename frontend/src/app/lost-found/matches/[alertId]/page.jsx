@@ -12,7 +12,7 @@ import { timeAgo } from '@/utils/dateUtils';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
-const CAT_PLACEHOLDER = 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400&q=80';
+const PET_PLACEHOLDER = 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400&q=80';
 
 function scoreTone(pct) { return pct >= 80 ? 'text-success' : pct >= 60 ? 'text-warning' : 'text-muted-foreground'; }
 function scoreBg(pct) { return pct >= 80 ? 'bg-success/10' : pct >= 60 ? 'bg-warning/10' : 'bg-surface-muted'; }
@@ -23,7 +23,7 @@ function MatchCard({ match, isOwner, onConfirm, onReject }) {
   return (
     <div className={cn('flex items-start gap-5 rounded-xl border-2 bg-card p-5', score >= 80 ? 'border-success/40 shadow-sm' : 'border-border')}>
       <div className="size-[100px] shrink-0 overflow-hidden rounded-xl bg-surface-muted">
-        <img src={(match.found_report?.photos && match.found_report.photos[0]) || CAT_PLACEHOLDER} alt="Found animal" className="size-full object-cover" onError={(e) => { e.currentTarget.src = CAT_PLACEHOLDER; }} />
+        <img src={(match.found_report?.photos && match.found_report.photos[0]) || PET_PLACEHOLDER} alt="Found animal" className="size-full object-cover" onError={(e) => { e.currentTarget.src = PET_PLACEHOLDER; }} />
       </div>
 
       <div className="min-w-0 flex-1">

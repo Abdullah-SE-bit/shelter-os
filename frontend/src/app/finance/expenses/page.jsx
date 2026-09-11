@@ -118,8 +118,8 @@ export default function ExpensesPage() {
         <form id="exp-form" onSubmit={handleSave} className="grid grid-cols-2 gap-3.5">
           <div><Label htmlFor="exp-amount">Amount (PKR) *</Label><Input id="exp-amount" required type="number" min="1" value={form.amount} onChange={(e) => set('amount', e.target.value)} className="mt-1.5" /></div>
           <div>
-            <Label htmlFor="exp-cat">Category</Label>
-            <NativeSelect id="exp-cat" value={form.category} onChange={(e) => set('category', e.target.value)} className="mt-1.5">
+            <Label htmlFor="exp-pet">Category</Label>
+            <NativeSelect id="exp-pet" value={form.category} onChange={(e) => set('category', e.target.value)} className="mt-1.5">
               {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
             </NativeSelect>
           </div>

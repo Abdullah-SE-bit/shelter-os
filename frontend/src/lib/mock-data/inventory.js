@@ -1,6 +1,6 @@
 export const mockInventory = [
-  { id: 'inv-1', shelter_id: 'shelter-1', name: 'Dry cat food (10kg)', category: 'FOOD', current_quantity: 24, unit: 'bags', minimum_threshold: 10 },
-  { id: 'inv-2', shelter_id: 'shelter-1', name: 'Cat litter', category: 'CLEANING', current_quantity: 8, unit: 'bags', minimum_threshold: 10 },
+  { id: 'inv-1', shelter_id: 'shelter-1', name: 'Dry pet food (10kg)', category: 'FOOD', current_quantity: 24, unit: 'bags', minimum_threshold: 10 },
+  { id: 'inv-2', shelter_id: 'shelter-1', name: 'Pet litter', category: 'CLEANING', current_quantity: 8, unit: 'bags', minimum_threshold: 10 },
   { id: 'inv-3', shelter_id: 'shelter-1', name: 'Amoxicillin 50mg', category: 'MEDICINE', current_quantity: 40, unit: 'tablets', minimum_threshold: 20 },
   { id: 'inv-4', shelter_id: 'shelter-1', name: 'Cleaning solution', category: 'CLEANING', current_quantity: 5, unit: 'bottles', minimum_threshold: 6 },
   { id: 'inv-5', shelter_id: 'shelter-1', name: 'Dog food (15kg)', category: 'FOOD', current_quantity: 15, unit: 'bags', minimum_threshold: 8 },

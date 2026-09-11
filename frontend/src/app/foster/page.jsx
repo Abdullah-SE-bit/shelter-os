@@ -15,7 +15,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 
-const CAT_PLACEHOLDER = 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400&q=80';
+const PET_PLACEHOLDER = 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400&q=80';
 const STATUS_TONE = { ACTIVE: 'bg-success/10 text-success', COMPLETED: 'bg-info/10 text-info', RETURNED: 'bg-warning/10 text-warning' };
 const STATUS_LABEL = { ACTIVE: 'Active', COMPLETED: 'Completed', RETURNED: 'Returned' };
 
@@ -55,10 +55,10 @@ export default function FosterListPage() {
             return (
               <div key={p.id} className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
                 <div className="relative h-[120px] overflow-hidden bg-surface-muted">
-                  <img src={p.cat_photo || CAT_PLACEHOLDER} alt={p.cat_name} className="size-full object-cover" onError={(e) => { e.currentTarget.src = CAT_PLACEHOLDER; }} />
+                  <img src={p.pet_photo || PET_PLACEHOLDER} alt={p.pet_name} className="size-full object-cover" onError={(e) => { e.currentTarget.src = PET_PLACEHOLDER; }} />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                   <span className={cn('absolute top-2.5 right-2.5 rounded-full px-2 py-0.5 text-[11px] font-bold', STATUS_TONE[p.status] || STATUS_TONE.ACTIVE)}>{STATUS_LABEL[p.status] || p.status}</span>
-                  <Link href={`/cats/${p.cat}`} className="absolute bottom-2.5 left-3.5 text-base font-extrabold text-white">{p.cat_name}</Link>
+                  <Link href={`/pets/${p.pet}`} className="absolute bottom-2.5 left-3.5 text-base font-extrabold text-white">{p.pet_name}</Link>
                 </div>
 
                 <div className="flex flex-col gap-2.5 p-4">
@@ -84,7 +84,7 @@ export default function FosterListPage() {
 
       <Pagination page={page} totalPages={totalPages} total={total} pageSize={pageSize} onPrev={prevPage} onNext={nextPage} onGoTo={goTo} />
 
-      <Modal open={!!updateOpen} onClose={() => setUpdateOpen(null)} title={`Foster update: ${updateOpen?.cat_name}`}
+      <Modal open={!!updateOpen} onClose={() => setUpdateOpen(null)} title={`Foster update: ${updateOpen?.pet_name}`}
         footer={<><Button variant="secondary" onClick={() => setUpdateOpen(null)}>Cancel</Button><Button onClick={handleUpdate} disabled={saving}>{saving ? 'Submitting…' : 'Submit update'}</Button></>}
       >
         <Label>Update notes</Label>

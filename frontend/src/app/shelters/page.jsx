@@ -2,17 +2,17 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { Building2, Cat, MapPin, Search } from 'lucide-react';
+import { PawPrint, Building2, MapPin, Search } from 'lucide-react';
 import { mockShelters } from '@/lib/mock-data/shelters';
-import { mockCats } from '@/lib/mock-data/cats';
-import { mockVolunteers } from '@/lib/mock-data/users';
+import { mockPets } from '@/lib/mock-data/pets';
+import { mockEmployees } from '@/lib/mock-data/users';
 import EmptyState from '@/components/EmptyState';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
 function ShelterCard({ shelter }) {
-  const catCount = mockCats.filter((c) => c.shelter_id === shelter.id).length;
-  const volunteerCount = mockVolunteers.filter((v) => v.shelter_id === shelter.id).length;
+  const petCount = mockPets.filter((c) => c.shelter_id === shelter.id).length;
+  const employeeCount = mockEmployees.filter((v) => v.shelter_id === shelter.id).length;
   return (
     <div className="flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-shadow hover:shadow-md">
       <div className="relative h-36 bg-gradient-to-br from-primary to-[var(--brand-ink)]">
@@ -21,8 +21,8 @@ function ShelterCard({ shelter }) {
           <div className="text-xs font-semibold">{shelter.city || 'Shelter'}</div>
         </div>
         <div className="absolute top-3 right-3 flex items-center gap-1 rounded-full bg-black/50 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur-sm">
-          <Cat className="size-3" />
-          {catCount} animals
+          <PawPrint className="size-3" />
+          {petCount} animals
         </div>
       </div>
 
@@ -45,7 +45,7 @@ function ShelterCard({ shelter }) {
         <div className="mt-1 flex gap-2 rounded-lg bg-surface-muted p-2.5">
           {[
             { label: 'Capacity', value: shelter.capacity || '—' },
-            { label: 'Volunteers', value: volunteerCount },
+            { label: 'Employees', value: employeeCount },
           ].map(({ label, value }) => (
             <div key={label} className="flex-1 text-center">
               <div className="text-lg font-bold text-primary">{value}</div>

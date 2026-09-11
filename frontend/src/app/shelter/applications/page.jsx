@@ -105,7 +105,7 @@ export default function AdminApplicationsPage() {
                     <div className="font-semibold text-foreground">{app.applicant_name}</div>
                     <div className="text-xs text-muted-foreground">{app.applicant_email}</div>
                   </TableCell>
-                  <TableCell><Link href={`/cats/${app.cat}`} className="font-semibold text-primary">{app.cat_name}</Link></TableCell>
+                  <TableCell><Link href={`/pets/${app.pet}`} className="font-semibold text-primary">{app.pet_name}</Link></TableCell>
                   <TableCell><span className={cn('rounded-full px-2.5 py-0.5 text-xs font-semibold', STATUS_TONE[app.status] || STATUS_TONE.SUBMITTED)}>{STATUS_LABEL[app.status] || app.status}</span></TableCell>
                   <TableCell className="text-sm text-muted-foreground">{timeAgo(app.created_at)}</TableCell>
                   <TableCell>{app.compatibility_score && <span className="font-bold text-primary">{Math.round(app.compatibility_score * 100)}%</span>}</TableCell>
@@ -130,7 +130,7 @@ export default function AdminApplicationsPage() {
         {selected && (
           <div className="flex flex-col gap-4">
             <div className="flex gap-4 text-sm text-muted-foreground">
-              <span>Animal: <strong className="text-foreground">{selected.cat_name}</strong></span>
+              <span>Animal: <strong className="text-foreground">{selected.pet_name}</strong></span>
               <span>Applied: <strong className="text-foreground">{formatDate(selected.created_at)}</strong></span>
             </div>
 

@@ -42,10 +42,10 @@ function RescueCard({ report }) {
         </div>
       )}
 
-      {report.assigned_volunteer_name && (
+      {report.assigned_employee_name && (
         <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
           <HeartHandshake className="size-3.5" />
-          Assigned to <strong className="text-foreground">{report.assigned_volunteer_name}</strong>
+          Assigned to <strong className="text-foreground">{report.assigned_employee_name}</strong>
         </div>
       )}
 

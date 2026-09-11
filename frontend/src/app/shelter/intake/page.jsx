@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Cat, HandHeart, Siren, Building2, Baby, Inbox } from 'lucide-react';
+import { PawPrint, HandHeart, Siren, Building2, Baby, Inbox } from 'lucide-react';
 import PageHeader from '@/components/patterns/PageHeader';
 import PhoneInput, { isValidPkMobile } from '@/components/PhoneInput';
 import { Button } from '@/components/ui/button';
@@ -13,7 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
 const INTAKE_REASONS = [
-  { value: 'STRAY', icon: Cat, label: 'Stray' },
+  { value: 'STRAY', icon: PawPrint, label: 'Stray' },
   { value: 'SURRENDER', icon: HandHeart, label: 'Surrender' },
   { value: 'RESCUE', icon: Siren, label: 'Rescue' },
   { value: 'TRANSFER', icon: Building2, label: 'Transfer' },
@@ -23,7 +23,7 @@ const INTAKE_REASONS = [
 export default function IntakePage() {
   const router = useRouter();
   const [form, setForm] = useState({
-    cat_name: '', reason: 'STRAY', intake_date: new Date().toISOString().split('T')[0],
+    pet_name: '', reason: 'STRAY', intake_date: new Date().toISOString().split('T')[0],
     condition_on_arrival: '', intake_notes: '', microchip_number: '',
     found_location: '', surrenderer_name: '', surrenderer_phone: '',
   });
@@ -74,7 +74,7 @@ export default function IntakePage() {
           <CardHeader><CardTitle>Animal information</CardTitle></CardHeader>
           <CardContent className="flex flex-col gap-3.5">
             <div className="grid grid-cols-2 gap-3">
-              <div><Label htmlFor="intake-name">Name (or "Unknown")</Label><Input id="intake-name" value={form.cat_name} onChange={(e) => set('cat_name', e.target.value)} placeholder="Whiskers / Unknown" className="mt-1.5" /></div>
+              <div><Label htmlFor="intake-name">Name (or "Unknown")</Label><Input id="intake-name" value={form.pet_name} onChange={(e) => set('pet_name', e.target.value)} placeholder="Whiskers / Unknown" className="mt-1.5" /></div>
               <div><Label htmlFor="intake-date">Intake date *</Label><Input id="intake-date" required type="date" value={form.intake_date} onChange={(e) => set('intake_date', e.target.value)} className="mt-1.5" /></div>
             </div>
             <div><Label htmlFor="intake-chip">Microchip number</Label><Input id="intake-chip" value={form.microchip_number} onChange={(e) => set('microchip_number', e.target.value)} placeholder="If known" className="mt-1.5" /></div>

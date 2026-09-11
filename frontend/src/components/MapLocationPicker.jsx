@@ -178,8 +178,8 @@ export default function MapLocationPicker({ cityName, cityCenter, latitude, long
             padding: '0.6rem 0.8rem',
             borderRadius: '8px',
             background: 'rgba(200,60,60,0.08)',
-            border: '1px solid var(--cat-red)',
-            color: 'var(--cat-red)',
+            border: '1px solid var(--pet-red)',
+            color: 'var(--pet-red)',
             fontSize: '0.8rem',
             fontWeight: 600,
           }}
@@ -187,7 +187,7 @@ export default function MapLocationPicker({ cityName, cityCenter, latitude, long
           ⚠️ This point is outside {cityName}. Please pick a location within the city.
         </div>
       )}
-      {msg && <div style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: 'var(--cat-red)' }}>{msg}</div>}
+      {msg && <div style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: 'var(--pet-red)' }}>{msg}</div>}
     </div>
   );
 }

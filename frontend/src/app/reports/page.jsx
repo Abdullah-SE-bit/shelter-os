@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Download, Cat, Heart, Siren, HeartHandshake, Gift } from 'lucide-react';
+import { PawPrint, Download, Heart, Siren, HeartHandshake, Gift } from 'lucide-react';
 import { mockReports } from '@/lib/mock-data/analytics';
 import PageHeader from '@/components/patterns/PageHeader';
 import { formatCurrency } from '@/utils/formatters';
@@ -41,8 +41,8 @@ export default function ReportsPage() {
   const [period, setPeriod] = useState('month');
   const r = mockReports;
 
-  const maxBreed = Math.max(...Object.values(r.cats_by_breed || {}).map(Number), 1);
-  const maxStatus = Math.max(...Object.values(r.cats_by_status || {}).map(Number), 1);
+  const maxBreed = Math.max(...Object.values(r.pets_by_breed || {}).map(Number), 1);
+  const maxStatus = Math.max(...Object.values(r.pets_by_status || {}).map(Number), 1);
 
   const handleExport = (type) => {
     alert(`Mock export: ${type}_report.csv (no real file in this demo)`);
@@ -83,28 +83,28 @@ export default function ReportsPage() {
 
       <div className="flex flex-col gap-6">
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-          <NumberCard icon={Cat} label="Total cats" value={r.total_cats || 0} tone="primary" />
+          <NumberCard icon={PawPrint} label="Total pets" value={r.total_pets || 0} tone="primary" />
           <NumberCard icon={Heart} label="Adoptions" value={r.adoptions || 0} tone="success" />
           <NumberCard icon={Siren} label="Rescues" value={r.rescues_resolved || 0} tone="destructive" />
-          <NumberCard icon={HeartHandshake} label="Volunteers" value={r.active_volunteers || 0} tone="info" />
+          <NumberCard icon={HeartHandshake} label="Employees" value={r.active_employees || 0} tone="info" />
           <NumberCard icon={Gift} label="Donations" value={formatCurrency(r.total_donations)} tone="warning" wide />
         </div>
 
         <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
           <div className="rounded-xl border border-border bg-card p-5">
-            <h3 className="mb-5 text-xs font-semibold tracking-wide text-muted-foreground uppercase">Cats by status</h3>
-            {Object.entries(r.cats_by_status || {}).map(([status, count]) => (
+            <h3 className="mb-5 text-xs font-semibold tracking-wide text-muted-foreground uppercase">Pets by status</h3>
+            {Object.entries(r.pets_by_status || {}).map(([status, count]) => (
               <StatBar key={status} label={status.replace(/_/g, ' ')} value={Number(count)} max={maxStatus} tone="primary" />
             ))}
-            {Object.keys(r.cats_by_status || {}).length === 0 && <p className="text-sm text-muted-foreground">No data</p>}
+            {Object.keys(r.pets_by_status || {}).length === 0 && <p className="text-sm text-muted-foreground">No data</p>}
           </div>
 
           <div className="rounded-xl border border-border bg-card p-5">
-            <h3 className="mb-5 text-xs font-semibold tracking-wide text-muted-foreground uppercase">Cats by breed</h3>
-            {Object.entries(r.cats_by_breed || {}).slice(0, 8).map(([breed, count]) => (
+            <h3 className="mb-5 text-xs font-semibold tracking-wide text-muted-foreground uppercase">Pets by breed</h3>
+            {Object.entries(r.pets_by_breed || {}).slice(0, 8).map(([breed, count]) => (
               <StatBar key={breed} label={breed.replace(/_/g, ' ')} value={Number(count)} max={maxBreed} tone="info" />
             ))}
-            {Object.keys(r.cats_by_breed || {}).length === 0 && <p className="text-sm text-muted-foreground">No data</p>}
+            {Object.keys(r.pets_by_breed || {}).length === 0 && <p className="text-sm text-muted-foreground">No data</p>}
           </div>
         </div>
 

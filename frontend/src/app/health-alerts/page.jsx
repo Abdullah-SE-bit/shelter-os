@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Info, TriangleAlert, Siren, Syringe, AlertOctagon, Pill, Stethoscope, Scale, FileText, CheckCircle2, Cat, ChevronRight } from 'lucide-react';
+import { PawPrint, Info, TriangleAlert, Siren, Syringe, AlertOctagon, Pill, Stethoscope, Scale, FileText, CheckCircle2, ChevronRight } from 'lucide-react';
 import { mockHealthAlerts } from '@/lib/mock-data/wellness';
 import EmptyState from '@/components/EmptyState';
 import PageHeader from '@/components/patterns/PageHeader';
@@ -103,9 +103,9 @@ export default function HealthAlertsPage() {
                       </h3>
                     </div>
 
-                    {alert.cat && (
+                    {alert.pet && (
                       <Button size="sm" variant="secondary" asChild>
-                        <Link href={`/cats/${alert.cat}`}><Cat className="size-3.5" />{alert.cat_name || 'View animal'}<ChevronRight className="size-3.5" /></Link>
+                        <Link href={`/pets/${alert.pet}`}><PawPrint className="size-3.5" />{alert.pet_name || 'View animal'}<ChevronRight className="size-3.5" /></Link>
                       </Button>
                     )}
                   </div>

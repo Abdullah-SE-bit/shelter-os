@@ -12,12 +12,12 @@ import { cn } from '@/lib/utils';
 const FILTERS = [
   { value: 'ALL', label: 'All locations', icon: Map },
   { value: 'SHELTER', label: 'Shelters', icon: Building2 },
-  { value: 'LOST_ALERT', label: 'Lost cats', icon: Search },
+  { value: 'LOST_ALERT', label: 'Lost pets', icon: Search },
 ];
 
 const TYPE_META = {
   SHELTER: { icon: Building2, label: 'Shelter', tone: 'border-success/40', chip: 'bg-success/10 text-success' },
-  LOST_ALERT: { icon: Search, label: 'Lost cat', chip: 'bg-warning/10 text-warning', tone: 'border-warning/40' },
+  LOST_ALERT: { icon: Search, label: 'Lost pet', chip: 'bg-warning/10 text-warning', tone: 'border-warning/40' },
 };
 
 export default function MapPage() {
@@ -32,7 +32,7 @@ export default function MapPage() {
       city: s.city, capacity: s.capacity, occupancy: s.current_occupancy,
     })),
     ...alerts.map((a) => ({
-      type: 'LOST_ALERT', id: a.id, name: `Lost: ${a.cat_name || 'Cat'}`, lat: a.last_seen_latitude,
+      type: 'LOST_ALERT', id: a.id, name: `Lost: ${a.pet_name || 'Pet'}`, lat: a.last_seen_latitude,
       lng: a.last_seen_longitude, city: a.last_seen_city, date: a.last_seen_at,
     })),
   ];
@@ -41,7 +41,7 @@ export default function MapPage() {
 
   return (
     <div className="mx-auto max-w-[1200px] px-4 py-6 sm:px-6">
-      <PageHeader title="Location map" description="View shelters and lost cat locations" />
+      <PageHeader title="Location map" description="View shelters and lost pet locations" />
 
       <div className="mb-6 flex flex-wrap gap-2">
         {FILTERS.map(({ value, label, icon: Icon }) => (
@@ -63,7 +63,7 @@ export default function MapPage() {
         <EmptyState
           icon={Map}
           title="No locations found"
-          message={filterType === 'ALL' ? 'No locations with coordinates available yet.' : filterType === 'SHELTER' ? 'No shelters with location data found.' : 'No lost cat alerts with location data found.'}
+          message={filterType === 'ALL' ? 'No locations with coordinates available yet.' : filterType === 'SHELTER' ? 'No shelters with location data found.' : 'No lost pet alerts with location data found.'}
         />
       )}
 
@@ -72,7 +72,7 @@ export default function MapPage() {
           <div className="mb-6 flex items-center gap-2 rounded-xl border border-border bg-card px-5 py-3 text-sm text-muted-foreground">
             <MapPin className="size-4 text-primary" />
             Showing <strong className="text-foreground">{filteredLocations.length}</strong> location{filteredLocations.length !== 1 ? 's' : ''}
-            {filterType !== 'ALL' && ` (${filterType === 'SHELTER' ? 'Shelters' : 'Lost Cats'})`}
+            {filterType !== 'ALL' && ` (${filterType === 'SHELTER' ? 'Shelters' : 'Lost Pets'})`}
           </div>
 
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">

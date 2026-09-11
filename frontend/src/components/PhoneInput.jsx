@@ -53,7 +53,7 @@ export function isEmptyPkMobile(value) {
 
 export default function PhoneInput({ value, onChange, error, id, disabled }) {
   const { prefix, local } = parsePkMobile(value);
-  const errBorder = error ? { borderColor: 'var(--cat-red)' } : undefined;
+  const errBorder = error ? { borderColor: 'var(--pet-red)' } : undefined;
 
   return (
     <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'stretch' }}>
@@ -64,7 +64,7 @@ export default function PhoneInput({ value, onChange, error, id, disabled }) {
           padding: '0 0.7rem',
           borderRadius: '8px',
           border: '1px solid var(--border-default)',
-          background: 'var(--cat-linen)',
+          background: 'var(--pet-linen)',
           fontWeight: 700,
           color: 'var(--text-secondary)',
           whiteSpace: 'nowrap',

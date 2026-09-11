@@ -165,8 +165,8 @@ function AddItemModal({ open, onClose, onSaved }) {
         <div className="grid grid-cols-2 gap-3">
           <div><Label htmlFor="inv-name">Item name *</Label><Input id="inv-name" required value={form.name} onChange={(e) => set('name', e.target.value)} placeholder="Royal Canin Kitten" className="mt-1.5" /></div>
           <div>
-            <Label htmlFor="inv-cat">Category</Label>
-            <NativeSelect id="inv-cat" value={form.category} onChange={(e) => set('category', e.target.value)} className="mt-1.5">
+            <Label htmlFor="inv-pet">Category</Label>
+            <NativeSelect id="inv-pet" value={form.category} onChange={(e) => set('category', e.target.value)} className="mt-1.5">
               {Object.keys(CATEGORIES).map((k) => <option key={k} value={k}>{k}</option>)}
             </NativeSelect>
           </div>

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Heart, Building2, Feather, PawPrint, HandHeart, ClipboardList, Inbox, LogOut } from 'lucide-react';
-import { mockCats } from '@/lib/mock-data/cats';
+import { mockPets } from '@/lib/mock-data/pets';
 import { mockAdoptionApplications } from '@/lib/mock-data/adoption';
 import PageHeader from '@/components/patterns/PageHeader';
 import PhoneInput, { isValidPkMobile } from '@/components/PhoneInput';
@@ -32,7 +32,7 @@ export default function DischargePage() {
   const router = useRouter();
   const [reason, setReason] = useState('ADOPTED');
   const [selectedApp, setSelectedApp] = useState('');
-  const [selectedCat, setSelectedCat] = useState('');
+  const [selectedPet, setSelectedPet] = useState('');
   const [feePaid, setFeePaid] = useState('');
   const [notes, setNotes] = useState('');
   const [recipientName, setRecipientName] = useState('');
@@ -40,7 +40,7 @@ export default function DischargePage() {
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
 
-  const cats = mockCats.filter((c) => c.shelter_id === MY_SHELTER_ID && c.current_status === 'IN_SHELTER');
+  const pets = mockPets.filter((c) => c.shelter_id === MY_SHELTER_ID && c.current_status === 'IN_SHELTER');
   const applications = mockAdoptionApplications.filter((a) => ACTIVE_APP_STATUSES.includes(a.status));
 
   const set = (fn) => (e) => { fn(e.target.value); setError(''); };
@@ -52,7 +52,7 @@ export default function DischargePage() {
       setError("Select the adopter's request — an animal can only be discharged as adopted through an adoption request.");
       return;
     }
-    if (reason !== 'ADOPTED' && !selectedCat) { setError('Please select an animal to discharge.'); return; }
+    if (reason !== 'ADOPTED' && !selectedPet) { setError('Please select an animal to discharge.'); return; }
     if (reason !== 'ADOPTED' && recipientPhone && !isValidPkMobile(recipientPhone)) {
       setError('Enter a valid Pakistani mobile number (+92 3XX XXXXXXX) or leave the recipient phone blank.');
       return;
@@ -116,7 +116,7 @@ export default function DischargePage() {
                     <NativeSelect id="dis-app" value={selectedApp} onChange={set(setSelectedApp)} className="mt-1.5">
                       <option value="">Choose an animal and adopter…</option>
                       {applications.map((a) => (
-                        <option key={a.id} value={a.id}>{a.cat_name || 'Animal'} → {a.applicant_name} ({a.status.replace(/_/g, ' ').toLowerCase()})</option>
+                        <option key={a.id} value={a.id}>{a.pet_name || 'Animal'} → {a.applicant_name} ({a.status.replace(/_/g, ' ').toLowerCase()})</option>
                       ))}
                     </NativeSelect>
                   </div>
@@ -135,12 +135,12 @@ export default function DischargePage() {
             <CardHeader><CardTitle>Animal & details</CardTitle></CardHeader>
             <CardContent className="flex flex-col gap-3.5">
               <div>
-                <Label htmlFor="dis-cat">Animal (in shelter) *</Label>
-                <NativeSelect id="dis-cat" value={selectedCat} onChange={set(setSelectedCat)} className="mt-1.5">
+                <Label htmlFor="dis-pet">Animal (in shelter) *</Label>
+                <NativeSelect id="dis-pet" value={selectedPet} onChange={set(setSelectedPet)} className="mt-1.5">
                   <option value="">Select an animal…</option>
-                  {cats.map((c) => <option key={c.id} value={c.id}>{c.name || 'Unnamed'}{c.breed_label ? ` — ${c.breed_label}` : ''}</option>)}
+                  {pets.map((c) => <option key={c.id} value={c.id}>{c.name || 'Unnamed'}{c.breed_label ? ` — ${c.breed_label}` : ''}</option>)}
                 </NativeSelect>
-                {cats.length === 0 && <p className="mt-1 text-xs text-muted-foreground">No animals are currently in your shelter.</p>}
+                {pets.length === 0 && <p className="mt-1 text-xs text-muted-foreground">No animals are currently in your shelter.</p>}
               </div>
 
               {['TRANSFERRED', 'RETURNED_TO_OWNER'].includes(reason) && (

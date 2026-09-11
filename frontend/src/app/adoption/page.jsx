@@ -2,29 +2,29 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { PawPrint, Cat, Home, Heart, Syringe, Radio, Scissors } from 'lucide-react';
+import { PawPrint, Home, Heart, Syringe, Radio, Scissors } from 'lucide-react';
 import { mockAdoptionListings } from '@/lib/mock-data/adoption';
 import usePagination from '@/hooks/usePagination';
 import EmptyState from '@/components/EmptyState';
 import Pagination from '@/components/Pagination';
-import { formatCurrency, formatCatAge } from '@/utils/formatters';
+import { formatCurrency, formatPetAge } from '@/utils/formatters';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { NativeSelect } from '@/components/ui/native-select';
 
-function CatCard({ cat }) {
+function PetCard({ pet }) {
   return (
-    <Link href={`/adoption/${cat.cat}`} className="group flex h-full flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-shadow hover:shadow-md">
+    <Link href={`/adoption/${pet.pet}`} className="group flex h-full flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-shadow hover:shadow-md">
       <div className="relative h-[220px] overflow-hidden bg-surface-muted">
-        {cat.primary_photo_url ? (
-          <img src={cat.primary_photo_url} alt={cat.name} className="size-full object-cover transition-transform duration-300 group-hover:scale-105" />
+        {pet.primary_photo_url ? (
+          <img src={pet.primary_photo_url} alt={pet.name} className="size-full object-cover transition-transform duration-300 group-hover:scale-105" />
         ) : (
           <div className="flex size-full items-center justify-center bg-gradient-to-br from-surface-muted to-primary/10">
-            <Cat className="size-16 text-muted-foreground" strokeWidth={1} />
+            <PawPrint className="size-16 text-muted-foreground" strokeWidth={1} />
           </div>
         )}
         <span className="absolute top-3 left-3 rounded-full bg-success/90 px-2.5 py-0.5 text-[11px] font-bold tracking-wide text-white uppercase backdrop-blur-sm">Available</span>
-        {cat.is_neutered && (
+        {pet.is_neutered && (
           <span className="absolute top-3 right-3 flex items-center gap-1 rounded-full bg-info/90 px-2 py-0.5 text-[11px] font-bold text-white backdrop-blur-sm">
             <Scissors className="size-3" />Neutered
           </span>
@@ -33,14 +33,14 @@ function CatCard({ cat }) {
 
       <div className="flex flex-1 flex-col gap-2 p-4">
         <div className="flex items-start justify-between gap-2">
-          <h3 className="text-[17px] font-extrabold text-foreground">{cat.name || 'Unnamed'}</h3>
-          <span className="shrink-0 text-[15px] font-extrabold text-primary">{cat.adoption_fee > 0 ? formatCurrency(cat.adoption_fee) : 'Free'}</span>
+          <h3 className="text-[17px] font-extrabold text-foreground">{pet.name || 'Unnamed'}</h3>
+          <span className="shrink-0 text-[15px] font-extrabold text-primary">{pet.adoption_fee > 0 ? formatCurrency(pet.adoption_fee) : 'Free'}</span>
         </div>
-        <p className="text-[13px] font-semibold text-muted-foreground">{cat.breed_label || 'Mixed breed'} · {cat.gender} · {formatCatAge(cat.age_years, cat.age_months)}</p>
-        {cat.shelter_name && <p className="flex items-center gap-1 text-xs text-muted-foreground"><Home className="size-3" />{cat.shelter_name}</p>}
+        <p className="text-[13px] font-semibold text-muted-foreground">{pet.breed_label || 'Mixed breed'} · {pet.gender} · {formatPetAge(pet.age_years, pet.age_months)}</p>
+        {pet.shelter_name && <p className="flex items-center gap-1 text-xs text-muted-foreground"><Home className="size-3" />{pet.shelter_name}</p>}
         <div className="mt-auto flex flex-wrap gap-1.5 pt-1">
-          {cat.is_vaccinated_core && <span className="flex items-center gap-1 rounded-full bg-success/10 px-2 py-0.5 text-[11px] font-bold text-success"><Syringe className="size-3" />Vaccinated</span>}
-          {cat.is_microchipped && <span className="flex items-center gap-1 rounded-full bg-info/10 px-2 py-0.5 text-[11px] font-bold text-info"><Radio className="size-3" />Microchipped</span>}
+          {pet.is_vaccinated_core && <span className="flex items-center gap-1 rounded-full bg-success/10 px-2 py-0.5 text-[11px] font-bold text-success"><Syringe className="size-3" />Vaccinated</span>}
+          {pet.is_microchipped && <span className="flex items-center gap-1 rounded-full bg-info/10 px-2 py-0.5 text-[11px] font-bold text-info"><Radio className="size-3" />Microchipped</span>}
         </div>
       </div>
     </Link>
@@ -75,7 +75,7 @@ export default function BrowsePage() {
             Give a shelter pet the love they deserve.
           </p>
           <div className="flex flex-wrap gap-8">
-            {[{ Icon: Cat, label: `${total || '—'} animals available` }, { Icon: Home, label: 'Verified shelters' }, { Icon: Heart, label: 'Happy adoptions' }].map(({ Icon, label }) => (
+            {[{ Icon: PawPrint, label: `${total || '—'} animals available` }, { Icon: Home, label: 'Verified shelters' }, { Icon: Heart, label: 'Happy adoptions' }].map(({ Icon, label }) => (
               <div key={label} className="flex items-center gap-2 text-white/85">
                 <Icon className="size-[18px]" />
                 <span className="text-sm font-semibold">{label}</span>
@@ -109,7 +109,7 @@ export default function BrowsePage() {
 
         {listings.length > 0 && (
           <div className="mb-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {listings.map((cat) => <CatCard key={cat.cat} cat={cat} />)}
+            {listings.map((pet) => <PetCard key={pet.pet} pet={pet} />)}
           </div>
         )}
 

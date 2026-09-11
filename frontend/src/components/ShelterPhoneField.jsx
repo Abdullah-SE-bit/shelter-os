@@ -52,7 +52,7 @@ export default function ShelterPhoneField({ cityName, value, onChange, error }) 
       : digits.replace(/^0/, '');
   }
 
-  const errBorder = error ? { borderColor: 'var(--cat-red)' } : undefined;
+  const errBorder = error ? { borderColor: 'var(--pet-red)' } : undefined;
 
   const emitLandline = (code, sub) => {
     const c = code ? (code.startsWith('0') ? code : `0${code}`) : '';
@@ -73,8 +73,8 @@ export default function ShelterPhoneField({ cityName, value, onChange, error }) 
       onClick={() => switchMode(m)}
       style={{
         padding: '0.4rem 0.9rem', borderRadius: '999px', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer',
-        border: `1.5px solid ${mode === m ? 'var(--cat-terra)' : 'var(--border-default)'}`,
-        background: mode === m ? 'var(--cat-terra)' : 'var(--surface-card)',
+        border: `1.5px solid ${mode === m ? 'var(--pet-terra)' : 'var(--border-default)'}`,
+        background: mode === m ? 'var(--pet-terra)' : 'var(--surface-card)',
         color: mode === m ? 'white' : 'var(--text-secondary)',
       }}
     >
@@ -98,7 +98,7 @@ export default function ShelterPhoneField({ cityName, value, onChange, error }) 
               title={cityName ? `Landline area code for ${cityName}` : 'Landline area code'}
               style={{
                 display: 'flex', alignItems: 'center', padding: '0 0.7rem', borderRadius: '8px',
-                border: '1px solid var(--border-default)', background: 'var(--cat-linen)',
+                border: '1px solid var(--border-default)', background: 'var(--pet-linen)',
                 fontWeight: 700, color: 'var(--text-secondary)', whiteSpace: 'nowrap',
               }}
             >

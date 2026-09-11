@@ -2,12 +2,12 @@ export const ROLES = {
   SUPER_ADMIN:   'SUPER_ADMIN',
   SHELTER_ADMIN: 'SHELTER_ADMIN',
   VET:           'VET',
-  VOLUNTEER:     'VOLUNTEER',
-  CAT_OWNER:     'CAT_OWNER',
+  EMPLOYEE:     'EMPLOYEE',
+  PET_OWNER:     'PET_OWNER',
   ADOPTER:       'ADOPTER',
 };
 
-export const CAT_STATUSES = {
+export const PET_STATUSES = {
   UNKNOWN:    'UNKNOWN',
   IN_SHELTER: 'IN_SHELTER',
   FOSTERED:   'FOSTERED',
@@ -34,7 +34,7 @@ export const STATUS_CSS = {
   UNKNOWN:    'status-unknown',
 };
 
-export const CAT_PLACEHOLDER_IMAGES = [
+export const PET_PLACEHOLDER_IMAGES = [
   'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400&q=80',
   'https://images.unsplash.com/photo-1573865526739-10659fec78a5?w=400&q=80',
   'https://images.unsplash.com/photo-1592194996308-7b43878e84a6?w=400&q=80',
@@ -42,10 +42,10 @@ export const CAT_PLACEHOLDER_IMAGES = [
   'https://images.unsplash.com/photo-1533738363-b7f9aef128ce?w=400&q=80',
 ];
 
-export const NAV_CAT_FACTS = [
-  'Cats sleep 12–16 hours a day 😴',
-  'A group of cats is called a clowder 🐱',
-  'Cats have 32 muscles in each ear 👂',
-  'A cat\'s purr can heal bones 🦴',
-  'Cats can jump 6× their own length 🐾',
+export const NAV_PET_FACTS = [
+  'Pets can lower stress and blood pressure just by being nearby 💓',
+  'Most shelter pets are fully grown within a year or two 🐾',
+  'A wagging tail or a slow blink can both mean "I trust you" 😊',
+  'Adopted pets often settle in fastest with a consistent daily routine 🏡',
+  'Spaying and neutering helps pets live longer, healthier lives 🩺',
 ];

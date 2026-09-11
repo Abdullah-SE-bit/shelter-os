@@ -82,7 +82,7 @@ export default function TermsPage() {
 
           <Section n="3" title="Description of the Service">
             The Service provides tools for animal registration, medical and vaccination records, adoption
-            applications, rescue coordination, lost &amp; found matching, volunteer and foster management, donations,
+            applications, rescue coordination, lost &amp; found matching, employee and foster management, donations,
             inventory, and related analytics. Features vary by user role and may change over time as the Service
             evolves.
           </Section>

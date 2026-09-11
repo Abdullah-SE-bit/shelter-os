@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Camera, X, Search } from 'lucide-react';
-import { mockBreeds } from '@/lib/mock-data/cats';
+import { mockBreeds } from '@/lib/mock-data/pets';
 import PageHeader from '@/components/patterns/PageHeader';
 import LocationPicker from '@/components/LocationPicker';
 import PhoneInput, { isValidPkMobile } from '@/components/PhoneInput';
@@ -19,7 +19,7 @@ const MAX_PHOTOS = 5;
 export default function CreateLostAlertPage() {
   const router = useRouter();
   const [form, setForm] = useState({
-    title: '', cat_name: '', breed: '', color: '', description: '', last_seen_at: '', last_seen_latitude: '',
+    title: '', pet_name: '', breed: '', color: '', description: '', last_seen_at: '', last_seen_latitude: '',
     last_seen_longitude: '', behavioral_notes: '', contact_phone: '', contact_email: '',
   });
   const [photos, setPhotos] = useState([]);
@@ -99,7 +99,7 @@ export default function CreateLostAlertPage() {
           <CardContent className="flex flex-col gap-3.5">
             <div><Label>Alert title *</Label><Input required value={form.title} onChange={(e) => set('title', e.target.value)} placeholder="e.g. Lost orange tabby near Park Road" className="mt-1.5" /></div>
             <div className="grid grid-cols-2 gap-3">
-              <div><Label>Name</Label><Input value={form.cat_name} onChange={(e) => set('cat_name', e.target.value)} placeholder="e.g. Whiskers" className="mt-1.5" /></div>
+              <div><Label>Name</Label><Input value={form.pet_name} onChange={(e) => set('pet_name', e.target.value)} placeholder="e.g. Whiskers" className="mt-1.5" /></div>
               <div>
                 <Label>Breed</Label>
                 <NativeSelect value={form.breed} onChange={(e) => set('breed', e.target.value)} className="mt-1.5">

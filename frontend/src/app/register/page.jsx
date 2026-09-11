@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Heart, Cat, HeartHandshake, Stethoscope, Mail, Eye, EyeOff, Check, X, Lock } from 'lucide-react';
+import { PawPrint, Heart, HeartHandshake, Stethoscope, Mail, Eye, EyeOff, Check, X, Lock } from 'lucide-react';
 import { mockShelters } from '@/lib/mock-data/shelters';
 import PhoneInput, { isValidPkMobile } from '@/components/PhoneInput';
 import useDocumentTitle from '@/hooks/useDocumentTitle';
@@ -16,8 +16,8 @@ import { cn } from '@/lib/utils';
 
 const ROLES = [
   { value: 'ADOPTER', icon: Heart, label: 'Adopter', desc: 'I want to adopt an animal' },
-  { value: 'CAT_OWNER', icon: Cat, label: 'Pet Owner', desc: 'I already own pets' },
-  { value: 'VOLUNTEER', icon: HeartHandshake, label: 'Volunteer', desc: 'I want to help rescue animals' },
+  { value: 'PET_OWNER', icon: PawPrint, label: 'Pet Owner', desc: 'I already own pets' },
+  { value: 'EMPLOYEE', icon: HeartHandshake, label: 'Employee', desc: 'I want to help rescue animals' },
   { value: 'VET', icon: Stethoscope, label: 'Veterinarian', desc: 'I provide medical care' },
 ];
 
@@ -122,7 +122,7 @@ export default function RegisterPage() {
 
   const validateStep2 = () => {
     const errs = {};
-    if (form.role === 'VOLUNTEER') {
+    if (form.role === 'EMPLOYEE') {
       if (!details.shelter_id) errs.shelter_id = 'Please select a shelter to join.';
     } else if (form.role === 'VET') {
       const digits = details.reg_digits.trim();
@@ -135,7 +135,7 @@ export default function RegisterPage() {
         errs.shelter_id = 'Please select the shelter you will work at.';
       }
       if (details.specializations.length === 0) errs.specializations = 'Select at least one specialization.';
-    } else if (form.role === 'CAT_OWNER') {
+    } else if (form.role === 'PET_OWNER') {
       if (details.phone && !isValidPkMobile(details.phone)) errs.phone = 'Enter a valid Pakistani mobile number.';
     }
     return errs;
@@ -267,7 +267,7 @@ export default function RegisterPage() {
             <>
               <p className="text-center text-sm font-semibold text-foreground">{ROLES.find((r) => r.value === form.role)?.label} details</p>
 
-              {form.role === 'VOLUNTEER' && (
+              {form.role === 'EMPLOYEE' && (
                 <>
                   <div>
                     <Label>Shelter to join *</Label>
@@ -412,7 +412,7 @@ export default function RegisterPage() {
                 </>
               )}
 
-              {form.role === 'CAT_OWNER' && (
+              {form.role === 'PET_OWNER' && (
                 <>
                   <div>
                     <Label>Phone</Label>

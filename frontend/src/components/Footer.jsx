@@ -50,7 +50,7 @@ export default function Footer() {
 
             <p className="mb-3 text-sm text-white/85 italic">"Every animal deserves a loving home."</p>
             <p className="mb-5 text-sm leading-relaxed text-white/70">
-              Shelter OS is an animal-welfare platform connecting shelters, vets, volunteers, and adopters to
+              Shelter OS is an animal-welfare platform connecting shelters, vets, employees, and adopters to
               rescue, care for, and rehome animals in need.
             </p>
 

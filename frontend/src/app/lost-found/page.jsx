@@ -15,7 +15,7 @@ import { Input } from '@/components/ui/input';
 import { NativeSelect } from '@/components/ui/native-select';
 import { cn } from '@/lib/utils';
 
-const CAT_PLACEHOLDER = 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400&q=80';
+const PET_PLACEHOLDER = 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400&q=80';
 const STATUS_TONE = { ACTIVE: 'bg-destructive text-white', RESOLVED: 'bg-success text-white', EXPIRED: 'bg-surface-muted text-muted-foreground' };
 const STATUS_LABEL = { ACTIVE: 'Lost', RESOLVED: 'Resolved', EXPIRED: 'Expired' };
 const FOUND_TONE = { OPEN: 'bg-success/10 text-success', MATCHED: 'bg-warning/10 text-warning', REUNITED: 'bg-success/10 text-success', SHELTERED: 'bg-info/10 text-info', CLOSED: 'bg-surface-muted text-muted-foreground' };
@@ -25,7 +25,7 @@ function LostAlertCard({ alert }) {
   return (
     <Link href={`/lost-found/lost/${alert.id}`} className="flex h-full flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
       <div className="relative h-[180px] overflow-hidden bg-surface-muted">
-        <img src={(alert.photos && alert.photos[0]) || CAT_PLACEHOLDER} alt={alert.title} className="size-full object-cover" onError={(e) => { e.currentTarget.src = CAT_PLACEHOLDER; }} />
+        <img src={(alert.photos && alert.photos[0]) || PET_PLACEHOLDER} alt={alert.title} className="size-full object-cover" onError={(e) => { e.currentTarget.src = PET_PLACEHOLDER; }} />
         <span className={cn('absolute top-3 left-3 rounded-full px-2.5 py-0.5 text-[11px] font-bold tracking-wide uppercase', STATUS_TONE[alert.status] || STATUS_TONE.ACTIVE)}>{STATUS_LABEL[alert.status] || alert.status}</span>
         {alert.match_count > 0 && (
           <span className="absolute top-3 right-3 flex items-center gap-1 rounded-full bg-warning px-2 py-0.5 text-[11px] font-bold text-warning-foreground">
@@ -33,7 +33,7 @@ function LostAlertCard({ alert }) {
           </span>
         )}
         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-3.5 pt-6 pb-2.5">
-          <p className="text-base font-extrabold text-white">{alert.cat_name || alert.title}</p>
+          <p className="text-base font-extrabold text-white">{alert.pet_name || alert.title}</p>
         </div>
       </div>
       <div className="flex flex-1 flex-col gap-2 p-4">
@@ -119,7 +119,7 @@ export default function LostAlertsPage() {
             {pageItems.map((report) => (
               <Link key={report.id} href={`/lost-found/found/${report.id}`} className="flex items-start gap-4 rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary">
                 <div className="size-16 shrink-0 overflow-hidden rounded-lg bg-surface-muted">
-                  <img src={(report.photos && report.photos[0]) || CAT_PLACEHOLDER} alt="Found animal" className="size-full object-cover" onError={(e) => { e.currentTarget.src = CAT_PLACEHOLDER; }} />
+                  <img src={(report.photos && report.photos[0]) || PET_PLACEHOLDER} alt="Found animal" className="size-full object-cover" onError={(e) => { e.currentTarget.src = PET_PLACEHOLDER; }} />
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="mb-1 flex flex-wrap items-center gap-2">

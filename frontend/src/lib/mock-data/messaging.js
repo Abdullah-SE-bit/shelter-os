@@ -8,7 +8,7 @@ export const mockConversations = [
     last_message: "Oliver's follow-up is confirmed for the 20th.", last_message_at: '2026-09-08T12:00:00Z',
   },
   {
-    id: 'conv-3', other_user_name: 'Priya Singh', other_user_role: 'VOLUNTEER', unread_count: 1,
+    id: 'conv-3', other_user_name: 'Priya Singh', other_user_role: 'EMPLOYEE', unread_count: 1,
     last_message: 'I can pick up the kittens tomorrow morning if that works!', last_message_at: '2026-09-07T09:30:00Z',
   },
 ];

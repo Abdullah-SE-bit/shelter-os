@@ -135,7 +135,7 @@ export default function MessagingPage() {
             <Label>Context type</Label>
             <NativeSelect value={contextType} onChange={(e) => setContextType(e.target.value)} className="mt-1.5">
               <option value="GENERAL">General</option>
-              <option value="SHELTER_VOLUNTEER">Shelter & Volunteer</option>
+              <option value="SHELTER_EMPLOYEE">Shelter & Employee</option>
               <option value="SHELTER_ADOPTER">Shelter & Adopter</option>
               <option value="VET_OWNER">Vet & Owner</option>
             </NativeSelect>

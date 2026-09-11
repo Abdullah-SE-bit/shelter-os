@@ -19,7 +19,7 @@ const STATUS_CONFIG = {
   WITHDRAWN: { tone: 'bg-surface-muted text-muted-foreground', icon: Undo2, label: 'Withdrawn' },
 };
 const TIMELINE_STEPS = ['SUBMITTED', 'UNDER_REVIEW', 'INTERVIEW_SCHEDULED', 'APPROVED'];
-const CAT_PLACEHOLDER = 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400&q=80';
+const PET_PLACEHOLDER = 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400&q=80';
 
 export default function MyApplicationsPage() {
   const [applications, setApplications] = useState(mockAdoptionApplications);
@@ -47,12 +47,12 @@ export default function MyApplicationsPage() {
               <div key={app.id} className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
                 <div className="flex flex-wrap items-start gap-4 p-5">
                   <div className="size-20 shrink-0 overflow-hidden rounded-xl bg-surface-muted">
-                    <img src={app.cat_photo || CAT_PLACEHOLDER} alt={app.cat_name} className="size-full object-cover" onError={(e) => { e.currentTarget.src = CAT_PLACEHOLDER; }} />
+                    <img src={app.pet_photo || PET_PLACEHOLDER} alt={app.pet_name} className="size-full object-cover" onError={(e) => { e.currentTarget.src = PET_PLACEHOLDER; }} />
                   </div>
 
                   <div className="min-w-0 flex-1">
                     <div className="mb-1.5 flex flex-wrap items-start justify-between gap-2">
-                      <h3 className="text-[17px] font-extrabold text-foreground">{app.cat_name || 'Animal'}</h3>
+                      <h3 className="text-[17px] font-extrabold text-foreground">{app.pet_name || 'Animal'}</h3>
                       <span className={cn('flex shrink-0 items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold', cfg.tone)}><cfg.icon className="size-3" />{cfg.label}</span>
                     </div>
 

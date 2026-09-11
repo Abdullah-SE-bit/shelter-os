@@ -32,7 +32,7 @@ export default function RescueDetailPage() {
   const [report, setReport] = useState(() => getRescueById(id));
 
   const canAdmin = ['SUPER_ADMIN', 'SHELTER_ADMIN'].includes(user?.role);
-  const canResolve = canAdmin || report?.assigned_volunteer === user?.id;
+  const canResolve = canAdmin || report?.assigned_employee === user?.id;
 
   const handleResolve = () => {
     setSaving(true);
@@ -82,7 +82,7 @@ export default function RescueDetailPage() {
             {[
               { label: 'Reported by', value: report.reporter_name || 'Anonymous' },
               { label: 'Reported at', value: formatDateTime(report.reported_at) },
-              { label: 'Assigned to', value: report.assigned_volunteer_name || '—' },
+              { label: 'Assigned to', value: report.assigned_employee_name || '—' },
               { label: 'Shelter', value: report.assigned_shelter_name || '—' },
               { label: 'Resolved at', value: report.resolved_at ? formatDateTime(report.resolved_at) : '—' },
             ].map(({ label, value }) => (
@@ -110,10 +110,10 @@ export default function RescueDetailPage() {
           </div>
         )}
 
-        {report.cat_condition_notes && (
+        {report.pet_condition_notes && (
           <div className="rounded-xl border border-warning/25 bg-warning/10 p-4">
             <h4 className="mb-2 text-xs font-semibold tracking-wide text-warning uppercase">Condition notes</h4>
-            <p className="text-sm leading-relaxed text-foreground">{report.cat_condition_notes}</p>
+            <p className="text-sm leading-relaxed text-foreground">{report.pet_condition_notes}</p>
           </div>
         )}
 
@@ -147,12 +147,12 @@ export default function RescueDetailPage() {
         {!loadingSuggest && suggestions && (
           <div className="flex flex-col gap-5">
             <div>
-              <h4 className="mb-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">Ranked volunteers</h4>
+              <h4 className="mb-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">Ranked employees</h4>
               <div className="flex flex-col gap-2">
-                {(suggestions.ranked_volunteers || []).map((v, i) => {
+                {(suggestions.ranked_employees || []).map((v, i) => {
                   const RankIcon = RANK_ICONS[i];
                   return (
-                    <div key={v.volunteer_id} className={cn('flex items-center gap-4 rounded-lg border p-3', i === 0 ? 'border-primary/30 bg-primary/5' : 'border-border bg-surface-muted')}>
+                    <div key={v.employee_id} className={cn('flex items-center gap-4 rounded-lg border p-3', i === 0 ? 'border-primary/30 bg-primary/5' : 'border-border bg-surface-muted')}>
                       <span className="flex w-7 justify-center">{RankIcon ? <RankIcon className="size-5 text-primary" /> : <span className="text-sm font-bold text-muted-foreground">{i + 1}</span>}</span>
                       <div className="flex-1">
                         <div className="text-sm font-semibold text-foreground">{v.name}</div>

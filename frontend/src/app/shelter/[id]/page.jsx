@@ -3,11 +3,11 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { Cat, Package, CircleCheck, HeartHandshake, CalendarDays, Phone, Mail, MapPin, Globe, Heart, Pencil, Frown, ArrowRight } from 'lucide-react';
+import { PawPrint, Package, CircleCheck, HeartHandshake, CalendarDays, Phone, Mail, MapPin, Globe, Heart, Pencil, Frown, ArrowRight } from 'lucide-react';
 import { getShelterById } from '@/lib/mock-data/shelters';
-import { mockCats } from '@/lib/mock-data/cats';
+import { mockPets } from '@/lib/mock-data/pets';
 import { mockUsers } from '@/lib/mock-data/users';
-import { mockVolunteers } from '@/lib/mock-data/users';
+import { mockEmployees } from '@/lib/mock-data/users';
 import { useAuth } from '@/context/AuthContext';
 import Modal from '@/components/Modal';
 import ShelterPhoneField, { isValidPkPhone } from '@/components/ShelterPhoneField';
@@ -17,14 +17,14 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { NativeSelect } from '@/components/ui/native-select';
 
-const CAT_PLACEHOLDER = 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400&q=80';
+const PET_PLACEHOLDER = 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400&q=80';
 
 export default function ShelterDetailPage() {
   const { id } = useParams();
   const { user } = useAuth();
   const shelter = getShelterById(id);
-  const cats = mockCats.filter((c) => c.shelter_id === id).slice(0, 8);
-  const volunteerCount = mockVolunteers.filter((v) => v.shelter_id === id).length;
+  const pets = mockPets.filter((c) => c.shelter_id === id).slice(0, 8);
+  const employeeCount = mockEmployees.filter((v) => v.shelter_id === id).length;
   const admins = mockUsers.filter((u) => u.role === 'SHELTER_ADMIN');
 
   const [editOpen, setEditOpen] = useState(false);
@@ -59,10 +59,10 @@ export default function ShelterDetailPage() {
   );
 
   const details = [
-    { icon: Cat, label: 'Animals (occupancy)', value: shelter.current_occupancy ?? '—' },
+    { icon: PawPrint, label: 'Animals (occupancy)', value: shelter.current_occupancy ?? '—' },
     { icon: Package, label: 'Capacity', value: shelter.capacity ?? '—' },
     { icon: CircleCheck, label: 'Available', value: shelter.capacity ? shelter.capacity - shelter.current_occupancy : '—' },
-    { icon: HeartHandshake, label: 'Volunteers', value: volunteerCount },
+    { icon: HeartHandshake, label: 'Employees', value: employeeCount },
     { icon: CalendarDays, label: 'Established', value: shelter.created_at ? `Since ${new Date(shelter.created_at).getFullYear()}` : '—' },
   ];
 
@@ -97,29 +97,29 @@ export default function ShelterDetailPage() {
             <div className="rounded-xl border border-border bg-card p-5">
               <div className="mb-4 flex items-center justify-between">
                 <h2 className="flex items-center gap-2 text-sm font-bold text-foreground">
-                  <Cat className="size-4 text-primary" />
+                  <PawPrint className="size-4 text-primary" />
                   Animals in shelter
                 </h2>
-                <Link href={`/cats?shelter=${id}`} className="flex items-center gap-1 text-xs font-semibold text-primary">
+                <Link href={`/pets?shelter=${id}`} className="flex items-center gap-1 text-xs font-semibold text-primary">
                   See all <ArrowRight className="size-3" />
                 </Link>
               </div>
               <div className="grid grid-cols-4 gap-3">
-                {cats.map((cat) => (
-                  <Link key={cat.id} href={`/cats/${cat.id}`} className="group relative aspect-square overflow-hidden rounded-lg bg-surface-muted">
+                {pets.map((pet) => (
+                  <Link key={pet.id} href={`/pets/${pet.id}`} className="group relative aspect-square overflow-hidden rounded-lg bg-surface-muted">
                     <img
-                      src={cat.primary_photo_url || CAT_PLACEHOLDER}
-                      alt={cat.name}
+                      src={pet.primary_photo_url || PET_PLACEHOLDER}
+                      alt={pet.name}
                       className="size-full object-cover"
-                      onError={(e) => { e.currentTarget.src = CAT_PLACEHOLDER; }}
+                      onError={(e) => { e.currentTarget.src = PET_PLACEHOLDER; }}
                     />
                     <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 to-transparent px-2 py-1.5">
-                      <p className="truncate text-xs font-semibold text-white">{cat.name || '?'}</p>
+                      <p className="truncate text-xs font-semibold text-white">{pet.name || '?'}</p>
                     </div>
                   </Link>
                 ))}
               </div>
-              {cats.length === 0 && <p className="text-center text-sm text-muted-foreground">No animals currently listed</p>}
+              {pets.length === 0 && <p className="text-center text-sm text-muted-foreground">No animals currently listed</p>}
             </div>
           </div>
 

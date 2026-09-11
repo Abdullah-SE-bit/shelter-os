@@ -56,7 +56,7 @@ export default function FosterPlacementsPage() {
                 const days = Math.floor((new Date() - new Date(p.start_date)) / 86400000);
                 return (
                   <TableRow key={p.id}>
-                    <TableCell className="font-bold text-primary">{p.cat_name}</TableCell>
+                    <TableCell className="font-bold text-primary">{p.pet_name}</TableCell>
                     <TableCell>
                       <div className="font-semibold text-foreground">{p.foster_name}</div>
                       {p.foster_phone && <div className="flex items-center gap-1 text-xs text-muted-foreground"><Phone className="size-3" />{p.foster_phone}</div>}

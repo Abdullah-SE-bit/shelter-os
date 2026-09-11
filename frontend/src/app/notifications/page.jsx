@@ -65,10 +65,10 @@ export default function NotificationsPage() {
       </div>
 
       <div className="mb-6 flex gap-2 overflow-x-auto pb-1">
-        {CATEGORIES.map((cat) => (
-          <button key={cat.value} onClick={() => setSelectedCategory(cat.value)}
-            className={cn('flex shrink-0 items-center gap-1.5 rounded-lg border px-3.5 py-2 text-sm font-semibold whitespace-nowrap transition-colors', selectedCategory === cat.value ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card text-muted-foreground')}>
-            <cat.icon className="size-3.5" />{cat.label}
+        {CATEGORIES.map((pet) => (
+          <button key={pet.value} onClick={() => setSelectedCategory(pet.value)}
+            className={cn('flex shrink-0 items-center gap-1.5 rounded-lg border px-3.5 py-2 text-sm font-semibold whitespace-nowrap transition-colors', selectedCategory === pet.value ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card text-muted-foreground')}>
+            <pet.icon className="size-3.5" />{pet.label}
           </button>
         ))}
       </div>
