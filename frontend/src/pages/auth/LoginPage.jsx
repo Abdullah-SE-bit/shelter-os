@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { PawPrint, Eye, EyeOff, Clock, Mail, Loader2, Search } from 'lucide-react';
+import { HeartHandshake, Eye, EyeOff, Clock, Mail, Loader2 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import useDocumentTitle from '@/hooks/useDocumentTitle';
 import { authApi } from '@/api/authApi';
-import { tokenUtils } from '@/utils/tokenUtils';
 import TermsConsent from '@/components/TermsConsent';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,7 +28,6 @@ export default function LoginPage() {
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [guestLoading, setGuestLoading] = useState(false);
   const [showPass, setShowPass] = useState(false);
   const [agreed, setAgreed] = useState(false);
   const [needsVerification, setNeedsVerification] = useState(false);
@@ -77,25 +75,6 @@ export default function LoginPage() {
     }
   };
 
-  const handleGuestAccess = async () => {
-    setError('');
-    if (!agreed) {
-      setError('Please accept the Terms & Conditions and Licensing Agreement to continue.');
-      return;
-    }
-    setGuestLoading(true);
-    try {
-      const res = await authApi.guestSession();
-      const guestData = res.data.data || res.data;
-      tokenUtils.setTokens(guestData.access);
-      window.location.href = '/adoption';
-    } catch (err) {
-      setError(err.response?.data?.error?.message || 'Failed to start guest session. Please try again.');
-    } finally {
-      setGuestLoading(false);
-    }
-  };
-
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background p-6">
       {/* faint ambient vignette behind the whole page */}
@@ -139,7 +118,7 @@ export default function LoginPage() {
               className="flex size-11 items-center justify-center rounded-xl"
               style={{ background: 'linear-gradient(135deg, var(--brand-rust), var(--brand-amber))' }}
             >
-              <PawPrint className="size-5 text-white" />
+              <HeartHandshake className="size-5 text-white" />
             </div>
             <div className="font-display text-[17px] font-extrabold tracking-tight text-foreground">Shelter OS</div>
           </div>
@@ -239,39 +218,6 @@ export default function LoginPage() {
               )}
             </Button>
           </form>
-
-          <div className="my-6 flex items-center gap-4 text-xs text-muted-foreground">
-            <hr className="flex-1 border-border" />
-            or continue as guest
-            <hr className="flex-1 border-border" />
-          </div>
-
-          <Button type="button" variant="outline" onClick={handleGuestAccess} disabled={guestLoading || !agreed} className="w-full">
-            {guestLoading ? (
-              <>
-                <Loader2 className="size-4 animate-spin" />
-                Starting guest session…
-              </>
-            ) : (
-              <>
-                <Search className="size-4" />
-                Browse cats without an account
-              </>
-            )}
-          </Button>
-
-          <div className="mt-8 grid grid-cols-3 gap-3 rounded-xl border border-border bg-surface-muted p-5">
-            {[
-              { value: '500+', label: 'Cats Rescued' },
-              { value: '150+', label: 'Adoptions' },
-              { value: '80+', label: 'Volunteers' },
-            ].map(({ value, label }) => (
-              <div key={label} className="text-center">
-                <div className="text-xl font-bold text-primary">{value}</div>
-                <div className="text-[10px] font-semibold tracking-wide text-muted-foreground uppercase">{label}</div>
-              </div>
-            ))}
-          </div>
         </div>
       </div>
     </div>
