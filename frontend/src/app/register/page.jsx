@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { PawPrint, Heart, HeartHandshake, Stethoscope, Mail, Eye, EyeOff, Check, X, Lock } from 'lucide-react';
+import { PawPrint, Heart, HeartHandshake, Mail, Eye, EyeOff } from 'lucide-react';
 import { mockShelters } from '@/lib/mock-data/shelters';
 import PhoneInput, { isValidPkMobile } from '@/components/PhoneInput';
 import useDocumentTitle from '@/hooks/useDocumentTitle';
@@ -18,18 +18,10 @@ const ROLES = [
   { value: 'ADOPTER', icon: Heart, label: 'Adopter', desc: 'I want to adopt an animal' },
   { value: 'PET_OWNER', icon: PawPrint, label: 'Pet Owner', desc: 'I already own pets' },
   { value: 'EMPLOYEE', icon: HeartHandshake, label: 'Employee', desc: 'I want to help rescue animals' },
-  { value: 'VET', icon: Stethoscope, label: 'Veterinarian', desc: 'I provide medical care' },
 ];
 
 const SKILLS = ['RESCUE', 'TRANSPORT', 'FOSTERING', 'FUNDRAISING', 'MEDICAL_ASSIST', 'EVENT_SUPPORT'];
 const HOUSING = ['HOUSE', 'APARTMENT', 'CONDO', 'FARM', 'OTHER'];
-
-const SPECIALIZATIONS = [
-  'General Medicine', 'Surgery', 'Internal Medicine', 'Dermatology', 'Dentistry',
-  'Cardiology', 'Ophthalmology', 'Oncology', 'Neurology', 'Nutrition', 'Behavior',
-  'Emergency & Critical Care', 'Diagnostic Imaging / Radiology', 'Anesthesiology',
-  'Reproduction / Theriogenology', 'Parasitology', 'Preventive Care & Vaccination', 'Infectious Diseases',
-];
 
 const validateEmail = (email) => (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? null : 'Please enter a valid email address');
 
@@ -65,9 +57,6 @@ export default function RegisterPage() {
   const [form, setForm] = useState({ email: '', password: '', first_name: '', last_name: '', dob: '', role: 'ADOPTER' });
   const [details, setDetails] = useState({
     shelter_id: '', service_radius_km: 10, bio: '', skills: [],
-    reg_digits: '', reg_len: 3, practice_type: 'CLINIC',
-    clinic_name: '', clinic_location: '', clinic_registration_number: '',
-    specializations: [], custom_specialization: '',
     housing_type: 'HOUSE', has_other_pets: false, household_info: '',
     phone: '', address: '', city: '',
   });
@@ -82,26 +71,6 @@ export default function RegisterPage() {
 
   const shelters = mockShelters;
 
-  const toggleSpecialization = (spec) => {
-    setDetails((d) => ({
-      ...d,
-      specializations: d.specializations.includes(spec) ? d.specializations.filter((s) => s !== spec) : [...d.specializations, spec],
-    }));
-    setFieldErrors((fe) => ({ ...fe, specializations: undefined }));
-  };
-
-  const addCustomSpecialization = () => {
-    const val = details.custom_specialization.trim();
-    if (!val) return;
-    setDetails((d) => ({
-      ...d,
-      specializations: d.specializations.includes(val) ? d.specializations : [...d.specializations, val],
-      custom_specialization: '',
-    }));
-    setFieldErrors((fe) => ({ ...fe, specializations: undefined }));
-  };
-
-  const regNumber = () => (details.reg_digits ? `RVMP${details.reg_digits}` : '');
   const toggleSkill = (skill) => {
     setDetails((d) => ({ ...d, skills: d.skills.includes(skill) ? d.skills.filter((s) => s !== skill) : [...d.skills, skill] }));
   };
@@ -124,17 +93,6 @@ export default function RegisterPage() {
     const errs = {};
     if (form.role === 'EMPLOYEE') {
       if (!details.shelter_id) errs.shelter_id = 'Please select a shelter to join.';
-    } else if (form.role === 'VET') {
-      const digits = details.reg_digits.trim();
-      if (!digits) errs.registration_number = 'Registration number is required.';
-      else if (digits.length !== Number(details.reg_len) || !/^\d+$/.test(digits)) errs.registration_number = `Enter exactly ${details.reg_len} digits after RVMP.`;
-      if (details.practice_type === 'CLINIC') {
-        if (!details.clinic_location.trim()) errs.clinic_location = 'Clinic location is required.';
-        if (!details.clinic_registration_number.trim()) errs.clinic_registration_number = 'Clinic registration number is required.';
-      } else if (details.practice_type === 'SHELTER' && !details.shelter_id) {
-        errs.shelter_id = 'Please select the shelter you will work at.';
-      }
-      if (details.specializations.length === 0) errs.specializations = 'Select at least one specialization.';
     } else if (form.role === 'PET_OWNER') {
       if (details.phone && !isValidPkMobile(details.phone)) errs.phone = 'Enter a valid Pakistani mobile number.';
     }
@@ -171,14 +129,6 @@ export default function RegisterPage() {
           <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
             We sent a verification link to <strong className="text-primary">{form.email}</strong>. Click it to activate your account.
           </p>
-          {form.role === 'VET' && (
-            <div className="mt-4 rounded-lg border border-border bg-surface-muted p-4 text-left text-sm leading-relaxed text-muted-foreground">
-              <Stethoscope className="mb-1.5 size-4 text-primary" />
-              Your registration request has been sent to a <strong className="text-foreground">Super Admin</strong> and
-              then a <strong className="text-foreground">Shelter Admin</strong> for approval. After verifying your
-              email you can log in, but vet features stay locked until both approve your request.
-            </div>
-          )}
           <Button asChild className="mt-6 w-full">
             <Link href="/login">Go to login</Link>
           </Button>
@@ -294,105 +244,6 @@ export default function RegisterPage() {
                 </>
               )}
 
-              {form.role === 'VET' && (
-                <>
-                  <div>
-                    <Label>Registration number *</Label>
-                    <div className="mt-1.5 mb-2 flex gap-2">
-                      {[3, 5].map((len) => (
-                        <label key={len} className={cn('flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold', Number(details.reg_len) === len ? 'border-primary bg-primary/5 text-foreground' : 'border-border text-muted-foreground')}>
-                          <input type="radio" checked={Number(details.reg_len) === len} onChange={() => { setD('reg_len', len); setD('reg_digits', ''); }} className="size-3.5" />
-                          {len} digits
-                        </label>
-                      ))}
-                    </div>
-                    <div className="flex items-stretch">
-                      <span className="flex items-center rounded-l-md border border-r-0 border-input bg-surface-muted px-3 text-sm font-bold tracking-wide text-primary">RVMP</span>
-                      <Input value={details.reg_digits} onChange={(e) => setD('reg_digits', e.target.value.replace(/\D/g, '').slice(0, Number(details.reg_len)))} inputMode="numeric" placeholder={'0'.repeat(Number(details.reg_len))} className="rounded-l-none" aria-invalid={!!fieldErrors.registration_number} />
-                    </div>
-                    <p className="mt-1 text-xs text-muted-foreground">Your registration number — "RVMP" then {details.reg_len} digits{details.reg_digits ? ` → ${regNumber()}` : ''}.</p>
-                    <FieldError>{fieldErrors.registration_number}</FieldError>
-                  </div>
-
-                  <div>
-                    <Label>Where will you practise? *</Label>
-                    <div className="mt-1.5 grid grid-cols-2 gap-2">
-                      {[{ value: 'CLINIC', label: 'At a clinic' }, { value: 'SHELTER', label: 'At a shelter' }].map((opt) => (
-                        <button type="button" key={opt.value} onClick={() => setD('practice_type', opt.value)} className={cn('rounded-xl border-2 py-3 text-center text-sm font-bold transition-colors', details.practice_type === opt.value ? 'border-primary bg-primary/5 text-foreground' : 'border-border text-muted-foreground hover:border-border-strong')}>
-                          {opt.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {details.practice_type === 'CLINIC' && (
-                    <>
-                      <div>
-                        <Label htmlFor="reg-clinic-name">Clinic name</Label>
-                        <Input id="reg-clinic-name" value={details.clinic_name} onChange={(e) => setD('clinic_name', e.target.value)} placeholder="Happy Paws Veterinary Clinic" className="mt-1.5" />
-                      </div>
-                      <div>
-                        <Label htmlFor="reg-clinic-loc">Clinic location *</Label>
-                        <Input id="reg-clinic-loc" value={details.clinic_location} onChange={(e) => setD('clinic_location', e.target.value)} placeholder="Street, area, city" className="mt-1.5" aria-invalid={!!fieldErrors.clinic_location} />
-                        <FieldError>{fieldErrors.clinic_location}</FieldError>
-                      </div>
-                      <div>
-                        <Label htmlFor="reg-clinic-reg">Clinic registration number *</Label>
-                        <Input id="reg-clinic-reg" value={details.clinic_registration_number} onChange={(e) => setD('clinic_registration_number', e.target.value)} placeholder="Official clinic registration / license no." className="mt-1.5" aria-invalid={!!fieldErrors.clinic_registration_number} />
-                        <FieldError>{fieldErrors.clinic_registration_number}</FieldError>
-                      </div>
-                    </>
-                  )}
-
-                  {details.practice_type === 'SHELTER' && (
-                    <div>
-                      <Label>Shelter you will work at *</Label>
-                      <select value={details.shelter_id} onChange={(e) => setD('shelter_id', e.target.value)} className={cn(selectClass, 'mt-1.5')}>
-                        <option value="">Select a shelter…</option>
-                        {shelters.map((s) => <option key={s.id} value={s.id}>{s.name}{s.city ? ` — ${s.city}` : ''}</option>)}
-                      </select>
-                      <FieldError>{fieldErrors.shelter_id}</FieldError>
-                    </div>
-                  )}
-
-                  <div>
-                    <Label>Specializations *</Label>
-                    <div className="mt-1.5 mb-2 flex flex-wrap gap-1.5">
-                      {SPECIALIZATIONS.map((spec) => {
-                        const on = details.specializations.includes(spec);
-                        return (
-                          <button type="button" key={spec} onClick={() => toggleSpecialization(spec)} className={cn('inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-semibold', on ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card text-muted-foreground hover:border-border-strong')}>
-                            {on && <Check className="size-3" />}
-                            {spec}
-                          </button>
-                        );
-                      })}
-                    </div>
-                    {details.specializations.filter((s) => !SPECIALIZATIONS.includes(s)).length > 0 && (
-                      <div className="mb-2 flex flex-wrap gap-1.5">
-                        {details.specializations.filter((s) => !SPECIALIZATIONS.includes(s)).map((spec) => (
-                          <button type="button" key={spec} onClick={() => toggleSpecialization(spec)} className="inline-flex items-center gap-1 rounded-full border border-primary bg-primary px-2.5 py-1 text-xs font-semibold text-primary-foreground">
-                            <X className="size-3" />
-                            {spec}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                    <div className="flex gap-2">
-                      <Input value={details.custom_specialization} onChange={(e) => setD('custom_specialization', e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addCustomSpecialization(); } }} placeholder="Add another specialization…" className="flex-1" />
-                      <Button type="button" variant="secondary" onClick={addCustomSpecialization}>Add</Button>
-                    </div>
-                    <FieldError>{fieldErrors.specializations}</FieldError>
-                  </div>
-
-                  <div className="flex items-start gap-2 rounded-lg border border-border bg-surface-muted p-3 text-xs leading-relaxed text-muted-foreground">
-                    <Lock className="mt-0.5 size-3.5 shrink-0" />
-                    Your request will be reviewed by a <strong className="text-foreground">&nbsp;Super Admin&nbsp;</strong> and then a
-                    <strong className="text-foreground">&nbsp;Shelter Admin</strong>. You can log in right away, but vet features stay locked until both approve.
-                  </div>
-                </>
-              )}
-
               {form.role === 'ADOPTER' && (
                 <>
                   <div>
@@ -435,7 +286,7 @@ export default function RegisterPage() {
               <div className="mt-1 flex gap-3">
                 <Button type="button" variant="secondary" onClick={() => { setStep(1); setError(''); }} className="flex-1">Back</Button>
                 <Button type="submit" disabled={loading || !agreed} className="flex-[2]">
-                  {loading ? (form.role === 'VET' ? 'Sending request…' : 'Creating account…') : (form.role === 'VET' ? 'Send registration request' : 'Create account')}
+                  {loading ? 'Creating account…' : 'Create account'}
                 </Button>
               </div>
             </>

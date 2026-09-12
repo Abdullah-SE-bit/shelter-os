@@ -6,7 +6,6 @@ import {
   Users as UsersIcon,
   UserPlus,
   ShieldCheck,
-  Stethoscope,
   PawPrint,
   Heart,
   HeartHandshake,
@@ -24,7 +23,6 @@ import GreetingBanner from '@/components/patterns/GreetingBanner';
 
 const ROLE_STATS = [
   { role: 'SHELTER_ADMIN', icon: Building2, label: 'Shelter Admins' },
-  { role: 'VET', icon: Stethoscope, label: 'Vets' },
   { role: 'PET_OWNER', icon: PawPrint, label: 'Pet Owners' },
   { role: 'ADOPTER', icon: Heart, label: 'Adopters' },
   { role: 'EMPLOYEE', icon: HeartHandshake, label: 'Employees' },

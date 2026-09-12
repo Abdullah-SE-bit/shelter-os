@@ -2,7 +2,6 @@ import {
   LayoutDashboard,
   Users,
   UserPlus,
-  Stethoscope,
   Building2,
   CirclePlus,
   HeartHandshake,
@@ -16,7 +15,6 @@ import {
   LogIn,
   LogOut,
   PawPrint,
-  CalendarClock,
   Heart,
   Package,
   Wallet,
@@ -24,7 +22,6 @@ import {
   ClipboardCheck,
   ClipboardList,
   UserCircle,
-  AlertTriangle,
 } from 'lucide-react';
 
 /**
@@ -63,13 +60,11 @@ export const navConfig = {
       items: [
         { icon: HeartHandshake, label: 'Employees', path: '/employees' },
         { icon: PawPrint, label: 'Foster', path: '/foster' },
-        { icon: Stethoscope, label: 'Vet Approvals', path: '/admin/vet-approvals' },
       ],
     },
     {
       section: 'Care',
       items: [
-        { icon: CalendarClock, label: 'Appointments', path: '/appointments' },
         { icon: Heart, label: 'Adoption Applications', path: '/shelter/applications' },
         { icon: Siren, label: 'Rescues', path: '/rescue' },
       ],
@@ -93,22 +88,12 @@ export const navConfig = {
     },
   ],
 
-  VET: [
-    { icon: UserCircle, label: 'Profile', path: '/profile' },
-    { icon: CalendarClock, label: 'Appointments', path: '/appointments' },
-    { icon: AlertTriangle, label: 'Health Alerts', path: '/health-alerts' },
-    { icon: Map, label: 'Map', path: '/maps' },
-    { icon: Bell, label: 'Notifications', path: '/notifications' },
-    { icon: MessageSquare, label: 'Messages', path: '/messages' },
-  ],
-
   EMPLOYEE: [
     { icon: ClipboardCheck, label: 'Assignments', path: '/employees/assignments' },
     { icon: UserCircle, label: 'Profile', path: '/profile' },
     { icon: PawPrint, label: 'Pets', path: '/pets' },
     { icon: CirclePlus, label: 'Register My Pet', path: '/pets/register' },
     { icon: Building2, label: 'Add Shelter Pet', path: '/pets/create' },
-    { icon: CalendarClock, label: 'Appointments', path: '/appointments' },
     { icon: Siren, label: 'Rescues', path: '/rescue' },
     { icon: Map, label: 'Map', path: '/maps' },
     { icon: Bell, label: 'Notifications', path: '/notifications' },
@@ -118,7 +103,6 @@ export const navConfig = {
   PET_OWNER: [
     { icon: PawPrint, label: 'My Pets', path: '/pets' },
     { icon: CirclePlus, label: 'Register Pet', path: '/pets/register' },
-    { icon: CalendarClock, label: 'Appointments', path: '/appointments' },
     { icon: Search, label: 'Lost & Found', path: '/lost-found' },
     { icon: Map, label: 'Map', path: '/maps' },
     { icon: Bell, label: 'Notifications', path: '/notifications' },
@@ -131,7 +115,6 @@ export const navConfig = {
     { icon: ClipboardList, label: 'My Applications', path: '/adoption/my-applications' },
     { icon: PawPrint, label: 'My Pets', path: '/pets' },
     { icon: CirclePlus, label: 'Register Pet', path: '/pets/register' },
-    { icon: CalendarClock, label: 'Appointments', path: '/appointments' },
     { icon: Search, label: 'Lost & Found', path: '/lost-found' },
     { icon: Map, label: 'Map', path: '/maps' },
     { icon: Bell, label: 'Notifications', path: '/notifications' },
@@ -157,17 +140,17 @@ export const quickActions = [
   {
     label: 'Register My Pet',
     path: '/pets/register',
-    roles: ['SHELTER_ADMIN', 'VET', 'EMPLOYEE', 'PET_OWNER', 'ADOPTER'],
+    roles: ['SHELTER_ADMIN', 'EMPLOYEE', 'PET_OWNER', 'ADOPTER'],
   },
   {
     label: 'Submit Rescue Report',
     path: '/rescue/submit',
-    roles: ['SHELTER_ADMIN', 'VET', 'EMPLOYEE', 'PET_OWNER', 'ADOPTER'],
+    roles: ['SHELTER_ADMIN', 'EMPLOYEE', 'PET_OWNER', 'ADOPTER'],
   },
   {
     label: 'Report Lost Pet',
     path: '/lost-found/create',
-    roles: ['SHELTER_ADMIN', 'VET', 'EMPLOYEE', 'PET_OWNER', 'ADOPTER'],
+    roles: ['SHELTER_ADMIN', 'EMPLOYEE', 'PET_OWNER', 'ADOPTER'],
   },
-  { label: 'Send Message', path: '/messages', roles: ['SHELTER_ADMIN', 'VET', 'EMPLOYEE', 'PET_OWNER', 'ADOPTER'] },
+  { label: 'Send Message', path: '/messages', roles: ['SHELTER_ADMIN', 'EMPLOYEE', 'PET_OWNER', 'ADOPTER'] },
 ];

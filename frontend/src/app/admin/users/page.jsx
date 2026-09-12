@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
-import { PawPrint, Crown, Building2, Stethoscope, Heart, HeartHandshake, Users as UsersIcon, X } from 'lucide-react';
+import { PawPrint, Crown, Building2, Heart, HeartHandshake, Users as UsersIcon, X } from 'lucide-react';
 import { mockUsers } from '@/lib/mock-data/users';
 import { mockDashboardStats } from '@/lib/mock-data/analytics';
 import EmptyState from '@/components/EmptyState';
@@ -16,7 +16,6 @@ import { cn } from '@/lib/utils';
 const ROLE_META = {
   SUPER_ADMIN: { icon: Crown, label: 'Super Admins' },
   SHELTER_ADMIN: { icon: Building2, label: 'Shelter Admins' },
-  VET: { icon: Stethoscope, label: 'Vets' },
   PET_OWNER: { icon: PawPrint, label: 'Pet Owners' },
   ADOPTER: { icon: Heart, label: 'Adopters' },
   EMPLOYEE: { icon: HeartHandshake, label: 'Employees' },

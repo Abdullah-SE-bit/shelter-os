@@ -105,7 +105,7 @@ export default function AddMedicalRecordPage() {
                   <Checkbox checked={form.is_confidential} onCheckedChange={(v) => set('is_confidential', !!v)} className="mt-0.5" />
                   <div>
                     <div className="flex items-center gap-1.5 text-sm font-bold text-foreground"><Lock className="size-3.5" />Mark as confidential</div>
-                    <div className="mt-0.5 text-xs text-muted-foreground">Only admins and vets can view this record</div>
+                    <div className="mt-0.5 text-xs text-muted-foreground">Only admins can view this record</div>
                   </div>
                 </label>
               </CardContent>

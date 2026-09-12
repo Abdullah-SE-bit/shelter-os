@@ -48,7 +48,7 @@ export default function WeightTrackerPage() {
   const [form, setForm] = useState({ weight_kg: '', measured_at: new Date().toISOString().split('T')[0], notes: '' });
   const [saving, setSaving] = useState(false);
 
-  const canAdd = ['SUPER_ADMIN', 'SHELTER_ADMIN', 'VET'].includes(user?.role);
+  const canAdd = ['SUPER_ADMIN', 'SHELTER_ADMIN'].includes(user?.role);
   const sorted = [...logs].sort((a, b) => new Date(a.recorded_at) - new Date(b.recorded_at));
   const latest = sorted[sorted.length - 1];
   const prev = sorted[sorted.length - 2];

@@ -1,7 +1,6 @@
 export const ROLES = {
   SUPER_ADMIN:   'SUPER_ADMIN',
   SHELTER_ADMIN: 'SHELTER_ADMIN',
-  VET:           'VET',
   EMPLOYEE:     'EMPLOYEE',
   PET_OWNER:     'PET_OWNER',
   ADOPTER:       'ADOPTER',

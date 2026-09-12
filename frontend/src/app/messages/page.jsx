@@ -137,7 +137,6 @@ export default function MessagingPage() {
               <option value="GENERAL">General</option>
               <option value="SHELTER_EMPLOYEE">Shelter & Employee</option>
               <option value="SHELTER_ADOPTER">Shelter & Adopter</option>
-              <option value="VET_OWNER">Vet & Owner</option>
             </NativeSelect>
           </div>
           <div>

@@ -31,7 +31,7 @@ export default function VaccinationsPage() {
   const [form, setForm] = useState({ vaccine_name: '', date_given: new Date().toISOString().split('T')[0], next_due_date: '', vet_name: '', batch_number: '', notes: '' });
   const [saving, setSaving] = useState(false);
 
-  const canAdd = ['SUPER_ADMIN', 'SHELTER_ADMIN', 'VET'].includes(user?.role);
+  const canAdd = ['SUPER_ADMIN', 'SHELTER_ADMIN'].includes(user?.role);
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 

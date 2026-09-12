@@ -20,7 +20,6 @@ export const MAGIC_LOGINS = {
 export const ROLE_HOME = {
   [ROLES.SUPER_ADMIN]: '/dashboard',
   [ROLES.SHELTER_ADMIN]: '/shelter/dashboard',
-  [ROLES.VET]: '/appointments',
   [ROLES.EMPLOYEE]: '/employees/assignments',
   [ROLES.PET_OWNER]: '/pets',
   [ROLES.ADOPTER]: '/adoption',

@@ -27,7 +27,7 @@ export default function MedicationsPage() {
   const [form, setForm] = useState({ medication_name: '', dosage: '', frequency: 'DAILY', start_date: new Date().toISOString().split('T')[0], end_date: '', reason: '', prescribing_vet: '', notes: '' });
   const [saving, setSaving] = useState(false);
 
-  const canAdd = ['SUPER_ADMIN', 'SHELTER_ADMIN', 'VET'].includes(user?.role);
+  const canAdd = ['SUPER_ADMIN', 'SHELTER_ADMIN'].includes(user?.role);
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
   const handleSave = (e) => {

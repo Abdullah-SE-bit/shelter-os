@@ -35,7 +35,7 @@ export default function MedicalHistoryPage() {
 
   const pet = getPetById(petId);
   const isUntreatable = ['LOST', 'DECEASED'].includes(pet?.current_status);
-  const canAdd = ['SUPER_ADMIN', 'SHELTER_ADMIN', 'VET'].includes(user?.role) && !isUntreatable;
+  const canAdd = ['SUPER_ADMIN', 'SHELTER_ADMIN'].includes(user?.role) && !isUntreatable;
 
   return (
     <div className="mx-auto max-w-[720px] px-4 py-6 sm:px-6">

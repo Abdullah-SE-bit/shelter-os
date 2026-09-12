@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { PawPrint, Crown, Home, Stethoscope, HeartHandshake, Heart, User, Shield, CheckCircle2, XCircle, MessageSquare, Bell } from 'lucide-react';
+import { PawPrint, Crown, Home, HeartHandshake, Heart, User, Shield, CheckCircle2, XCircle, MessageSquare, Bell } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import PageHeader from '@/components/patterns/PageHeader';
 import { formatDate } from '@/utils/dateUtils';
@@ -12,7 +12,6 @@ import { cn } from '@/lib/utils';
 const ROLE_META = {
   SUPER_ADMIN: { icon: Crown, label: 'Super Admin' },
   SHELTER_ADMIN: { icon: Home, label: 'Shelter Admin' },
-  VET: { icon: Stethoscope, label: 'Veterinarian' },
   EMPLOYEE: { icon: HeartHandshake, label: 'Employee' },
   PET_OWNER: { icon: PawPrint, label: 'Pet Owner' },
   ADOPTER: { icon: Heart, label: 'Adopter' },

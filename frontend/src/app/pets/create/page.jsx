@@ -98,7 +98,7 @@ export default function CreatePetPage() {
                 </div>
               </div>
 
-              {(user?.role === 'SUPER_ADMIN' || user?.role === 'VET') && (
+              {user?.role === 'SUPER_ADMIN' && (
                 <div>
                   <Label htmlFor="pet-shelter">Shelter *</Label>
                   <NativeSelect id="pet-shelter" value={form.shelter} onChange={(e) => set('shelter', e.target.value)} className="mt-1.5">

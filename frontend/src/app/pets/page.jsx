@@ -58,7 +58,7 @@ export default function PetListPage() {
   const pets = filtered.slice((page - 1) * pageSize, page * pageSize);
 
   const canCreate = !!user;
-  const createPath = ['SUPER_ADMIN', 'SHELTER_ADMIN', 'VET'].includes(user?.role) ? '/pets/create' : '/pets/register';
+  const createPath = ['SUPER_ADMIN', 'SHELTER_ADMIN'].includes(user?.role) ? '/pets/create' : '/pets/register';
 
   const handleSearchChange = (v) => { setSearch(v); reset(); };
   const handleStatusChange = (v) => { setStatus(v); reset(); };
@@ -86,7 +86,7 @@ export default function PetListPage() {
           <option value="DECEASED">Deceased</option>
         </NativeSelect>
 
-        {(user?.role === 'SUPER_ADMIN' || user?.role === 'VET') && (
+        {user?.role === 'SUPER_ADMIN' && (
           <NativeSelect value={shelter} onChange={(e) => { setShelter(e.target.value); reset(); }} className="w-auto min-w-[150px]">
             <option value="">All shelters</option>
             {mockShelters.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}

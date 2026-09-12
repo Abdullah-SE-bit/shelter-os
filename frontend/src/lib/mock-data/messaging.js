@@ -4,7 +4,7 @@ export const mockConversations = [
     last_message: 'Sounds good — see you at the shelter Saturday morning.', last_message_at: '2026-09-10T16:00:00Z',
   },
   {
-    id: 'conv-2', other_user_name: 'Faisal Khan', other_user_role: 'VET', unread_count: 0,
+    id: 'conv-2', other_user_name: 'Faisal Khan', other_user_role: 'EMPLOYEE', unread_count: 0,
     last_message: "Oliver's follow-up is confirmed for the 20th.", last_message_at: '2026-09-08T12:00:00Z',
   },
   {

@@ -45,7 +45,7 @@ export default function PetDetailPage() {
 
   const pet = getPetById(id);
 
-  const canEdit = ['SUPER_ADMIN', 'SHELTER_ADMIN', 'VET'].includes(user?.role);
+  const canEdit = ['SUPER_ADMIN', 'SHELTER_ADMIN'].includes(user?.role);
   const canDelete = ['SUPER_ADMIN', 'SHELTER_ADMIN'].includes(user?.role);
 
   const handleDelete = () => {

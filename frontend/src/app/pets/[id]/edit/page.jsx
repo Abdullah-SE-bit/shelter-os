@@ -66,7 +66,7 @@ export default function EditPetPage() {
                 </NativeSelect>
               </div>
             </div>
-            {(user?.role === 'SUPER_ADMIN' || user?.role === 'VET') && (
+            {user?.role === 'SUPER_ADMIN' && (
               <div>
                 <Label htmlFor="edit-shelter">Shelter</Label>
                 <NativeSelect id="edit-shelter" value={form.shelter} onChange={(e) => set('shelter', e.target.value)} className="mt-1.5">

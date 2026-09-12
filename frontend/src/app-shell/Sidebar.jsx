@@ -3,7 +3,6 @@
 import { useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { UserCircle } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { getNavSections } from './navConfig';
 import { cn } from '@/lib/utils';
@@ -19,15 +18,9 @@ function useActivePath(items) {
   }, [items, pathname]);
 }
 
-/** The user's nav sections, accounting for the vet-pending lockdown. */
 export function useSidebarSections() {
   const { user } = useAuth();
-  const vetLocked = user?.role === 'VET' && user.vet_profile && !user.vet_profile.is_fully_approved;
-  const sections = !user
-    ? []
-    : vetLocked
-      ? [{ section: null, items: [{ icon: UserCircle, label: 'Profile', path: '/profile' }] }]
-      : getNavSections(user.role);
+  const sections = !user ? [] : getNavSections(user.role);
   const flatItems = sections.flatMap((s) => s.items);
   const activePath = useActivePath(flatItems);
   return { sections, activePath };
