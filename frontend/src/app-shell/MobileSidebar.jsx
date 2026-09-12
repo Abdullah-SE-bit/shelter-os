@@ -21,7 +21,10 @@ export default function MobileSidebar() {
         <SheetHeader className="border-b border-border px-4 py-3">
           <SheetTitle asChild>
             <Link href="/dashboard" className="flex items-center gap-2 font-display text-[15px] font-bold text-foreground" onClick={() => setOpen(false)}>
-              <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+              <span
+                className="flex size-7 shrink-0 items-center justify-center rounded-full"
+                style={{ background: 'var(--brand-teal)', color: 'var(--brand-cream)' }}
+              >
                 <PawPrint className="size-4" />
               </span>
               Shelter OS

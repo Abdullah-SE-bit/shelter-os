@@ -13,6 +13,7 @@
   --brand-mint:  #E0F2F1; /* subtle highlights */
   --brand-amber: #D8A25E; /* warm secondary tone, paired with teal in decorative gradients */
   --brand-gold:  var(--brand-coral); /* ambient glow accent (login page) */
+  --brand-cream: #FBF9F6; /* fixed off-white for marks drawn on brand-teal, e.g. the paw-print logo */
 
   /* Semantic — light theme (default) */
   --background:         #FBF9F6;
