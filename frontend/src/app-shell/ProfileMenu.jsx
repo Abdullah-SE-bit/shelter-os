@@ -28,6 +28,7 @@ export default function ProfileMenu() {
   const router = useRouter();
 
   if (!user) return null;
+  const isSuperAdmin = user.role === 'SUPER_ADMIN';
 
   const name = user.profile?.first_name
     ? `${user.profile.first_name} ${user.profile.last_name || ''}`.trim()
@@ -55,15 +56,19 @@ export default function ProfileMenu() {
           </span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onSelect={() => router.push('/profile')}>
-          <UserRound className="size-4" />
-          Profile
-        </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => router.push('/profile/edit')}>
-          <Settings className="size-4" />
-          Account settings
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
+        {!isSuperAdmin && (
+          <>
+            <DropdownMenuItem onSelect={() => router.push('/profile')}>
+              <UserRound className="size-4" />
+              Profile
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => router.push('/profile/edit')}>
+              <Settings className="size-4" />
+              Account settings
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+          </>
+        )}
         <DropdownMenuItem variant="destructive" onSelect={handleLogout}>
           <LogOut className="size-4" />
           Log out

@@ -37,6 +37,7 @@ function IconLink({ to, icon: Icon, count, label }) {
 
 export default function Navbar() {
   const { user } = useAuth();
+  const isSuperAdmin = user?.role === 'SUPER_ADMIN';
   const { unreadCount } = useNotifications();
   const unreadMessages = user ? mockConversations.reduce((sum, c) => sum + (c.unread_count || 0), 0) : 0;
 
@@ -80,8 +81,12 @@ export default function Navbar() {
         <div className="flex items-center gap-1">
           {user ? (
             <>
-              <IconLink to="/messages" icon={MessageSquare} count={unreadMessages} label="Messages" />
-              <IconLink to="/notifications" icon={Bell} count={unreadCount} label="Notifications" />
+              {!isSuperAdmin && (
+                <>
+                  <IconLink to="/messages" icon={MessageSquare} count={unreadMessages} label="Messages" />
+                  <IconLink to="/notifications" icon={Bell} count={unreadCount} label="Notifications" />
+                </>
+              )}
               <ThemeToggle />
               <ProfileMenu />
             </>
