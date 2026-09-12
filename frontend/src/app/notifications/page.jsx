@@ -64,7 +64,7 @@ export default function NotificationsPage() {
         <p className="mt-1 text-sm opacity-80">Stay updated with important activities and alerts</p>
       </div>
 
-      <div className="mb-6 flex gap-2 overflow-x-auto pb-1">
+      <div className="mb-6 flex gap-2 overflow-x-auto no-scrollbar pb-1">
         {CATEGORIES.map((pet) => (
           <button key={pet.value} onClick={() => setSelectedCategory(pet.value)}
             className={cn('flex shrink-0 items-center gap-1.5 rounded-lg border px-3.5 py-2 text-sm font-semibold whitespace-nowrap transition-colors', selectedCategory === pet.value ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card text-muted-foreground')}>

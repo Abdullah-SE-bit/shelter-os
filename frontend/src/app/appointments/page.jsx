@@ -165,7 +165,7 @@ export default function AppointmentsPage() {
         <CalendarDays className="pointer-events-none absolute right-4 -bottom-2 size-20 opacity-10" />
         <h1 className="font-display text-[26px] font-bold">Appointments</h1>
         <p className="mt-1 text-sm opacity-80">{isVet ? 'Manage your vet appointments' : 'Book and manage appointments with veterinarians'}</p>
-        {canBook && <Button variant="secondary" className="mt-4" onClick={() => setBookModalOpen(true)}><CalendarDays className="size-4" />Book appointment</Button>}
+        {canBook && <Button className="mt-4" onClick={() => setBookModalOpen(true)}><CalendarDays className="size-4" />Book appointment</Button>}
       </div>
 
       {upcomingAppointments.length > 0 && (
@@ -175,7 +175,7 @@ export default function AppointmentsPage() {
         </div>
       )}
 
-      <div className="mb-6 flex gap-2 overflow-x-auto pb-1">
+      <div className="mb-6 flex gap-2 overflow-x-auto no-scrollbar pb-1">
         {['ALL', 'SCHEDULED', 'CONFIRMED', 'COMPLETED', 'CANCELLED'].map((status) => (
           <button key={status} onClick={() => setFilterStatus(status)}
             className={cn('shrink-0 rounded-lg border px-3.5 py-2 text-sm font-semibold whitespace-nowrap transition-colors', filterStatus === status ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card text-muted-foreground')}>

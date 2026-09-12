@@ -121,7 +121,7 @@ export default function MessagingPage() {
             <Label>Recipient</Label>
             <Input value={recipient ? recipient.email : searchQuery} placeholder="Enter email to search…" onChange={(e) => { setSearchQuery(e.target.value); setRecipient(null); }} className="mt-1.5" />
             {results.length > 0 && !recipient && (
-              <div className="mt-2 max-h-[150px] overflow-y-auto rounded-lg border border-border bg-card">
+              <div className="mt-2 max-h-[150px] overflow-y-auto no-scrollbar rounded-lg border border-border bg-card">
                 {results.map((usr) => (
                   <button key={usr.id} type="button" onClick={() => { setRecipient(usr); setSearchQuery(usr.email); }}
                     className="block w-full border-b border-border px-3 py-2.5 text-left text-sm last:border-0 hover:bg-surface-muted">
@@ -157,7 +157,7 @@ export default function MessagingPage() {
           <Button className="w-full" onClick={() => setShowComposeModal(true)}><SquarePen className="size-4" />New message</Button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-3">
+        <div className="flex-1 overflow-y-auto no-scrollbar p-3">
           {conversations.length === 0 ? (
             <div className="p-8 text-center text-muted-foreground">
               <MessageSquare className="mx-auto mb-2 size-10" strokeWidth={1.5} />
@@ -189,7 +189,7 @@ export default function MessagingPage() {
               <Button variant="secondary" size="sm" className="text-destructive hover:text-destructive" onClick={handleDeleteConversation}><Trash2 className="size-3.5" />Delete chat</Button>
             </div>
 
-            <div ref={messagesListRef} className="flex-1 overflow-y-auto p-6">
+            <div ref={messagesListRef} className="flex-1 overflow-y-auto no-scrollbar p-6">
               {localMessages.length === 0 ? (
                 <div className="pt-8 text-center text-muted-foreground"><p>No messages yet. Start the conversation!</p></div>
               ) : (

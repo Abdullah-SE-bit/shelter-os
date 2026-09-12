@@ -74,7 +74,7 @@ export default function FoundReportsPage() {
         </div>
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" className="border-white/30 bg-white/18 text-white hover:bg-white/28 hover:text-white" asChild><Link href="/lost-found"><Search className="size-4" />Lost animals</Link></Button>
-          <Button variant="secondary" onClick={() => setAddOpen(true)}><Plus className="size-4" />Report found animal</Button>
+          <Button onClick={() => setAddOpen(true)}><Plus className="size-4" />Report found animal</Button>
         </div>
       </div>
 

@@ -120,7 +120,7 @@ export default function MapPage() {
                     </div>
                   )}
 
-                  <Button variant="secondary" className="mt-4 w-full" onClick={() => window.open(`https://www.google.com/maps?q=${location.lat},${location.lng}`, '_blank')}>
+                  <Button className="mt-4 w-full" onClick={() => window.open(`https://www.google.com/maps?q=${location.lat},${location.lng}`, '_blank')}>
                     <ExternalLink className="size-3.5" />
                     View on Google Maps
                   </Button>

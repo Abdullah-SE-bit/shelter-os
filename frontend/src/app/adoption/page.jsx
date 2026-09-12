@@ -122,7 +122,7 @@ export default function BrowsePage() {
               <h2 className="mb-1.5 text-2xl font-bold text-white">Ready to adopt?</h2>
               <p className="text-[15px] text-white/80">Create a free account to apply, save favorites, and track your applications.</p>
             </div>
-            <Button variant="secondary" size="lg" asChild><Link href="/register">Create free account</Link></Button>
+            <Button size="lg" asChild><Link href="/register">Create free account</Link></Button>
           </div>
         )}
       </div>

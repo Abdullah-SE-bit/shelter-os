@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Bell, MessageSquare, Search } from 'lucide-react';
+import { Bell, MessageSquare, PawPrint, Search } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import useNotifications from '@/hooks/useNotifications';
 import { mockConversations } from '@/lib/mock-data/messaging';
@@ -43,7 +43,18 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-40 flex h-14 shrink-0 items-center gap-3 border-b border-border bg-surface/95 px-4 backdrop-blur supports-backdrop-filter:bg-surface/75">
       {user ? (
-        <MobileSidebar />
+        <div className="flex items-center gap-2">
+          <MobileSidebar />
+          <Link href="/dashboard" className="hidden items-center gap-2 font-display text-[15px] font-bold text-foreground sm:flex">
+            <span
+              className="flex size-7 shrink-0 items-center justify-center rounded-full"
+              style={{ background: 'var(--brand-teal)', color: 'var(--brand-cream)' }}
+            >
+              <PawPrint className="size-4" />
+            </span>
+            Shelter OS
+          </Link>
+        </div>
       ) : (
         <Link href="/adoption" className="font-display text-[15px] font-bold text-foreground">
           Shelter OS

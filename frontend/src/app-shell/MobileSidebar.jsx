@@ -13,7 +13,12 @@ export default function MobileSidebar() {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="md:hidden" aria-label="Open menu">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-muted-foreground hover:bg-highlight-mint/30 hover:text-primary"
+          aria-label="Open menu"
+        >
           <Menu className="size-5" />
         </Button>
       </SheetTrigger>
@@ -31,7 +36,7 @@ export default function MobileSidebar() {
             </Link>
           </SheetTitle>
         </SheetHeader>
-        <SidebarContent showBrand={false} onNavigate={() => setOpen(false)} />
+        <SidebarContent onNavigate={() => setOpen(false)} />
       </SheetContent>
     </Sheet>
   );

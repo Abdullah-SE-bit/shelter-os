@@ -45,7 +45,7 @@ export default function Modal({ open, onClose, title, children, size = 'md', foo
           </div>
         )}
 
-        <div className="flex-1 overflow-y-auto p-6">{children}</div>
+        <div className="flex-1 overflow-y-auto no-scrollbar p-6">{children}</div>
 
         {footer && <div className="flex justify-end gap-3 border-t border-border px-6 py-4">{footer}</div>}
       </div>

@@ -101,3 +101,23 @@
 @media (prefers-reduced-motion: reduce) {
   .shelteros-glow-anim { animation: none !important; }
 }
+
+/* ============================================================
+   Hide the native scrollbar track/thumb everywhere (main page
+   scroll, sidebar nav, sheet drawers, scrollable cards/tables)
+   while keeping the element fully scrollable by wheel/touch/keys.
+   ============================================================ */
+html {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+html::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

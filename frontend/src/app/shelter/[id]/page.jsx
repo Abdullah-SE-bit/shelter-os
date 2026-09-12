@@ -158,7 +158,7 @@ export default function ShelterDetailPage() {
             <div className="rounded-xl bg-primary p-5 text-center text-primary-foreground">
               <Heart className="mx-auto mb-2 size-6" />
               <p className="mb-3 font-semibold">Adopt from this shelter</p>
-              <Button variant="secondary" asChild>
+              <Button asChild>
                 <Link href={`/adoption?shelter=${id}`}>View available animals</Link>
               </Button>
             </div>
@@ -177,7 +177,7 @@ export default function ShelterDetailPage() {
           </>
         }
       >
-        <form id="edit-shelter-form" onSubmit={handleEditSubmit} className="flex max-h-[70vh] flex-col gap-3.5 overflow-y-auto pr-1">
+        <form id="edit-shelter-form" onSubmit={handleEditSubmit} className="flex max-h-[70vh] flex-col gap-3.5 overflow-y-auto no-scrollbar pr-1">
           <div>
             <Label htmlFor="es-name">Shelter name *</Label>
             <Input id="es-name" required value={form.name} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))} className="mt-1.5" />

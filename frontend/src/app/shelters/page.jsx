@@ -54,7 +54,7 @@ function ShelterCard({ shelter }) {
           ))}
         </div>
 
-        <Button variant="secondary" className="mt-1 w-full" asChild>
+        <Button className="mt-1 w-full" asChild>
           <Link href={`/shelter/${shelter.id}`}>View shelter</Link>
         </Button>
       </div>

@@ -3,16 +3,10 @@
 import { useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { PanelLeftClose, PanelLeftOpen, PawPrint, UserCircle } from 'lucide-react';
+import { UserCircle } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { getNavSections } from './navConfig';
 import { cn } from '@/lib/utils';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
 
 function useActivePath(items) {
   const pathname = usePathname();
@@ -39,8 +33,8 @@ export function useSidebarSections() {
   return { sections, activePath };
 }
 
-function NavItem({ icon: Icon, label, path, active, collapsed, onNavigate }) {
-  const link = (
+function NavItem({ icon: Icon, label, path, active, onNavigate }) {
+  return (
     <Link
       href={path}
       onClick={onNavigate}
@@ -50,107 +44,34 @@ function NavItem({ icon: Icon, label, path, active, collapsed, onNavigate }) {
         active
           ? 'border-primary bg-highlight-mint/40 text-primary'
           : 'border-transparent text-muted-foreground hover:bg-surface-hover hover:text-foreground',
-        collapsed && 'justify-center px-0',
       )}
     >
       <Icon className="size-[18px] shrink-0" strokeWidth={2} />
-      {!collapsed && <span className="truncate">{label}</span>}
+      <span className="truncate">{label}</span>
     </Link>
-  );
-
-  if (!collapsed) return link;
-
-  return (
-    <Tooltip delayDuration={200}>
-      <TooltipTrigger asChild>{link}</TooltipTrigger>
-      <TooltipContent side="right">{label}</TooltipContent>
-    </Tooltip>
   );
 }
 
-/** Shared between the desktop rail and the mobile Sheet. */
-export function SidebarContent({ collapsed = false, onNavigate, showBrand = true }) {
+/** Nav list rendered inside the slide-in/out drawer (see MobileSidebar). */
+export function SidebarContent({ onNavigate }) {
   const { sections, activePath } = useSidebarSections();
 
   return (
-    <>
-      {showBrand && (
-        <div className={cn('flex h-14 items-center border-b border-border px-4', collapsed && 'justify-center px-0')}>
-          {!collapsed && (
-            <Link href="/dashboard" className="flex items-center gap-2 font-display text-[15px] font-bold text-foreground">
-              <span
-                className="flex size-7 shrink-0 items-center justify-center rounded-full"
-                style={{ background: 'var(--brand-teal)', color: 'var(--brand-cream)' }}
-              >
-                <PawPrint className="size-4" />
-              </span>
-              Shelter OS
-            </Link>
-          )}
-          {collapsed && (
-            <Link
-              href="/dashboard"
-              className="flex size-7 shrink-0 items-center justify-center rounded-full"
-              style={{ background: 'var(--brand-teal)', color: 'var(--brand-cream)' }}
-            >
-              <PawPrint className="size-4" />
-            </Link>
-          )}
-        </div>
-      )}
-
-      <nav className="flex-1 overflow-y-auto px-3 py-3">
-        <div className="flex flex-col gap-4">
-          {sections.map((sec, idx) => (
-            <div key={sec.section || idx} className="flex flex-col gap-0.5">
-              {sec.section && !collapsed && (
-                <div className="px-3 pb-1 text-[11px] font-semibold tracking-wide text-muted-foreground/70 uppercase">
-                  {sec.section}
-                </div>
-              )}
-              {sec.items.map((item) => (
-                <NavItem
-                  key={item.path}
-                  {...item}
-                  collapsed={collapsed}
-                  active={item.path === activePath}
-                  onNavigate={onNavigate}
-                />
-              ))}
-            </div>
-          ))}
-        </div>
-      </nav>
-    </>
-  );
-}
-
-export default function Sidebar() {
-  const { user } = useAuth();
-  const [collapsed, setCollapsed] = useLocalStorage('shelter-os-sidebar-collapsed', false);
-
-  if (!user) return null;
-
-  return (
-    <aside
-      className={cn(
-        'sticky top-0 hidden h-screen shrink-0 flex-col border-r border-border bg-surface transition-[width] duration-200 md:flex',
-        collapsed ? 'w-[72px]' : 'w-64',
-      )}
-    >
-      <SidebarContent collapsed={collapsed} />
-      <div className="border-t border-border p-3">
-        <button
-          onClick={() => setCollapsed((c) => !c)}
-          className={cn(
-            'flex w-full items-center gap-2 rounded-md px-3 py-2 text-xs font-medium text-muted-foreground hover:bg-surface-hover hover:text-foreground',
-            collapsed && 'justify-center px-0',
-          )}
-        >
-          {collapsed ? <PanelLeftOpen className="size-4" /> : <PanelLeftClose className="size-4" />}
-          {!collapsed && 'Collapse'}
-        </button>
+    <nav className="flex-1 overflow-y-auto no-scrollbar px-3 py-3">
+      <div className="flex flex-col gap-4">
+        {sections.map((sec, idx) => (
+          <div key={sec.section || idx} className="flex flex-col gap-0.5">
+            {sec.section && (
+              <div className="px-3 pb-1 text-[11px] font-semibold tracking-wide text-muted-foreground/70 uppercase">
+                {sec.section}
+              </div>
+            )}
+            {sec.items.map((item) => (
+              <NavItem key={item.path} {...item} active={item.path === activePath} onNavigate={onNavigate} />
+            ))}
+          </div>
+        ))}
       </div>
-    </aside>
+    </nav>
   );
 }

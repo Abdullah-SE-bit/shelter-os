@@ -71,7 +71,7 @@ export default function LostAlertsPage() {
           <h1 className="font-display mb-2 text-[clamp(1.75rem,4vw,2.75rem)] font-bold text-white">Lost &amp; Found</h1>
           <p className="mb-6 max-w-[480px] text-white/75">Help reunite lost animals with their families. Browse alerts or report a found animal.</p>
           <div className="flex flex-wrap gap-3">
-            {user && <Button variant="secondary" asChild><Link href="/lost-found/create"><Plus className="size-4" />Report lost animal</Link></Button>}
+            {user && <Button asChild><Link href="/lost-found/create"><Plus className="size-4" />Report lost animal</Link></Button>}
             <Button variant="outline" className="border-white/25 bg-white/15 text-white hover:bg-white/25 hover:text-white" asChild>
               <Link href="/lost-found/found"><ClipboardList className="size-4" />Found animal reports</Link>
             </Button>

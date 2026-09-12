@@ -5,7 +5,6 @@ import { useAuth } from '@/context/AuthContext';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Toaster } from '@/components/ui/sonner';
 import Navbar from './Navbar';
-import Sidebar from './Sidebar';
 import ShellFooter from './ShellFooter';
 import Footer from '@/components/Footer';
 import CommandPalette from './CommandPalette';
@@ -49,10 +48,7 @@ export default function AppShell({ children }) {
     return (
       <div className="flex min-h-screen flex-col bg-background">
         <Navbar />
-        <div className="flex flex-1">
-          <Sidebar />
-          <main className="min-w-0 flex-1">{children}</main>
-        </div>
+        <main className="min-w-0 flex-1">{children}</main>
         {!hideFooter && <ShellFooter />}
       </div>
     );
