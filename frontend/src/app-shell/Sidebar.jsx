@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { PanelLeftClose, PanelLeftOpen, HeartHandshake, UserCircle } from 'lucide-react';
+import { PanelLeftClose, PanelLeftOpen, PawPrint, UserCircle } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { getNavSections } from './navConfig';
@@ -78,11 +78,17 @@ export function SidebarContent({ collapsed = false, onNavigate, showBrand = true
         <div className={cn('flex h-14 items-center border-b border-border px-4', collapsed && 'justify-center px-0')}>
           {!collapsed && (
             <Link href="/dashboard" className="flex items-center gap-2 font-display text-[15px] font-bold text-foreground">
-              <HeartHandshake className="size-5 text-primary" />
+              <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                <PawPrint className="size-4" />
+              </span>
               Shelter OS
             </Link>
           )}
-          {collapsed && <HeartHandshake className="size-5 text-primary" />}
+          {collapsed && (
+            <Link href="/dashboard" className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+              <PawPrint className="size-4" />
+            </Link>
+          )}
         </div>
       )}
 

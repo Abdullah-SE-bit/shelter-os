@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Menu, HeartHandshake } from 'lucide-react';
+import { Menu, PawPrint } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { SidebarContent } from './Sidebar';
@@ -21,7 +21,9 @@ export default function MobileSidebar() {
         <SheetHeader className="border-b border-border px-4 py-3">
           <SheetTitle asChild>
             <Link href="/dashboard" className="flex items-center gap-2 font-display text-[15px] font-bold text-foreground" onClick={() => setOpen(false)}>
-              <HeartHandshake className="size-5 text-primary" />
+              <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                <PawPrint className="size-4" />
+              </span>
               Shelter OS
             </Link>
           </SheetTitle>
