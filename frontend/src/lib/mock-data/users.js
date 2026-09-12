@@ -6,9 +6,9 @@ export const mockUsers = [
   { id: 'u-5', email: 'sara.malik@shelteros.mock', role: 'EMPLOYEE', is_active: true, is_email_verified: false, date_joined: '2026-01-05T00:00:00Z', last_login_at: '2026-08-20T09:00:00Z', profile: { first_name: 'Sara', last_name: 'Malik' } },
   { id: 'u-6', email: 'casey.nguyen@shelteros.mock', role: 'EMPLOYEE', is_active: true, is_email_verified: true, date_joined: '2024-05-20T00:00:00Z', last_activity_at: '2026-09-11T08:05:00Z', profile: { first_name: 'Casey', last_name: 'Nguyen' } },
   { id: 'u-7', email: 'priya.singh@shelteros.mock', role: 'EMPLOYEE', is_active: true, is_email_verified: true, date_joined: '2024-06-11T00:00:00Z', last_login_at: '2026-07-18T17:40:00Z', profile: { first_name: 'Priya', last_name: 'Singh' } },
-  { id: 'u-8', email: 'bilal.ahmed@shelteros.mock', role: 'PET_OWNER', is_active: true, is_email_verified: true, date_joined: '2024-08-02T00:00:00Z', last_login_at: '2026-09-01T14:00:00Z', profile: { first_name: 'Bilal', last_name: 'Ahmed' } },
-  { id: 'u-9', email: 'noor.fatima@shelteros.mock', role: 'ADOPTER', is_active: true, is_email_verified: false, date_joined: '2025-01-15T00:00:00Z', last_login_at: '2026-08-30T11:00:00Z', profile: { first_name: 'Noor', last_name: 'Fatima' } },
-  { id: 'u-10', email: 'inactive.user@shelteros.mock', role: 'ADOPTER', is_active: false, is_email_verified: true, date_joined: '2024-09-09T00:00:00Z', last_login_at: '2025-11-02T10:00:00Z', profile: { first_name: 'Ali', last_name: 'Raza' } },
+  { id: 'u-8', email: 'bilal.ahmed@shelteros.mock', role: 'CUSTOMER', is_active: true, is_email_verified: true, date_joined: '2024-08-02T00:00:00Z', last_login_at: '2026-09-01T14:00:00Z', profile: { first_name: 'Bilal', last_name: 'Ahmed' } },
+  { id: 'u-9', email: 'noor.fatima@shelteros.mock', role: 'CUSTOMER', is_active: true, is_email_verified: false, date_joined: '2025-01-15T00:00:00Z', last_login_at: '2026-08-30T11:00:00Z', profile: { first_name: 'Noor', last_name: 'Fatima' } },
+  { id: 'u-10', email: 'inactive.user@shelteros.mock', role: 'CUSTOMER', is_active: false, is_email_verified: true, date_joined: '2024-09-09T00:00:00Z', last_login_at: '2025-11-02T10:00:00Z', profile: { first_name: 'Ali', last_name: 'Raza' } },
 ];
 
 export const mockEmployees = [

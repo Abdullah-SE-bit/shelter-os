@@ -59,6 +59,7 @@ export const navConfig = {
       section: 'People',
       items: [
         { icon: HeartHandshake, label: 'Employees', path: '/employees' },
+        { icon: UserPlus, label: 'Add Employee', path: '/employees/create' },
         { icon: PawPrint, label: 'Foster', path: '/foster' },
       ],
     },
@@ -100,17 +101,7 @@ export const navConfig = {
     { icon: MessageSquare, label: 'Messages', path: '/messages' },
   ],
 
-  PET_OWNER: [
-    { icon: PawPrint, label: 'My Pets', path: '/pets' },
-    { icon: CirclePlus, label: 'Register Pet', path: '/pets/register' },
-    { icon: Search, label: 'Lost & Found', path: '/lost-found' },
-    { icon: Map, label: 'Map', path: '/maps' },
-    { icon: Bell, label: 'Notifications', path: '/notifications' },
-    { icon: MessageSquare, label: 'Messages', path: '/messages' },
-    { icon: UserCircle, label: 'Profile', path: '/profile' },
-  ],
-
-  ADOPTER: [
+  CUSTOMER: [
     { icon: Heart, label: 'Browse Pets', path: '/adoption' },
     { icon: ClipboardList, label: 'My Applications', path: '/adoption/my-applications' },
     { icon: PawPrint, label: 'My Pets', path: '/pets' },
@@ -140,17 +131,17 @@ export const quickActions = [
   {
     label: 'Register My Pet',
     path: '/pets/register',
-    roles: ['SHELTER_ADMIN', 'EMPLOYEE', 'PET_OWNER', 'ADOPTER'],
+    roles: ['SHELTER_ADMIN', 'EMPLOYEE', 'CUSTOMER'],
   },
   {
     label: 'Submit Rescue Report',
     path: '/rescue/submit',
-    roles: ['SHELTER_ADMIN', 'EMPLOYEE', 'PET_OWNER', 'ADOPTER'],
+    roles: ['SHELTER_ADMIN', 'EMPLOYEE', 'CUSTOMER'],
   },
   {
     label: 'Report Lost Pet',
     path: '/lost-found/create',
-    roles: ['SHELTER_ADMIN', 'EMPLOYEE', 'PET_OWNER', 'ADOPTER'],
+    roles: ['SHELTER_ADMIN', 'EMPLOYEE', 'CUSTOMER'],
   },
-  { label: 'Send Message', path: '/messages', roles: ['SHELTER_ADMIN', 'EMPLOYEE', 'PET_OWNER', 'ADOPTER'] },
+  { label: 'Send Message', path: '/messages', roles: ['SHELTER_ADMIN', 'EMPLOYEE', 'CUSTOMER'] },
 ];

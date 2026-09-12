@@ -15,14 +15,14 @@ export const MAGIC_LOGINS = {
   'super-admin': ROLES.SUPER_ADMIN,
   'shelter-admin': ROLES.SHELTER_ADMIN,
   employee: ROLES.EMPLOYEE,
+  customer: ROLES.CUSTOMER,
 };
 
 export const ROLE_HOME = {
   [ROLES.SUPER_ADMIN]: '/dashboard',
   [ROLES.SHELTER_ADMIN]: '/shelter/dashboard',
   [ROLES.EMPLOYEE]: '/employees/assignments',
-  [ROLES.PET_OWNER]: '/pets',
-  [ROLES.ADOPTER]: '/adoption',
+  [ROLES.CUSTOMER]: '/pets',
 };
 
 const MOCK_USERS = {
@@ -49,6 +49,14 @@ const MOCK_USERS = {
     is_email_verified: true,
     created_at: '2024-05-20T00:00:00Z',
     profile: { first_name: 'Casey', last_name: 'Nguyen', bio: 'Weekend dog walker and pet socializer.', phone: '', date_of_birth: '' },
+  },
+  [ROLES.CUSTOMER]: {
+    id: 'mock-customer',
+    role: ROLES.CUSTOMER,
+    email: 'customer@shelteros.mock',
+    is_email_verified: true,
+    created_at: '2024-08-02T00:00:00Z',
+    profile: { first_name: 'Bilal', last_name: 'Ahmed', bio: '', phone: '', date_of_birth: '' },
   },
 };
 

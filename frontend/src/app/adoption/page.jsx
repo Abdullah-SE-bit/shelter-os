@@ -4,12 +4,14 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { PawPrint, Home, Heart, Syringe, Radio, Scissors } from 'lucide-react';
 import { mockAdoptionListings } from '@/lib/mock-data/adoption';
+import { mockPetSpeciesLabel } from '@/lib/mock-data/pets';
 import usePagination from '@/hooks/usePagination';
 import EmptyState from '@/components/EmptyState';
 import Pagination from '@/components/Pagination';
 import { formatCurrency, formatPetAge } from '@/utils/formatters';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { NativeSelect } from '@/components/ui/native-select';
 
 function PetCard({ pet }) {
@@ -50,15 +52,26 @@ function PetCard({ pet }) {
 export default function BrowsePage() {
   const { user } = useAuth();
   const { page, pageSize, nextPage, prevPage, goTo, reset } = usePagination(12);
+  const [species, setSpecies] = useState('');
+  const [typeQuery, setTypeQuery] = useState('');
   const [gender, setGender] = useState('');
   const [neutered, setNeutered] = useState('');
+  const [showTypeSuggestions, setShowTypeSuggestions] = useState(false);
 
-  const filtered = mockAdoptionListings.filter((c) => (!gender || c.gender === gender) && (!neutered || String(c.is_neutered) === neutered));
+  const filtered = mockAdoptionListings.filter((c) => (
+    (!species || c.species === species)
+    && (!gender || c.gender === gender)
+    && (!neutered || String(c.is_neutered) === neutered)
+  ));
   const total = filtered.length;
   const totalPages = Math.ceil(total / pageSize);
   const listings = filtered.slice((page - 1) * pageSize, page * pageSize);
 
+  const typeSuggestions = Object.entries(mockPetSpeciesLabel).filter(([, label]) => label.toLowerCase().includes(typeQuery.trim().toLowerCase()));
+
   const handleFilterChange = (setter, value) => { setter(value); reset(); };
+  const handleTypeQueryChange = (v) => { setTypeQuery(v); setShowTypeSuggestions(true); if (!v.trim()) setSpecies(''); reset(); };
+  const handleSelectType = (value, label) => { setSpecies(value); setTypeQuery(label); setShowTypeSuggestions(false); reset(); };
 
   return (
     <div>
@@ -89,6 +102,32 @@ export default function BrowsePage() {
       <div className="mx-auto max-w-[1200px] px-4 py-10 sm:px-6">
         <div className="mb-8 flex flex-wrap items-center gap-3 rounded-xl border border-border bg-card p-4 shadow-sm">
           <span className="mr-1 text-[13px] font-bold text-muted-foreground">Filter:</span>
+
+          <div className="relative w-auto min-w-[150px]">
+            <Input
+              value={typeQuery}
+              onChange={(e) => handleTypeQueryChange(e.target.value)}
+              onFocus={() => setShowTypeSuggestions(true)}
+              onBlur={() => setTimeout(() => setShowTypeSuggestions(false), 120)}
+              placeholder="Type e.g. Dog…"
+            />
+            {showTypeSuggestions && typeSuggestions.length > 0 && (
+              <div className="absolute top-full right-0 left-0 z-10 mt-1 overflow-hidden rounded-lg border border-border bg-card shadow-md">
+                {typeSuggestions.map(([value, label]) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => handleSelectType(value, label)}
+                    className="block w-full border-b border-border px-3 py-2 text-left text-sm font-medium text-foreground last:border-0 hover:bg-surface-muted"
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
           <NativeSelect value={gender} onChange={(e) => handleFilterChange(setGender, e.target.value)} className="w-auto">
             <option value="">Any gender</option>
             <option value="MALE">Male</option>

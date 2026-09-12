@@ -42,7 +42,7 @@ export default function LoginPage() {
       if (role) {
         router.push(ROLE_HOME[role]);
       } else {
-        setError('Unrecognized user. Try "super-admin", "shelter-admin", or "employee".');
+        setError('Unrecognized user. Try "super-admin", "shelter-admin", "employee", or "customer".');
       }
     }, 300);
   };
@@ -117,8 +117,9 @@ export default function LoginPage() {
 
           <div className="mb-5 rounded-lg border border-info/20 bg-info/10 p-3 text-xs leading-relaxed text-muted-foreground">
             <strong className="text-foreground">Playground login</strong> — type <code className="rounded bg-surface-muted px-1 py-0.5 font-mono text-[11px]">super-admin</code>,{' '}
-            <code className="rounded bg-surface-muted px-1 py-0.5 font-mono text-[11px]">shelter-admin</code>, or{' '}
-            <code className="rounded bg-surface-muted px-1 py-0.5 font-mono text-[11px]">employee</code> into the email field and sign in — no password needed.
+            <code className="rounded bg-surface-muted px-1 py-0.5 font-mono text-[11px]">shelter-admin</code>,{' '}
+            <code className="rounded bg-surface-muted px-1 py-0.5 font-mono text-[11px]">employee</code>, or{' '}
+            <code className="rounded bg-surface-muted px-1 py-0.5 font-mono text-[11px]">customer</code> into the email field and sign in — no password needed.
           </div>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -130,7 +131,7 @@ export default function LoginPage() {
                 required
                 value={form.email}
                 onChange={(e) => set('email', e.target.value)}
-                placeholder="super-admin / shelter-admin / employee"
+                placeholder="super-admin / shelter-admin / employee / customer"
                 autoComplete="username"
               />
             </div>

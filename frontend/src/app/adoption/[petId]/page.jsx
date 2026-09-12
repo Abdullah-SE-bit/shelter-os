@@ -39,7 +39,7 @@ export default function PetAdoptionDetailPage() {
 
   const photos = (pet.photos || []).filter(Boolean);
   const mainPhoto = photos[0] || pet.primary_photo_url || PET_PLACEHOLDER;
-  const canApply = user?.role === 'ADOPTER' || !user;
+  const canApply = user?.role === 'CUSTOMER' || !user;
 
   const healthBadges = [
     { ok: pet.is_neutered, label: 'Neutered/spayed' },

@@ -17,8 +17,7 @@ const ROLE_LABELS = {
   SUPER_ADMIN: 'Super Admin',
   SHELTER_ADMIN: 'Shelter Admin',
   EMPLOYEE: 'Employee',
-  PET_OWNER: 'Pet Owner',
-  ADOPTER: 'Adopter',
+  CUSTOMER: 'Customer',
   GUEST: 'Guest',
 };
 

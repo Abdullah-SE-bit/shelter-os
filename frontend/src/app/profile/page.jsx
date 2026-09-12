@@ -13,8 +13,7 @@ const ROLE_META = {
   SUPER_ADMIN: { icon: Crown, label: 'Super Admin' },
   SHELTER_ADMIN: { icon: Home, label: 'Shelter Admin' },
   EMPLOYEE: { icon: HeartHandshake, label: 'Employee' },
-  PET_OWNER: { icon: PawPrint, label: 'Pet Owner' },
-  ADOPTER: { icon: Heart, label: 'Adopter' },
+  CUSTOMER: { icon: Heart, label: 'Customer' },
 };
 
 function InfoBlock({ label, value }) {

@@ -2,8 +2,7 @@ export const ROLES = {
   SUPER_ADMIN:   'SUPER_ADMIN',
   SHELTER_ADMIN: 'SHELTER_ADMIN',
   EMPLOYEE:     'EMPLOYEE',
-  PET_OWNER:     'PET_OWNER',
-  ADOPTER:       'ADOPTER',
+  CUSTOMER:      'CUSTOMER',
 };
 
 export const PET_STATUSES = {

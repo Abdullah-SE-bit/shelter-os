@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { PawPrint, Plus, LayoutGrid, List, Search } from 'lucide-react';
-import { mockPets } from '@/lib/mock-data/pets';
+import { mockPets, mockPetSpeciesLabel } from '@/lib/mock-data/pets';
 import { mockShelters } from '@/lib/mock-data/shelters';
 import usePagination from '@/hooks/usePagination';
 import { useAuth } from '@/context/AuthContext';
@@ -43,13 +43,17 @@ export default function PetListPage() {
   const shelterParam = searchParams.get('shelter') || '';
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('');
+  const [species, setSpecies] = useState('');
+  const [typeQuery, setTypeQuery] = useState('');
   const [shelter, setShelter] = useState(shelterParam);
   const [view, setView] = useState('grid');
+  const [showTypeSuggestions, setShowTypeSuggestions] = useState(false);
   const { page, pageSize, nextPage, prevPage, goTo, reset } = usePagination(20);
 
   const filtered = mockPets.filter((pet) => {
     if (search && !`${pet.name} ${pet.breed_label} ${pet.color}`.toLowerCase().includes(search.toLowerCase())) return false;
     if (status && pet.current_status !== status) return false;
+    if (species && pet.species !== species) return false;
     if (shelter && pet.shelter_id !== shelter) return false;
     return true;
   });
@@ -57,11 +61,15 @@ export default function PetListPage() {
   const totalPages = Math.ceil(total / pageSize);
   const pets = filtered.slice((page - 1) * pageSize, page * pageSize);
 
+  const typeSuggestions = Object.entries(mockPetSpeciesLabel).filter(([, label]) => label.toLowerCase().includes(typeQuery.trim().toLowerCase()));
+
   const canCreate = !!user;
   const createPath = ['SUPER_ADMIN', 'SHELTER_ADMIN'].includes(user?.role) ? '/pets/create' : '/pets/register';
 
   const handleSearchChange = (v) => { setSearch(v); reset(); };
   const handleStatusChange = (v) => { setStatus(v); reset(); };
+  const handleTypeQueryChange = (v) => { setTypeQuery(v); setShowTypeSuggestions(true); if (!v.trim()) setSpecies(''); reset(); };
+  const handleSelectType = (value, label) => { setSpecies(value); setTypeQuery(label); setShowTypeSuggestions(false); reset(); };
 
   return (
     <div className="mx-auto max-w-[1200px] px-4 py-6 sm:px-6">
@@ -75,6 +83,31 @@ export default function PetListPage() {
         <div className="relative min-w-[220px] flex-1">
           <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input value={search} onChange={(e) => handleSearchChange(e.target.value)} placeholder="Search by name, breed, color…" className="pl-9" />
+        </div>
+
+        <div className="relative w-auto min-w-[150px]">
+          <Input
+            value={typeQuery}
+            onChange={(e) => handleTypeQueryChange(e.target.value)}
+            onFocus={() => setShowTypeSuggestions(true)}
+            onBlur={() => setTimeout(() => setShowTypeSuggestions(false), 120)}
+            placeholder="Type e.g. Dog…"
+          />
+          {showTypeSuggestions && typeSuggestions.length > 0 && (
+            <div className="absolute top-full right-0 left-0 z-10 mt-1 overflow-hidden rounded-lg border border-border bg-card shadow-md">
+              {typeSuggestions.map(([value, label]) => (
+                <button
+                  key={value}
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => handleSelectType(value, label)}
+                  className="block w-full border-b border-border px-3 py-2 text-left text-sm font-medium text-foreground last:border-0 hover:bg-surface-muted"
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         <NativeSelect value={status} onChange={(e) => handleStatusChange(e.target.value)} className="w-auto min-w-[150px]">

@@ -1,24 +1,44 @@
 'use client';
 
 import { useState } from 'react';
-import { HeartHandshake, RotateCw, Star, Building2, Frown, Stethoscope, Car, Home, Siren, Briefcase, Camera, HandHeart, Wrench } from 'lucide-react';
+import { HeartHandshake, RotateCw, Star, Building2, Frown, Pencil, Car, Home, Siren, Briefcase, Camera, HandHeart, Wrench } from 'lucide-react';
 import { mockEmployees, mockShelterChangeRequests } from '@/lib/mock-data/users';
 import { mockShelters } from '@/lib/mock-data/shelters';
 import { useAuth } from '@/context/AuthContext';
+import PhoneInput, { isValidPkMobile } from '@/components/PhoneInput';
 import Modal from '@/components/Modal';
 import { formatDate } from '@/utils/dateUtils';
 import { initials } from '@/utils/formatters';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { NativeSelect } from '@/components/ui/native-select';
+import { cn } from '@/lib/utils';
 
 const SKILL_ICONS = { Rescue: Siren, Transport: Car, 'Foster coordination': Home, 'Pet socialization': HandHeart, 'Dog walking': Briefcase, Photography: Camera, 'Adoption events': HeartHandshake };
+const SKILLS = ['RESCUE', 'TRANSPORT', 'FOSTERING', 'FUNDRAISING', 'MEDICAL_ASSIST', 'EVENT_SUPPORT'];
+
+function SkillPill({ active, onClick, children }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        'rounded-full border px-3 py-1 text-xs font-semibold transition-colors',
+        active ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card text-muted-foreground hover:border-border-strong',
+      )}
+    >
+      {children}
+    </button>
+  );
+}
 
 export default function EmployeeProfileView({ id }) {
   const { user } = useAuth();
   const isOwnProfile = !id;
-  const vol = id ? mockEmployees.find((v) => v.id === id) : mockEmployees.find((v) => v.name === `${user?.profile?.first_name} ${user?.profile?.last_name}`) || mockEmployees[0];
+  const baseVol = id ? mockEmployees.find((v) => v.id === id) : mockEmployees.find((v) => v.name === `${user?.profile?.first_name} ${user?.profile?.last_name}`) || mockEmployees[0];
+  const isShelterAdmin = user?.role === 'SHELTER_ADMIN';
 
   const [changeOpen, setChangeOpen] = useState(false);
   const [toShelter, setToShelter] = useState('');
@@ -26,6 +46,12 @@ export default function EmployeeProfileView({ id }) {
   const [saving, setSaving] = useState(false);
   const [changeMsg, setChangeMsg] = useState('');
   const [pending, setPending] = useState(isOwnProfile ? mockShelterChangeRequests[0] : null);
+
+  const [overrides, setOverrides] = useState(null);
+  const [editOpen, setEditOpen] = useState(false);
+  const [editForm, setEditForm] = useState(null);
+  const [editErrors, setEditErrors] = useState({});
+  const [editSaving, setEditSaving] = useState(false);
 
   const submitChange = () => {
     if (!toShelter) return;
@@ -38,12 +64,39 @@ export default function EmployeeProfileView({ id }) {
     }, 350);
   };
 
-  if (!vol) return (
+  if (!baseVol) return (
     <div className="flex flex-col items-center gap-3 p-16 text-center">
       <Frown className="size-12 text-muted-foreground" />
       <h2 className="font-display text-xl font-bold text-foreground">Employee not found</h2>
     </div>
   );
+
+  const vol = { ...baseVol, ...overrides };
+
+  const openEdit = () => {
+    setEditErrors({});
+    setEditForm({ name: vol.name, email: vol.email, phone: vol.phone, service_radius_km: vol.service_radius_km, skills: vol.skills || [], new_password: '' });
+    setEditOpen(true);
+  };
+
+  const toggleEditSkill = (skill) => {
+    setEditForm((f) => ({ ...f, skills: f.skills.includes(skill) ? f.skills.filter((s) => s !== skill) : [...f.skills, skill] }));
+  };
+
+  const submitEdit = () => {
+    const errs = {};
+    if (!editForm.name.trim()) errs.name = 'Name is required.';
+    if (editForm.phone && !isValidPkMobile(editForm.phone)) errs.phone = 'Enter a valid Pakistani mobile number.';
+    if (editForm.new_password && editForm.new_password.length < 8) errs.new_password = 'Password must be at least 8 characters.';
+    if (Object.keys(errs).length) { setEditErrors(errs); return; }
+
+    setEditSaving(true);
+    setTimeout(() => {
+      setOverrides((o) => ({ ...o, name: editForm.name, email: editForm.email, phone: editForm.phone, service_radius_km: editForm.service_radius_km, skills: editForm.skills }));
+      setEditSaving(false);
+      setEditOpen(false);
+    }, 350);
+  };
 
   const [first, ...rest] = vol.name.split(' ');
   const last = rest.join(' ');
@@ -62,8 +115,16 @@ export default function EmployeeProfileView({ id }) {
         </div>
         <h1 className="font-display text-2xl font-bold text-white">{vol.name}</h1>
         <p className="mt-0.5 mb-3 text-sm text-white/70">{vol.availability}</p>
-        <div className={`inline-block rounded-full border px-4 py-1 text-[13px] font-semibold ${vol.is_approved ? 'border-success/50 bg-success/25 text-white' : 'border-white/15 bg-white/10 text-white/70'}`}>
-          {vol.is_approved ? 'Approved' : 'Pending approval'}
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          <div className={`rounded-full border px-4 py-1 text-[13px] font-semibold ${vol.is_approved ? 'border-success/50 bg-success/25 text-white' : 'border-white/15 bg-white/10 text-white/70'}`}>
+            {vol.is_approved ? 'Approved' : 'Pending approval'}
+          </div>
+          {isShelterAdmin && !isOwnProfile && (
+            <Button size="sm" variant="secondary" onClick={openEdit}>
+              <Pencil className="size-3.5" />
+              Edit details
+            </Button>
+          )}
         </div>
       </div>
 
@@ -144,6 +205,50 @@ export default function EmployeeProfileView({ id }) {
           <Textarea value={reason} onChange={(e) => setReason(e.target.value)} rows={3} placeholder="Why do you want to change shelters?" className="mt-1.5" />
         </div>
       </Modal>
+
+      {isShelterAdmin && editForm && (
+        <Modal
+          open={editOpen}
+          onClose={() => setEditOpen(false)}
+          title="Edit employee"
+          footer={<><Button variant="secondary" onClick={() => setEditOpen(false)}>Cancel</Button><Button onClick={submitEdit} disabled={editSaving}>{editSaving ? 'Saving…' : 'Save changes'}</Button></>}
+        >
+          <div className="flex flex-col gap-3.5">
+            <div>
+              <Label htmlFor="emp-edit-name">Name</Label>
+              <Input id="emp-edit-name" value={editForm.name} onChange={(e) => setEditForm((f) => ({ ...f, name: e.target.value }))} className="mt-1.5" aria-invalid={!!editErrors.name} />
+              {editErrors.name && <p className="mt-1 text-xs font-medium text-destructive">{editErrors.name}</p>}
+            </div>
+            <div>
+              <Label htmlFor="emp-edit-email">Email</Label>
+              <Input id="emp-edit-email" type="email" value={editForm.email} onChange={(e) => setEditForm((f) => ({ ...f, email: e.target.value }))} className="mt-1.5" />
+            </div>
+            <div>
+              <Label>Phone</Label>
+              <div className="mt-1.5"><PhoneInput value={editForm.phone} onChange={(v) => setEditForm((f) => ({ ...f, phone: v }))} error={editErrors.phone} /></div>
+              {editErrors.phone && <p className="mt-1 text-xs font-medium text-destructive">{editErrors.phone}</p>}
+            </div>
+            <div>
+              <Label htmlFor="emp-edit-radius">Service radius (km)</Label>
+              <Input id="emp-edit-radius" type="number" min="1" max="200" value={editForm.service_radius_km} onChange={(e) => setEditForm((f) => ({ ...f, service_radius_km: e.target.value }))} className="mt-1.5" />
+            </div>
+            <div>
+              <Label>Skills</Label>
+              <div className="mt-1.5 flex flex-wrap gap-1.5">
+                {SKILLS.map((skill) => {
+                  const label = skill.replace(/_/g, ' ');
+                  return <SkillPill key={skill} active={editForm.skills.includes(label)} onClick={() => toggleEditSkill(label)}>{label}</SkillPill>;
+                })}
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="emp-edit-password">Reset password (optional)</Label>
+              <Input id="emp-edit-password" type="password" value={editForm.new_password} onChange={(e) => setEditForm((f) => ({ ...f, new_password: e.target.value }))} placeholder="Leave blank to keep current password" className="mt-1.5" aria-invalid={!!editErrors.new_password} />
+              {editErrors.new_password && <p className="mt-1 text-xs font-medium text-destructive">{editErrors.new_password}</p>}
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }
