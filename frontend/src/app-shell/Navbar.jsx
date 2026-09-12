@@ -24,7 +24,7 @@ function IconLink({ to, icon: Icon, count, label }) {
         <Icon className="size-[18px]" />
         {count > 0 && (
           <Badge
-            variant="destructive"
+            variant="default"
             className="absolute -top-1 -right-1 h-4 min-w-4 justify-center rounded-full px-1 text-[10px] leading-none"
           >
             {count > 9 ? '9+' : count}
