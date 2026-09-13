@@ -14,9 +14,8 @@ export default function TermsConsent({ checked, onChange, id = 'terms-consent' }
       <Label htmlFor={id} className="text-sm leading-relaxed font-normal text-muted-foreground">
         I have read and agree to the{' '}
         <Link href="/terms" target="_blank" rel="noopener noreferrer" className="font-medium text-primary underline underline-offset-2">
-          Terms &amp; Conditions and Licensing Agreement
+          Terms &amp; Conditions and Licensing Agreement.
         </Link>
-        .
       </Label>
     </div>
   );
