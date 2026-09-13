@@ -71,7 +71,7 @@
 /* Note: --radius-sm/md/lg/xl and --shadow-sm/md/lg are NOT remapped here.
    tokens.css declares them directly under those exact names (Tailwind's own
    theme keys), so its plain :root / [data-theme=dark] values already flow
-   into every rounded-*/shadow-* utility without a @theme indirection. */
+   into every rounded-* and shadow-* utility without a @theme indirection. */
 
 /* ============================================================
    Ambient glow keyframes — used by LoginPage's centered auth card
