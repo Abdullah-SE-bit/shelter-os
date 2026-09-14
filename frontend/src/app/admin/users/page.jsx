@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { Crown, Building2, Heart, HeartHandshake, Users as UsersIcon, X } from 'lucide-react';
 import { mockUsers } from '@/lib/mock-data/users';
@@ -23,6 +23,14 @@ const ROLE_META = {
 const ONLINE_WINDOW_MS = 5 * 60 * 1000;
 
 export default function AdminUsersPage() {
+  return (
+    <Suspense fallback={null}>
+      <AdminUsersPageInner />
+    </Suspense>
+  );
+}
+
+function AdminUsersPageInner() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();

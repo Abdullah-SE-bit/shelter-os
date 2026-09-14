@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { PawPrint, Plus, LayoutGrid, List, Search } from 'lucide-react';
@@ -38,6 +38,14 @@ function StatusBadge({ status }) {
 }
 
 export default function PetListPage() {
+  return (
+    <Suspense fallback={null}>
+      <PetListPageInner />
+    </Suspense>
+  );
+}
+
+function PetListPageInner() {
   const { user } = useAuth();
   const searchParams = useSearchParams();
   const shelterParam = searchParams.get('shelter') || '';

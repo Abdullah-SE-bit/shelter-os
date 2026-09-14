@@ -4,7 +4,6 @@ import { useState, useEffect, useRef } from 'react';
 import { MessageSquare, SquarePen, Trash2, Send } from 'lucide-react';
 import { mockConversations, mockMessages } from '@/lib/mock-data/messaging';
 import { mockUsers } from '@/lib/mock-data/users';
-import { useAuth } from '@/context/AuthContext';
 import EmptyState from '@/components/EmptyState';
 import Modal from '@/components/Modal';
 import { formatDate, timeAgo } from '@/utils/dateUtils';
@@ -27,8 +26,104 @@ function Avatar({ label, size = 40 }) {
   );
 }
 
+function ConversationListItem({ conversation, isSelected, onSelect }) {
+  return (
+    <button
+      onClick={onSelect}
+      className={cn('flex w-full items-center gap-3 rounded-xl border p-3 text-left transition-colors', isSelected ? 'border-primary bg-highlight-mint/20' : 'border-border bg-card hover:border-primary/50')}
+    >
+      <Avatar label={conversation.other_user_name} size={42} />
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center justify-between gap-2">
+          <div className="truncate text-sm font-bold text-foreground">{conversation.other_user_name}</div>
+          <div className="flex shrink-0 items-center gap-1.5">
+            {conversation.last_message_at && <span className="text-[11px] text-muted-foreground">{timeAgo(conversation.last_message_at)}</span>}
+            {conversation.unread_count > 0 && <span className="min-w-[1.25rem] rounded-full bg-primary px-1.5 py-0.5 text-center text-[11px] font-extrabold text-primary-foreground">{conversation.unread_count}</span>}
+          </div>
+        </div>
+        <div className="mt-0.5 truncate text-xs text-muted-foreground">{conversation.last_message}</div>
+      </div>
+    </button>
+  );
+}
+
+function MessageBubble({ message }) {
+  return (
+    <div className={cn('mb-4 flex', message.is_mine ? 'justify-end' : 'justify-start')}>
+      <div className={cn('max-w-[70%] rounded-xl px-4 py-3', message.is_mine ? 'bg-primary text-primary-foreground' : 'border border-border bg-card text-foreground')}>
+        {!message.is_mine && <div className="mb-1 text-xs font-semibold opacity-80">{message.sender_name}</div>}
+        <div className="text-sm leading-relaxed break-words">{message.text}</div>
+        <div className={cn('mt-1.5 text-[11px] opacity-70', message.is_mine ? 'text-right' : 'text-left')}>{formatDate(message.sent_at)}</div>
+      </div>
+    </div>
+  );
+}
+
+function ComposeModal({ open, onClose, onCreated }) {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [recipient, setRecipient] = useState(null);
+  const [contextType, setContextType] = useState('GENERAL');
+  const [messageBody, setMessageBody] = useState('');
+  const results = searchQuery.trim() ? mockUsers.filter((u) => u.email.toLowerCase().includes(searchQuery.toLowerCase())) : [];
+
+  const reset = () => {
+    setSearchQuery('');
+    setRecipient(null);
+    setContextType('GENERAL');
+    setMessageBody('');
+  };
+
+  const handleClose = () => {
+    reset();
+    onClose();
+  };
+
+  const handleCreateConversation = () => {
+    if (!recipient || !messageBody.trim()) return;
+    const name = `${recipient.profile.first_name} ${recipient.profile.last_name}`;
+    const newConv = { id: `conv-${Date.now()}`, other_user_name: name, other_user_role: recipient.role, unread_count: 0, last_message: messageBody.trim(), last_message_at: new Date().toISOString() };
+    mockMessages[newConv.id] = [{ id: `m-${Date.now()}`, sender_name: 'You', is_mine: true, text: messageBody.trim(), sent_at: new Date().toISOString() }];
+    onCreated(newConv);
+    reset();
+  };
+
+  return (
+    <Modal open={open} onClose={handleClose} title="New conversation"
+      footer={<><Button variant="secondary" onClick={handleClose}>Cancel</Button><Button onClick={handleCreateConversation} disabled={!recipient || !messageBody.trim()}>Send message</Button></>}
+    >
+      <div className="flex flex-col gap-4">
+        <div>
+          <Label>Recipient</Label>
+          <Input value={recipient ? recipient.email : searchQuery} placeholder="Enter email to search…" onChange={(e) => { setSearchQuery(e.target.value); setRecipient(null); }} className="mt-1.5" />
+          {results.length > 0 && !recipient && (
+            <div className="mt-2 max-h-[150px] overflow-y-auto no-scrollbar rounded-lg border border-border bg-card">
+              {results.map((usr) => (
+                <button key={usr.id} type="button" onClick={() => { setRecipient(usr); setSearchQuery(usr.email); }}
+                  className="block w-full border-b border-border px-3 py-2.5 text-left text-sm last:border-0 hover:bg-surface-muted">
+                  {usr.email} - {usr.role}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+        <div>
+          <Label>Context type</Label>
+          <NativeSelect value={contextType} onChange={(e) => setContextType(e.target.value)} className="mt-1.5">
+            <option value="GENERAL">General</option>
+            <option value="SHELTER_EMPLOYEE">Shelter & Employee</option>
+            <option value="SHELTER_ADOPTER">Shelter & Adopter</option>
+          </NativeSelect>
+        </div>
+        <div>
+          <Label>Message</Label>
+          <Textarea value={messageBody} onChange={(e) => setMessageBody(e.target.value)} placeholder="Type your message…" rows={4} className="mt-1.5" />
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
 export default function MessagingPage() {
-  const { user } = useAuth();
   const [conversations, setConversations] = useState(mockConversations);
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [newMessageBody, setNewMessageBody] = useState('');
@@ -62,90 +157,10 @@ export default function MessagingPage() {
     setSelectedConversation(null);
   };
 
-  const ConversationListItem = ({ conversation }) => {
-    const isSelected = selectedConversation?.id === conversation.id;
-    return (
-      <button
-        onClick={() => setSelectedConversation(conversation)}
-        className={cn('flex w-full items-center gap-3 rounded-xl border p-3 text-left transition-colors', isSelected ? 'border-primary bg-highlight-mint/20' : 'border-border bg-card hover:border-primary/50')}
-      >
-        <Avatar label={conversation.other_user_name} size={42} />
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center justify-between gap-2">
-            <div className="truncate text-sm font-bold text-foreground">{conversation.other_user_name}</div>
-            <div className="flex shrink-0 items-center gap-1.5">
-              {conversation.last_message_at && <span className="text-[11px] text-muted-foreground">{timeAgo(conversation.last_message_at)}</span>}
-              {conversation.unread_count > 0 && <span className="min-w-[1.25rem] rounded-full bg-primary px-1.5 py-0.5 text-center text-[11px] font-extrabold text-primary-foreground">{conversation.unread_count}</span>}
-            </div>
-          </div>
-          <div className="mt-0.5 truncate text-xs text-muted-foreground">{conversation.last_message}</div>
-        </div>
-      </button>
-    );
-  };
-
-  const MessageBubble = ({ message }) => (
-    <div className={cn('mb-4 flex', message.is_mine ? 'justify-end' : 'justify-start')}>
-      <div className={cn('max-w-[70%] rounded-xl px-4 py-3', message.is_mine ? 'bg-primary text-primary-foreground' : 'border border-border bg-card text-foreground')}>
-        {!message.is_mine && <div className="mb-1 text-xs font-semibold opacity-80">{message.sender_name}</div>}
-        <div className="text-sm leading-relaxed break-words">{message.text}</div>
-        <div className={cn('mt-1.5 text-[11px] opacity-70', message.is_mine ? 'text-right' : 'text-left')}>{formatDate(message.sent_at)}</div>
-      </div>
-    </div>
-  );
-
-  const ComposeModal = () => {
-    const [searchQuery, setSearchQuery] = useState('');
-    const [recipient, setRecipient] = useState(null);
-    const [contextType, setContextType] = useState('GENERAL');
-    const [messageBody, setMessageBody] = useState('');
-    const results = searchQuery.trim() ? mockUsers.filter((u) => u.email.toLowerCase().includes(searchQuery.toLowerCase())) : [];
-
-    const handleCreateConversation = () => {
-      if (!recipient || !messageBody.trim()) return;
-      const name = `${recipient.profile.first_name} ${recipient.profile.last_name}`;
-      const newConv = { id: `conv-${Date.now()}`, other_user_name: name, other_user_role: recipient.role, unread_count: 0, last_message: messageBody.trim(), last_message_at: new Date().toISOString() };
-      mockMessages[newConv.id] = [{ id: `m-${Date.now()}`, sender_name: 'You', is_mine: true, text: messageBody.trim(), sent_at: new Date().toISOString() }];
-      setConversations((cs) => [newConv, ...cs]);
-      setSelectedConversation(newConv);
-      setShowComposeModal(false);
-      setSearchQuery(''); setRecipient(null); setMessageBody('');
-    };
-
-    return (
-      <Modal open={showComposeModal} onClose={() => setShowComposeModal(false)} title="New conversation"
-        footer={<><Button variant="secondary" onClick={() => setShowComposeModal(false)}>Cancel</Button><Button onClick={handleCreateConversation} disabled={!recipient || !messageBody.trim()}>Send message</Button></>}
-      >
-        <div className="flex flex-col gap-4">
-          <div>
-            <Label>Recipient</Label>
-            <Input value={recipient ? recipient.email : searchQuery} placeholder="Enter email to search…" onChange={(e) => { setSearchQuery(e.target.value); setRecipient(null); }} className="mt-1.5" />
-            {results.length > 0 && !recipient && (
-              <div className="mt-2 max-h-[150px] overflow-y-auto no-scrollbar rounded-lg border border-border bg-card">
-                {results.map((usr) => (
-                  <button key={usr.id} type="button" onClick={() => { setRecipient(usr); setSearchQuery(usr.email); }}
-                    className="block w-full border-b border-border px-3 py-2.5 text-left text-sm last:border-0 hover:bg-surface-muted">
-                    {usr.email} - {usr.role}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-          <div>
-            <Label>Context type</Label>
-            <NativeSelect value={contextType} onChange={(e) => setContextType(e.target.value)} className="mt-1.5">
-              <option value="GENERAL">General</option>
-              <option value="SHELTER_EMPLOYEE">Shelter & Employee</option>
-              <option value="SHELTER_ADOPTER">Shelter & Adopter</option>
-            </NativeSelect>
-          </div>
-          <div>
-            <Label>Message</Label>
-            <Textarea value={messageBody} onChange={(e) => setMessageBody(e.target.value)} placeholder="Type your message…" rows={4} className="mt-1.5" />
-          </div>
-        </div>
-      </Modal>
-    );
+  const handleConversationCreated = (newConv) => {
+    setConversations((cs) => [newConv, ...cs]);
+    setSelectedConversation(newConv);
+    setShowComposeModal(false);
   };
 
   return (
@@ -164,7 +179,14 @@ export default function MessagingPage() {
             </div>
           ) : (
             <div className="flex flex-col gap-2">
-              {conversations.map((conv) => <ConversationListItem key={conv.id} conversation={conv} />)}
+              {conversations.map((conv) => (
+                <ConversationListItem
+                  key={conv.id}
+                  conversation={conv}
+                  isSelected={selectedConversation?.id === conv.id}
+                  onSelect={() => setSelectedConversation(conv)}
+                />
+              ))}
             </div>
           )}
         </div>
@@ -204,7 +226,7 @@ export default function MessagingPage() {
         )}
       </div>
 
-      <ComposeModal />
+      <ComposeModal open={showComposeModal} onClose={() => setShowComposeModal(false)} onCreated={handleConversationCreated} />
     </div>
   );
 }
